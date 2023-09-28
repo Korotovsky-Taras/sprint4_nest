@@ -1,8 +1,8 @@
-import { useAppDescribe } from './utils/appDescribe';
+import { useTestDescribeConfig } from './utils/useTestDescribeConfig';
 
 describe('AppConroller', () => {
-  const appConsumer = useAppDescribe();
+  const config = useTestDescribeConfig();
   it('/ (GET)', () => {
-    return appConsumer.getHttp().get('/').expect(200).expect('Hello World!');
+    return config.getHttp().get('/').expect(200).expect('Hello World!');
   });
 });

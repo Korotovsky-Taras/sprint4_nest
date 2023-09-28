@@ -9,7 +9,8 @@ export type AppTestProvider = {
   getHttp(): SuperAgentTest;
 };
 
-export function useAppDescribe(): AppTestProvider {
+//TODO возможно стоит иcпользовать MemoryDatabase
+export function useTestDescribeConfig(): AppTestProvider {
   let app: INestApplication;
   let http: SuperAgentTest;
   // let mongoConnection?: Connection;

@@ -1,43 +1,45 @@
-import { useAppDescribe } from './utils/appDescribe';
-import { authBasic64, createNewUserModel, createUser, validBlogData, validPostData } from './utils';
+import { useTestDescribeConfig } from './utils/useTestDescribeConfig';
+
 import { UserViewDto } from '../src/features/users/types/dto';
 import { BlogViewDto } from '../src/features/blogs/types/dto';
 import { PostCreateDto, PostViewDto } from '../src/features/posts/types/dto';
 import { Status } from '../src/application/utils/types';
+import { authBasic64, TestCreateUtils, validBlogData, validPostData } from './utils/test.create.utils';
 
 let createdBlogId: string | null = null;
 let createdPostId: string | null = null;
 let user: UserViewDto | null = null;
 
 describe('blogs testing', () => {
-  const appConsumer = useAppDescribe();
+  const config = useTestDescribeConfig();
+  const utils = new TestCreateUtils(config);
 
   beforeAll(async () => {
     createdBlogId = null;
     createdPostId = null;
-    user = await createUser(appConsumer.getHttp(), createNewUserModel());
-    await appConsumer.getHttp().delete('/testing/all-data');
+    user = await utils.createUser(utils.createNewUserModel());
+    await config.getHttp().delete('/testing/all-data');
   });
 
   // it('should require authorization', async () => {
-  //   await appConsumer.getHttp().post('/blogs').set('Content-Type', 'application/json').send({}).expect(Status.UNATHORIZED);
+  //   await config.getHttp().post('/blogs').set('Content-Type', 'application/json').send({}).expect(Status.UNATHORIZED);
   //
-  //   await appConsumer.getHttp().delete('/blogs/1').expect(Status.UNATHORIZED);
+  //   await config.getHttp().delete('/blogs/1').expect(Status.UNATHORIZED);
   //
-  //   await appConsumer.getHttp().put('/blogs/1').set('Content-Type', 'application/json').send({}).expect(Status.UNATHORIZED);
+  //   await config.getHttp().put('/blogs/1').set('Content-Type', 'application/json').send({}).expect(Status.UNATHORIZED);
   //
-  //   await appConsumer.getHttp().post('/posts').set('Content-Type', 'application/json').send({}).expect(Status.UNATHORIZED);
+  //   await config.getHttp().post('/posts').set('Content-Type', 'application/json').send({}).expect(Status.UNATHORIZED);
   //
-  //   await appConsumer.getHttp().delete('/posts/1').expect(Status.UNATHORIZED);
+  //   await config.getHttp().delete('/posts/1').expect(Status.UNATHORIZED);
   //
-  //   await appConsumer.getHttp().put('/posts/1').set('Content-Type', 'application/json').send({}).expect(Status.UNATHORIZED);
+  //   await config.getHttp().put('/posts/1').set('Content-Type', 'application/json').send({}).expect(Status.UNATHORIZED);
   // });
 
   // it('should return bad request', async () => {
   //   expect(user).not.toBeNull();
   //
   //   if (user) {
-  //     await appConsumer
+  //     await config
   //       .getHttp()
   //       .get('/blogs/1')
   //       .set('Authorization', 'Bearer ' + createAccessToken(user.id).token)
@@ -49,7 +51,7 @@ describe('blogs testing', () => {
     expect(user).not.toBeNull();
 
     if (user) {
-      const result = await appConsumer
+      const result = await config
         .getHttp()
         .post('/blogs')
         .set('Authorization', 'Basic ' + authBasic64)
@@ -77,7 +79,7 @@ describe('blogs testing', () => {
     expect(createdBlogId).not.toBeNull();
 
     if (user) {
-      const result = await appConsumer
+      const result = await config
         .getHttp()
         .post('/posts')
         .set('Authorization', 'Basic ' + authBasic64)
@@ -112,7 +114,7 @@ describe('blogs testing', () => {
     if (user) {
       const newTitle = 'new title';
 
-      await appConsumer
+      await config
         .getHttp()
         .put(`/posts/${createdPostId}`)
         .set('Authorization', 'Basic ' + authBasic64)
@@ -125,7 +127,7 @@ describe('blogs testing', () => {
         } as PostCreateDto)
         .expect(Status.NO_CONTENT);
 
-      const result = await appConsumer.getHttp().get(`/posts/${createdPostId}`).set('Content-Type', 'application/json').expect(Status.OK);
+      const result = await config.getHttp().get(`/posts/${createdPostId}`).set('Content-Type', 'application/json').expect(Status.OK);
 
       expect(result.body).toEqual({
         id: expect.any(String),
