@@ -1,17 +1,17 @@
 import { BlogCreateDto, BlogPaginationQueryDto, BlogPostCreateDto, BlogUpdateDto, BlogViewDto } from './dto';
-import { UserIdReq, WithPagination, WithPaginationQuery } from '../../../utils/types';
 import { BlogMongoType, IBlog } from './dao';
 import { Request } from 'express';
 import { PostPaginationQueryDto, PostViewDto } from '../../posts/types/dto';
 import { IRepository, IService } from '../../types';
-import { ServiceResult } from '../../../application/ServiceResult';
+import { ServiceResult } from '../../../application/errors/ServiceResult';
+import { UserIdReq, WithPagination, WithPaginationQuery } from '../../../application/utils/types';
 
 export type BlogMapperType<T> = (blog: BlogMongoType) => T;
 export type BlogListMapperType<T> = (blog: BlogMongoType[]) => T[];
 
 export interface IBlogService extends IService {
   createBlog(dto: BlogCreateDto): Promise<BlogViewDto>;
-  createPost(userId: UserIdReq, blogId: string, dto: BlogPostCreateDto): Promise<ServiceResult<PostViewDto | null>>;
+  createPost(userId: UserIdReq, blogId: string, dto: BlogPostCreateDto): Promise<ServiceResult<PostViewDto>>;
   updateBlogById(blogId: string, model: BlogUpdateDto): Promise<ServiceResult<boolean>>;
   deleteBlogById(blogId: string): Promise<ServiceResult<boolean>>;
 }

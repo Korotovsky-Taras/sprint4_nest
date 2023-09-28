@@ -4,8 +4,8 @@ import { CommentDocumentType, CommentMongoType, ICommentModel } from '../types/d
 import { InjectModel } from '@nestjs/mongoose';
 import { Comment } from './comments.schema';
 import { CommentPaginationRepositoryDto } from '../types/dto';
-import { UserIdReq, WithPagination } from '../../../utils/types';
-import { withModelPagination } from '../../../utils/withModelPagination';
+import { UserIdReq, WithPagination } from '../../../application/utils/types';
+import { withModelPagination } from '../../../application/utils/withModelPagination';
 import { ObjectId } from 'mongodb';
 
 @Injectable()

@@ -2,13 +2,13 @@ import 'reflect-metadata';
 
 import { FilterQuery, Model } from 'mongoose';
 import { Injectable } from '@nestjs/common';
-import { withModelPagination } from '../../../utils/withModelPagination';
-import { WithPagination } from '../../../utils/types';
 import { InjectModel } from '@nestjs/mongoose';
 import { Blog } from './blogs.schema';
 import { BlogQueryDto } from '../types/dto';
 import { BlogListMapperType, BlogMapperType, IBlogsQueryRepository } from '../types/common';
 import { BlogDocumentType, BlogMongoType, IBlog } from '../types/dao';
+import { withModelPagination } from '../../../application/utils/withModelPagination';
+import { WithPagination } from '../../../application/utils/types';
 
 @Injectable()
 export class BlogsQueryRepository implements IBlogsQueryRepository {

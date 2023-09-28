@@ -1,9 +1,9 @@
 import { PostPaginationQueryDto, PostPaginationRepositoryDto, PostViewDto } from '../types/dto';
-import { UserIdReq } from '../../../utils/types';
 import { PostMongoType } from '../types/dao';
-import { withExternalDirection, withExternalNumber, withExternalString } from '../../../utils/withExternalQuery';
-import { toIsoString } from '../../../utils/date';
 import { LastLike, Like, LikesExtendedInfo, LikeStatus } from '../../likes/types';
+import { withExternalDirection, withExternalNumber, withExternalString } from '../../../application/utils/withExternalQuery';
+import { UserIdReq } from '../../../application/utils/types';
+import { toIsoString } from '../../../application/utils/date';
 
 const initialQuery: PostPaginationRepositoryDto = {
   sortBy: 'createdAt',

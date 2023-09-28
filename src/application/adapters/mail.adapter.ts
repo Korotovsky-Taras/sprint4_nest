@@ -1,7 +1,6 @@
 import nodemailer from 'nodemailer';
 import Mail from 'nodemailer/lib/mailer';
 import SMTPTransport from 'nodemailer/lib/smtp-transport';
-import { Injectable } from '@nestjs/common';
 import { appConfig } from '../utils/config';
 
 type GmailAdapterConfig = {
@@ -11,7 +10,6 @@ type GmailAdapterConfig = {
   html: string;
 };
 
-@Injectable()
 export class MailAdapter {
   async sendGmail(config: GmailAdapterConfig): Promise<boolean> {
     if (!this.isValidConfig(config)) {

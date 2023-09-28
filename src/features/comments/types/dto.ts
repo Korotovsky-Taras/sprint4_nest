@@ -1,5 +1,5 @@
 import { CommentCommentatorInfo, IComment } from './dao';
-import { PaginationQueryModel, WithPaginationQuery } from '../../../utils/types';
+import { PaginationQueryModel, WithPaginationQuery } from '../../../application/utils/types';
 import { LikeStatus, WithLikes } from '../../likes/types';
 
 export type CommentCreateRequestDto = Pick<IComment, 'postId' | 'content'> & Pick<CommentCommentatorInfo, 'userId' | 'userLogin'>;

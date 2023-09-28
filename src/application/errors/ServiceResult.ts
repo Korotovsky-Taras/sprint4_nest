@@ -1,7 +1,7 @@
 import { ServiceError } from './ServiceError';
 
 type ServiceErrorType = {
-  message: string;
+  message?: string;
   code: number;
 };
 

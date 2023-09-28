@@ -1,6 +1,6 @@
 import { ForbiddenException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { CommentMapperType, ICommentsService } from '../types/common';
-import { UserIdReq } from '../../../utils/types';
+import { UserIdReq } from '../../../application/utils/types';
 import { CommentLikeStatusInputDto, CommentUpdateDto } from '../types/dto';
 import { CommentDocumentType, ICommentModel } from '../types/dao';
 import { PostCommentCreateDto, PostViewDto } from '../../posts/types/dto';
@@ -14,7 +14,7 @@ import { PostsDataMapper } from '../../posts/api/posts.dm';
 import { UsersQueryRepository } from '../../users/dao/users.query.repository';
 import { UserViewDto } from '../../users/types/dto';
 import { UsersDataMapper } from '../../users/api/users.dm';
-import { ServiceResult } from '../../../application/ServiceResult';
+import { ServiceResult } from '../../../application/errors/ServiceResult';
 
 @Injectable()
 export class CommentsService implements ICommentsService {

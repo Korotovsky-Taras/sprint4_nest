@@ -3,7 +3,6 @@ import { IPostsController } from '../types/common';
 import { PostsService } from '../domain/posts.service';
 import { PostsDataMapper } from './posts.dm';
 import { PostsQueryRepository } from '../dao/posts.query.repository';
-import { PaginationQueryModel, Status, WithPagination } from '../../../utils/types';
 import { IPost } from '../types/dao';
 import { PostCommentCreateDto, PostCreateDto, PostUpdateDto, PostViewDto } from '../types/dto';
 import { Request } from 'express';
@@ -12,7 +11,8 @@ import { CommentServiceError, CommentsService } from '../../comments/domain/comm
 import { CommentsQueryRepository } from '../../comments/dao/comments.query.repository';
 import { CommentsDataMapper } from '../../comments/api/comments.dm';
 import { IComment } from '../../comments/types/dao';
-import { ServiceResult } from '../../../application/ServiceResult';
+import { ServiceResult } from '../../../application/errors/ServiceResult';
+import { PaginationQueryModel, Status, WithPagination } from '../../../application/utils/types';
 
 @Injectable()
 @Controller('posts')

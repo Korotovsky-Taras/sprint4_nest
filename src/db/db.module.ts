@@ -1,6 +1,6 @@
 import { Logger, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { appConfig } from '../utils/config';
+import { appConfig } from '../application/utils/config';
 import { ServerApiVersion } from 'mongodb';
 import { Connection } from 'mongoose';
 

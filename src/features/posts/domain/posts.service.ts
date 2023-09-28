@@ -6,7 +6,7 @@ import { PostCreateDto, PostUpdateDto, PostViewDto } from '../types/dto';
 import { BlogsDataMapper } from '../../blogs/api/blogs.dm';
 import { BlogViewDto } from '../../blogs/types/dto';
 import { PostsDataMapper } from '../api/posts.dm';
-import { UserIdReq } from '../../../utils/types';
+import { UserIdReq } from '../../../application/utils/types';
 import { IPostsService } from '../types/common';
 
 @Injectable()

@@ -1,10 +1,11 @@
 import { BadRequestException, Body, Controller, Delete, Get, HttpCode, Injectable, NotFoundException, Param, Post, Query } from '@nestjs/common';
 import { IUsersController } from '../types/common';
-import { UsersService } from '../domain/users.service';
+import { UserServiceError, UsersService } from '../domain/users.service';
 import { UsersQueryRepository } from '../dao/users.query.repository';
 import { UsersDataMapper } from './users.dm';
 import { UserCreateRequestDto, UserListViewDto, UserPaginationQueryDto, UserViewDto } from '../types/dto';
-import { Status } from '../../../utils/types';
+import { Status } from '../../../application/utils/types';
+import { ServiceResult } from '../../../application/errors/ServiceResult';
 
 @Injectable()
 @Controller('users')
@@ -23,11 +24,11 @@ export class UsersController implements IUsersController {
   @Post()
   @HttpCode(Status.CREATED)
   async createUser(@Body() input: UserCreateRequestDto): Promise<UserViewDto> {
-    const user: UserViewDto | null = await this.usersService.createUser(input);
-    if (!user) {
+    const result: ServiceResult<UserViewDto> = await this.usersService.createUser(input, true);
+    if (result.hasErrorCode(UserServiceError.USER_ALREADY_REGISTER)) {
       throw new BadRequestException();
     }
-    return user;
+    return result.getData();
   }
 
   @Delete(':id')

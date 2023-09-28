@@ -1,10 +1,10 @@
-import { PaginationQueryModel, UserIdReq, WithPagination } from '../../../utils/types';
 import { PostCommentCreateDto, PostCreateDto, PostPaginationRepositoryDto, PostUpdateDto, PostViewDto } from './dto';
 import { IPost, PostMongoType } from './dao';
 import { IRepository, IService } from '../../types';
 import { Request } from 'express';
 import { CommentViewDto } from '../../comments/types/dto';
 import { IComment } from '../../comments/types/dao';
+import { PaginationQueryModel, UserIdReq, WithPagination } from '../../../application/utils/types';
 
 export type PostMapperType<T> = (post: PostMongoType, userId: UserIdReq) => T;
 export type PostListMapperType<T> = (post: PostMongoType[], userId: UserIdReq) => T[];

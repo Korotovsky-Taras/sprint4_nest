@@ -1,8 +1,8 @@
 import { CommentMongoType } from '../types/dao';
-import { UserIdReq } from '../../../utils/types';
+import { UserIdReq } from '../../../application/utils/types';
 import { CommentPaginationQueryDto, CommentPaginationRepositoryDto, CommentViewDto } from '../types/dto';
-import { toIsoString } from '../../../utils/date';
-import { withExternalDirection, withExternalNumber, withExternalString } from '../../../utils/withExternalQuery';
+import { toIsoString } from '../../../application/utils/date';
+import { withExternalDirection, withExternalNumber, withExternalString } from '../../../application/utils/withExternalQuery';
 import { Like, LikeStatus } from '../../likes/types';
 
 const initialQuery: CommentPaginationRepositoryDto = {

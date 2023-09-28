@@ -1,11 +1,11 @@
-import { UserIdReq, WithPagination } from '../../../utils/types';
+import { UserIdReq, WithPagination } from '../../../application/utils/types';
 import { CommentMongoType, IComment } from './dao';
 import { IRepository, IService } from '../../types';
 import { CommentLikeStatusInputDto, CommentPaginationRepositoryDto, CommentUpdateDto, CommentViewDto } from './dto';
 import { PostCommentCreateDto } from '../../posts/types/dto';
 import { Request } from 'express';
-import { ServiceResult } from '../../../application/ServiceResult';
 import { LikeStatusUpdateDto } from '../../likes/types';
+import { ServiceResult } from '../../../application/errors/ServiceResult';
 
 export type CommentMapperType<T> = (comment: CommentMongoType, userId: UserIdReq) => T;
 export type CommentListMapperType<T> = (comment: CommentMongoType[], userId: UserIdReq) => T[];

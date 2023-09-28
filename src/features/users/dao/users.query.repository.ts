@@ -4,9 +4,9 @@ import { IUsersQueryRepository, UserListMapperType, UserMapperType } from '../ty
 import { IUserModel, UserDocumentType, UserMongoType } from '../types/dao';
 import { User } from './users.schema';
 import { UserConfirmationCodeValidateResult, UserPaginationRepositoryDto } from '../types/dto';
-import { WithPagination } from '../../../utils/types';
 import { FilterQuery } from 'mongoose';
-import { withModelPagination } from '../../../utils/withModelPagination';
+import { WithPagination } from '../../../application/utils/types';
+import { withModelPagination } from '../../../application/utils/withModelPagination';
 
 @Injectable()
 export class UsersQueryRepository implements IUsersQueryRepository {
@@ -109,5 +109,10 @@ export class UsersQueryRepository implements IUsersQueryRepository {
       return dto(user);
     }
     return null;
+  }
+
+  async isUserAuthConfirmed(userId: string): Promise<boolean> {
+    const user: UserDocumentType | null = await this.userModel.findById(userId).exec();
+    return user !== null && user.isAuthConfirmed();
   }
 }

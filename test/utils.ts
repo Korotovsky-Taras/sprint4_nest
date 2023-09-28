@@ -1,12 +1,12 @@
 import setCookie from 'set-cookie-parser';
-import { createAccessToken, verifyRefreshToken } from '../src/utils/tokenAdapter';
 import { UUID } from 'crypto';
 import { BlogCreateDto, BlogViewDto } from '../src/features/blogs/types/dto';
 import { PostCommentCreateDto, PostCreateDto, PostViewDto } from '../src/features/posts/types/dto';
 import { UserCreateRequestDto, UserViewDto } from '../src/features/users/types/dto';
-import { AuthRefreshTokenPayload } from '../src/features/auth/types/types';
 import { CommentCreateRequestDto, CommentViewDto } from '../src/features/comments/types/dto';
 import { Response, SuperAgentTest } from 'supertest';
+import { AuthRefreshTokenPayload } from '../src/features/auth/utils/tokenCreator.types';
+import { AuthTokenCreator } from '../src/features/auth/utils/tokenCreator';
 
 export const authBasic64 = Buffer.from('admin:qwerty').toString('base64');
 
@@ -14,6 +14,8 @@ export type BlogCreationTestModel = BlogCreateDto;
 export type PostCreationTestModel = Omit<PostCreateDto, 'blogId' | 'blogName'>;
 export type CommentCreationTestModel = PostCommentCreateDto;
 export type UserCreationTestModel = UserCreateRequestDto;
+
+const authTokenCreator = new AuthTokenCreator();
 
 export const validBlogData: BlogCreationTestModel = {
   name: 'Taras',
@@ -51,7 +53,7 @@ export function refreshCookie(cookie: Cookie | undefined, session: SessionUnit) 
   if (!cookie || !cookie.value) {
     throw Error('Refresh cookie error');
   }
-  const payload: AuthRefreshTokenPayload | null = verifyRefreshToken(cookie.value);
+  const payload: AuthRefreshTokenPayload | null = authTokenCreator.verifyRefreshToken(cookie.value);
   if (payload) {
     session.payload = payload;
     session.refreshToken = cookie.value;
@@ -144,7 +146,7 @@ export const createComment = async (
 ): Promise<CommentViewDto> => {
   const result = await http
     .post(`/posts/${postId}/comments`)
-    .set('Authorization', 'Bearer ' + createAccessToken(userId).token)
+    .set('Authorization', 'Bearer ' + authTokenCreator.createAccessToken(userId).token)
     .set('Content-Type', 'application/json')
     .send({
       ...model,

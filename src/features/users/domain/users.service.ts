@@ -9,6 +9,10 @@ import { InjectModel } from '@nestjs/mongoose';
 import { User } from '../dao/users.schema';
 import { IUserModel, UserDocumentType } from '../types/dao';
 import { DeleteResult, ObjectId } from 'mongodb';
+import { MailSender } from '../../../application/mailSender';
+import { AuthConfirmationCodeDto, AuthNewPasswordInputDto, AuthResendingEmailInputDto } from '../../auth/types/dto';
+import { ServiceEmptyResult } from '../../../application/errors/ServiceEmptyResult';
+import { ServiceResult } from '../../../application/errors/ServiceResult';
 
 @Injectable()
 export class UsersService extends AbstractUsersService implements IUsersService {
@@ -16,6 +20,7 @@ export class UsersService extends AbstractUsersService implements IUsersService 
     @InjectModel(User.name) private userModel: IUserModel,
     private readonly usersRepo: UsersRepository,
     private readonly usersQueryRepo: UsersQueryRepository,
+    private readonly mailSender: MailSender,
   ) {
     super();
   }
@@ -25,25 +30,100 @@ export class UsersService extends AbstractUsersService implements IUsersService 
     return result.deletedCount === 1;
   }
 
-  /**
-   * Создаст пользователя без подтверждения авторизации
-   */
-  async createUser(model: UserCreateRequestDto): Promise<UserViewDto | null> {
+  async createUser(model: UserCreateRequestDto, isUserConfirmed: boolean): Promise<ServiceResult<UserViewDto>> {
+    const result = new ServiceResult<UserViewDto>();
     const isUserRegistered = await this.usersQueryRepo.isUserExistByLoginOrEmail(model.login, model.email);
 
     if (isUserRegistered) {
-      return null;
+      result.addError({
+        code: UserServiceError.USER_ALREADY_REGISTER,
+      });
     }
 
     const user: UserDocumentType = this.userModel.createUser({
       login: model.login,
       email: model.email,
       password: this._hashPassword(model.password),
-      authConfirmation: this._createUserConfirmation(true),
+      authConfirmation: this._createUserConfirmation(isUserConfirmed),
     });
+
+    if (!isUserConfirmed) {
+      this.mailSender.sendRegistrationMail(user.email, user.authConfirmation.code).then();
+    }
 
     await this.usersRepo.saveDoc(user);
 
-    return UsersDataMapper.toUserView(user);
+    result.setData(UsersDataMapper.toUserView(user));
+
+    return result;
   }
+
+  async verifyConfirmationCode(model: AuthConfirmationCodeDto): Promise<ServiceEmptyResult> {
+    const result = new ServiceEmptyResult();
+    const user: UserDocumentType | null = await this.userModel
+      .findOne({
+        'authConfirmation.code': model.code,
+      })
+      .exec();
+
+    if (user === null || user.isAuthConfirmed() || user.isAuthExpired()) {
+      result.addError({
+        code: UserServiceError.AUTH_CONFIRMATION_INVALID,
+      });
+    } else {
+      user.setAuthConfirmed(true);
+      await this.usersRepo.saveDoc(user);
+    }
+
+    return result;
+  }
+
+  async tryResendConfirmationCode(input: AuthResendingEmailInputDto): Promise<void> {
+    const user: UserDocumentType | null = await this.userModel.findOne({ email: input.email }).exec();
+
+    if (user && !user.isAuthConfirmed()) {
+      user.setAuthConfirmation(this._createUserConfirmation());
+
+      await this.usersRepo.saveDoc(user);
+
+      this.mailSender.sendRegistrationMail(user.email, user.authConfirmation.code).then();
+    }
+  }
+
+  async tryResendPasswordRecoverCode(input: AuthResendingEmailInputDto): Promise<void> {
+    const user: UserDocumentType | null = await this.userModel.findOne({ email: input.email }).exec();
+    if (user) {
+      user.setPassConfirmation(this._createUserConfirmation());
+
+      await this.usersRepo.saveDoc(user);
+
+      this.mailSender.sendPasswordRecoveryMail(user.email, user.passConfirmation.code).then();
+    }
+  }
+
+  async recoverPasswordWithConfirmationCode(model: AuthNewPasswordInputDto): Promise<ServiceEmptyResult> {
+    const result = new ServiceEmptyResult();
+    const user: UserDocumentType | null = await this.userModel
+      .findOne({
+        'passConfirmation.code': model.recoveryCode,
+      })
+      .exec();
+
+    if (user === null || user.isPassExpired() || user.isPassConfirmed()) {
+      result.addError({
+        code: UserServiceError.PASS_CONFIRMATION_INVALID,
+      });
+    } else {
+      user.password = this._hashPassword(model.newPassword);
+      user.setPassConfirmed(true);
+      await this.usersRepo.saveDoc(user);
+    }
+    return result;
+  }
+}
+
+export enum UserServiceError {
+  AUTH_CONFIRMATION_INVALID = 1,
+  PASS_CONFIRMATION_INVALID = 2,
+  USER_ALREADY_REGISTER = 3,
 }

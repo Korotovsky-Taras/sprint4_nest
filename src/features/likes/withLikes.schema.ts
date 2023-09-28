@@ -1,6 +1,6 @@
 import { Prop, Schema } from '@nestjs/mongoose';
 import { Like, LikeStatus } from './types';
-import { toIsoString } from '../../utils/date';
+import { toIsoString } from '../../application/utils/date';
 
 @Schema()
 export class WithLikes {

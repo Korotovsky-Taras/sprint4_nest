@@ -8,7 +8,7 @@ import {
   UserPaginationRepositoryDto,
   UserViewDto,
 } from './dto';
-import { WithPagination } from '../../../utils/types';
+import { WithPagination } from '../../../application/utils/types';
 import { FilterQuery } from 'mongoose';
 
 export type UserMapperType<T> = (post: UserMongoType) => T;

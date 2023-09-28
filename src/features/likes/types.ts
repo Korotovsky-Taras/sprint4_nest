@@ -1,4 +1,4 @@
-import { EnhancedOmit } from '../../utils/types';
+import { EnhancedOmit } from '../../application/utils/types';
 
 export interface IWithLikes {
   likes: Like[];

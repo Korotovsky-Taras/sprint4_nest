@@ -1,6 +1,6 @@
 import { IBlog } from './dao';
 import { IPost } from '../../posts/types/dao';
-import { EnhancedOmit, PaginationQueryModel, WithPaginationQuery } from '../../../utils/types';
+import { EnhancedOmit, PaginationQueryModel, WithPaginationQuery } from '../../../application/utils/types';
 
 export type BlogCreateDto = Pick<IBlog, 'name' | 'description' | 'websiteUrl'>;
 

@@ -1,7 +1,15 @@
-import { UserMeViewDto, UserPaginationQueryDto, UserPaginationRepositoryDto, UserViewDto, UserWithConfirmedViewDto } from '../types/dto';
+import {
+  UserAuthDto,
+  UserAuthWithConfirmationDto,
+  UserMeViewDto,
+  UserPaginationQueryDto,
+  UserPaginationRepositoryDto,
+  UserViewDto,
+  UserWithConfirmedViewDto,
+} from '../types/dto';
 import { UserMongoType } from '../types/dao';
-import { toIsoString } from '../../../utils/date';
-import { withExternalDirection, withExternalNumber, withExternalString, withExternalTerm } from '../../../utils/withExternalQuery';
+import { toIsoString } from '../../../application/utils/date';
+import { withExternalDirection, withExternalNumber, withExternalString, withExternalTerm } from '../../../application/utils/withExternalQuery';
 
 const initialQuery: UserPaginationRepositoryDto = {
   sortBy: 'createdAt',
@@ -28,6 +36,14 @@ export class UsersDataMapper {
       createdAt: toIsoString(input.createdAt),
     };
   }
+  static toUserAuth(input: UserMongoType): UserAuthDto {
+    return {
+      id: input._id.toString(),
+      login: input.login,
+      password: input.password,
+      email: input.email,
+    };
+  }
   static toUsersView(list: UserMongoType[]): UserViewDto[] {
     return list.map((item) => {
       return UsersDataMapper.toUserView(item);
@@ -36,6 +52,13 @@ export class UsersDataMapper {
   static toUserWithAuthConfirmation(userModel: UserMongoType): UserWithConfirmedViewDto {
     return {
       ...UsersDataMapper.toUserView(userModel),
+      confirmed: userModel.authConfirmation.confirmed,
+      confirmationCode: userModel.authConfirmation.code,
+    };
+  }
+  static toUserAuthWithConfirmation(userModel: UserMongoType): UserAuthWithConfirmationDto {
+    return {
+      ...UsersDataMapper.toUserAuth(userModel),
       confirmed: userModel.authConfirmation.confirmed,
       confirmationCode: userModel.authConfirmation.code,
     };

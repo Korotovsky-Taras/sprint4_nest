@@ -5,7 +5,7 @@ import { CommentsQueryRepository } from '../dao/comments.query.repository';
 import { CommentUpdateDto, CommentViewDto } from '../types/dto';
 import { Request } from 'express';
 import { CommentsDataMapper } from './comments.dm';
-import { Status } from '../../../utils/types';
+import { Status } from '../../../application/utils/types';
 import { LikeStatusUpdateDto } from '../../likes/types';
 
 @Injectable()

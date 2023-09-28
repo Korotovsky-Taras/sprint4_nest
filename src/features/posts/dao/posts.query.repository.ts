@@ -2,10 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Post } from './posts.schema';
 import { IPostModel, PostMongoType } from '../types/dao';
-import { withModelPagination } from '../../../utils/withModelPagination';
 import { PostPaginationRepositoryDto } from '../types/dto';
 import { IPostsQueryRepository, PostListMapperType, PostMapperType } from '../types/common';
-import { UserIdReq, WithPagination } from '../../../utils/types';
+import { withModelPagination } from '../../../application/utils/withModelPagination';
+import { UserIdReq, WithPagination } from '../../../application/utils/types';
 
 @Injectable()
 export class PostsQueryRepository implements IPostsQueryRepository {

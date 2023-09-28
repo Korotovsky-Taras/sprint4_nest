@@ -4,11 +4,11 @@ import { BlogsQueryRepository } from '../dao/blogs.query.repository';
 import { BlogsDataMapper } from '../api/blogs.dm';
 import { IBlogService } from '../types/common';
 import { BlogCreateDto, BlogPostCreateDto, BlogUpdateDto, BlogViewDto } from '../types/dto';
-import { UserIdReq } from '../../../utils/types';
 import { PostViewDto } from '../../posts/types/dto';
 import { PostsDataMapper } from '../../posts/api/posts.dm';
 import { PostsRepository } from '../../posts/dao/posts.repository';
-import { ServiceResult } from '../../../application/ServiceResult';
+import { ServiceResult } from '../../../application/errors/ServiceResult';
+import { UserIdReq } from '../../../application/utils/types';
 
 @Injectable()
 export class BlogsService implements IBlogService {

@@ -1,6 +1,6 @@
-import { PaginationQueryModel, WithPaginationQuery } from '../../../utils/types';
 import { IPost } from './dao';
 import { LikeStatus, WithExtendedLikes } from '../../likes/types';
+import { PaginationQueryModel, WithPaginationQuery } from '../../../application/utils/types';
 
 export type PostCreateDto = Pick<IPost, 'title' | 'shortDescription' | 'content' | 'blogId' | 'blogName'>;
 

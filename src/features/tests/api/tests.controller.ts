@@ -1,9 +1,10 @@
 import { Controller, Delete, HttpCode, Injectable } from '@nestjs/common';
-import { Status } from '../../../utils/types';
+import { Status } from '../../../application/utils/types';
 import { BlogsRepository } from '../../blogs/dao/blogs.repository';
 import { PostsRepository } from '../../posts/dao/posts.repository';
 import { CommentsRepository } from '../../comments/dao/comments.repository';
 import { UsersRepository } from '../../users/dao/users.repository';
+import { AuthSessionRepository } from '../../auth/dao/auth.repository';
 
 @Injectable()
 @Controller('testing')
@@ -12,6 +13,7 @@ export class TestsController {
     private readonly blogsRepo: BlogsRepository,
     private readonly postsRepo: PostsRepository,
     private readonly usersRepo: UsersRepository,
+    private readonly authSessionRepo: AuthSessionRepository,
     private readonly commentsRepo: CommentsRepository,
   ) {}
 
@@ -22,5 +24,6 @@ export class TestsController {
     await this.postsRepo.clear();
     await this.usersRepo.clear();
     await this.commentsRepo.clear();
+    await this.authSessionRepo.clear();
   }
 }

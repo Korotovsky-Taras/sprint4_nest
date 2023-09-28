@@ -1,6 +1,7 @@
-import { appDescribe } from './utils/appDescribe';
+import { useAppDescribe } from './utils/appDescribe';
 
-appDescribe((appConsumer) => {
+describe('AppConroller', () => {
+  const appConsumer = useAppDescribe();
   it('/ (GET)', () => {
     return appConsumer.getHttp().get('/').expect(200).expect('Hello World!');
   });

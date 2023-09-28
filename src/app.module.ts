@@ -7,9 +7,10 @@ import { PostsModule } from './features/posts/posts.module';
 import { UsersModule } from './features/users/users.module';
 import { CommentsModule } from './features/comments/comments.module';
 import { DbModule } from './db/db.module';
+import { AuthModule } from './features/auth/auth.module';
 
 @Module({
-  imports: [DbModule, BlogsModule, PostsModule, CommentsModule, UsersModule],
+  imports: [DbModule, BlogsModule, PostsModule, CommentsModule, UsersModule, AuthModule],
   controllers: [AppController],
   providers: [AppService],
 })

@@ -1,6 +1,5 @@
 import { Body, Controller, Delete, Get, HttpCode, Injectable, NotFoundException, Param, Post, Put, Query, Req } from '@nestjs/common';
 import { BlogsDataMapper } from './blogs.dm';
-import { Status, WithPagination } from '../../../utils/types';
 import { BlogServiceError, BlogsService } from '../domain/blogs.service';
 import { BlogsQueryRepository } from '../dao/blogs.query.repository';
 import { Request } from 'express';
@@ -9,7 +8,8 @@ import { BlogCreateDto, BlogPaginationQueryDto, BlogPostCreateDto, BlogUpdateDto
 import { PostsDataMapper } from '../../posts/api/posts.dm';
 import { PostsQueryRepository } from '../../posts/dao/posts.query.repository';
 import { PostPaginationQueryDto, PostViewDto } from '../../posts/types/dto';
-import { ServiceResult } from '../../../application/ServiceResult';
+import { ServiceResult } from '../../../application/errors/ServiceResult';
+import { Status, WithPagination } from '../../../application/utils/types';
 
 @Injectable()
 @Controller('blogs')
