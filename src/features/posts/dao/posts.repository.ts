@@ -4,20 +4,33 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Post } from './posts.schema';
 import { IPostModel, PostDocumentType } from '../types/dao';
 import { IPostsRepository, PostMapperType } from '../types/common';
-import { PostCreateDto, PostUpdateDto } from '../types/dto';
+import { PostCreateModel } from '../types/dto';
+import { PostUpdateDto } from '../dto/PostUpdateDto';
 
 @Injectable()
 export class PostsRepository implements IPostsRepository {
   constructor(@InjectModel(Post.name) private postModel: IPostModel) {}
 
-  async createPost<T>(userId: string | null, input: PostCreateDto, dto: PostMapperType<T>): Promise<T> {
+  async createPost<T>(userId: string | null, input: PostCreateModel, mapper: PostMapperType<T>): Promise<T> {
     const model: PostDocumentType = this.postModel.createPost(input);
     await this.saveDoc(model);
-    return dto(model, userId);
+    return mapper(model, userId);
   }
 
-  async updatePostById(id: string, input: PostUpdateDto): Promise<boolean> {
-    const res: UpdateResult = await this.postModel.updateOne({ _id: new ObjectId(id) }, { $set: input }).exec();
+  async updatePostById(id: string, dto: PostUpdateDto): Promise<boolean> {
+    const res: UpdateResult = await this.postModel
+      .updateOne(
+        { _id: new ObjectId(id) },
+        {
+          $set: {
+            blogId: dto.blogId,
+            title: dto.title,
+            shortDescription: dto.shortDescription,
+            content: dto.content,
+          },
+        },
+      )
+      .exec();
     return res.modifiedCount > 0;
   }
 

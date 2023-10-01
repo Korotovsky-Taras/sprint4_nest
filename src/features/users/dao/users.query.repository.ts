@@ -12,7 +12,7 @@ import { withModelPagination } from '../../../application/utils/withModelPaginat
 export class UsersQueryRepository implements IUsersQueryRepository {
   constructor(@InjectModel(User.name) private userModel: IUserModel) {}
 
-  async getUsers<T>(query: UserPaginationRepositoryDto, dto: UserListMapperType<T>): Promise<WithPagination<T>> {
+  async getUsers<T>(query: UserPaginationRepositoryDto, mapper: UserListMapperType<T>): Promise<WithPagination<T>> {
     let filter: FilterQuery<UserMongoType> = {};
 
     const searchLoginTermFilter: FilterQuery<UserMongoType> | null =
@@ -42,13 +42,13 @@ export class UsersQueryRepository implements IUsersQueryRepository {
       filter = searchEmailTermFilter;
     }
 
-    return withModelPagination<UserMongoType, T>(this.userModel, filter, query, dto);
+    return withModelPagination<UserMongoType, T>(this.userModel, filter, query, mapper);
   }
 
-  async getUserById<T>(userId: string, dto: UserMapperType<T>): Promise<T | null> {
+  async getUserById<T>(userId: string, mapper: UserMapperType<T>): Promise<T | null> {
     const user: UserMongoType | null = await this.userModel.findById(userId).lean();
     if (user) {
-      return dto(user);
+      return mapper(user);
     }
     return null;
   }
@@ -63,10 +63,10 @@ export class UsersQueryRepository implements IUsersQueryRepository {
     return !!user;
   }
 
-  async getUserByLoginOrEmail<T>(login: string, email: string, dto: UserMapperType<T>): Promise<T | null> {
+  async getUserByLoginOrEmail<T>(login: string, email: string, mapper: UserMapperType<T>): Promise<T | null> {
     const user: UserMongoType | null = await this.userModel.findOne().or([{ email }, { login }]).lean();
     if (user) {
-      return dto(user);
+      return mapper(user);
     }
     return null;
   }
@@ -103,10 +103,10 @@ export class UsersQueryRepository implements IUsersQueryRepository {
     return null;
   }
 
-  async getUserByFilter<T>(filter: FilterQuery<UserMongoType>, dto: UserMapperType<T>): Promise<T | null> {
+  async getUserByFilter<T>(filter: FilterQuery<UserMongoType>, mapper: UserMapperType<T>): Promise<T | null> {
     const user = await this.userModel.findOne(filter).exec();
     if (user) {
-      return dto(user);
+      return mapper(user);
     }
     return null;
   }

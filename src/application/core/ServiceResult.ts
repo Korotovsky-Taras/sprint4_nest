@@ -5,7 +5,7 @@ type ServiceErrorType = {
   code: number;
 };
 
-export class ServiceResult<T> {
+export class ServiceResult<T = null> {
   private data: T | null;
   private errors: ServiceErrorType[];
   constructor() {

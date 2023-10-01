@@ -1,14 +1,14 @@
 import { useTestDescribeConfig } from './utils/useTestDescribeConfig';
 
-import { UserViewDto } from '../src/features/users/types/dto';
+import { UserViewModel } from '../src/features/users/types/dto';
 import { BlogViewDto } from '../src/features/blogs/types/dto';
-import { PostCreateDto, PostViewDto } from '../src/features/posts/types/dto';
+import { PostViewDto } from '../src/features/posts/types/dto';
 import { Status } from '../src/application/utils/types';
 import { authBasic64, TestCreateUtils, validBlogData, validPostData } from './utils/test.create.utils';
 
 let createdBlogId: string | null = null;
 let createdPostId: string | null = null;
-let user: UserViewDto | null = null;
+let user: UserViewModel | null = null;
 
 describe('blogs testing', () => {
   const config = useTestDescribeConfig();
@@ -21,31 +21,13 @@ describe('blogs testing', () => {
     await config.getHttp().delete('/testing/all-data');
   });
 
-  // it('should require authorization', async () => {
-  //   await config.getHttp().post('/blogs').set('Content-Type', 'application/json').send({}).expect(Status.UNATHORIZED);
-  //
-  //   await config.getHttp().delete('/blogs/1').expect(Status.UNATHORIZED);
-  //
-  //   await config.getHttp().put('/blogs/1').set('Content-Type', 'application/json').send({}).expect(Status.UNATHORIZED);
-  //
-  //   await config.getHttp().post('/posts').set('Content-Type', 'application/json').send({}).expect(Status.UNATHORIZED);
-  //
-  //   await config.getHttp().delete('/posts/1').expect(Status.UNATHORIZED);
-  //
-  //   await config.getHttp().put('/posts/1').set('Content-Type', 'application/json').send({}).expect(Status.UNATHORIZED);
-  // });
+  it('should return bad request', async () => {
+    expect(user).not.toBeNull();
 
-  // it('should return bad request', async () => {
-  //   expect(user).not.toBeNull();
-  //
-  //   if (user) {
-  //     await config
-  //       .getHttp()
-  //       .get('/blogs/1')
-  //       .set('Authorization', 'Bearer ' + createAccessToken(user.id).token)
-  //       .expect(Status.UNHANDLED);
-  //   }
-  // });
+    if (user) {
+      await config.getHttp().get('/blogs/1').expect(Status.UNHANDLED);
+    }
+  });
 
   it('should create blog', async () => {
     expect(user).not.toBeNull();
@@ -74,6 +56,17 @@ describe('blogs testing', () => {
     }
   });
 
+  it('should require authorization', async () => {
+    expect(user).not.toBeNull();
+    expect(createdBlogId).not.toBeNull();
+
+    await config.getHttp().post('/blogs').set('Content-Type', 'application/json').send({}).expect(Status.UNATHORIZED);
+
+    await config.getHttp().delete(`/blogs/${createdBlogId}`).expect(Status.UNATHORIZED);
+
+    await config.getHttp().put(`/blogs/${createdBlogId}`).set('Content-Type', 'application/json').send({}).expect(Status.UNATHORIZED);
+  });
+
   it('should create post', async () => {
     expect(user).not.toBeNull();
     expect(createdBlogId).not.toBeNull();
@@ -87,7 +80,7 @@ describe('blogs testing', () => {
         .send({
           ...validPostData,
           blogId: createdBlogId,
-        } as PostCreateDto)
+        })
         .expect(Status.CREATED);
 
       const { id }: Pick<PostViewDto, 'id'> = result.body;
@@ -124,7 +117,7 @@ describe('blogs testing', () => {
           shortDescription: 'valid short description',
           content: 'valid content',
           blogId: createdBlogId,
-        } as PostCreateDto)
+        })
         .expect(Status.NO_CONTENT);
 
       const result = await config.getHttp().get(`/posts/${createdPostId}`).set('Content-Type', 'application/json').expect(Status.OK);

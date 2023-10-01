@@ -5,7 +5,7 @@ export async function withModelPagination<T, O>(
   model: Model<T>,
   filter: FilterQuery<T>,
   query: WithPaginationQuery<T>,
-  dto: (input: T[]) => O[],
+  mapper: (input: T[]) => O[],
 ): Promise<WithPagination<O>> {
   const totalCount: number = (await model.countDocuments(filter)) as number;
 
@@ -21,6 +21,6 @@ export async function withModelPagination<T, O>(
     page: query.pageNumber,
     pageSize: query.pageSize,
     totalCount,
-    items: dto(items),
+    items: mapper(items),
   };
 }

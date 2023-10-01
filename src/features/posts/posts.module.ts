@@ -7,6 +7,8 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { Post, PostSchema } from './dao/posts.schema';
 import { CommentsModule } from '../comments/comments.module';
 import { BlogsModule } from '../blogs/blogs.module';
+import { IsPostIdExistValidator } from '../../application/decorators/validation/IsPostExist';
+import { UsersModule } from '../users/users.module';
 
 @Module({
   imports: [
@@ -18,9 +20,10 @@ import { BlogsModule } from '../blogs/blogs.module';
     ]),
     forwardRef(() => CommentsModule),
     forwardRef(() => BlogsModule),
+    UsersModule,
   ],
   controllers: [PostsController],
-  providers: [PostsService, PostsRepository, PostsQueryRepository],
+  providers: [PostsService, PostsRepository, PostsQueryRepository, IsPostIdExistValidator],
   exports: [PostsRepository, PostsQueryRepository],
 })
 export class PostsModule {}

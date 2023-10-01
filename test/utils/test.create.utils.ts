@@ -1,10 +1,13 @@
 import { AppTestProvider } from './useTestDescribeConfig';
-import { UserCreateRequestDto, UserViewDto } from '../../src/features/users/types/dto';
+import { UserCreateRequestDto, UserViewModel } from '../../src/features/users/types/dto';
 import { AuthTokenCreator } from '../../src/features/auth/utils/tokenCreator';
 import { CommentCreateRequestDto, CommentViewDto } from '../../src/features/comments/types/dto';
-import { BlogCreateDto, BlogViewDto } from '../../src/features/blogs/types/dto';
-import { PostCommentCreateDto, PostCreateDto, PostViewDto } from '../../src/features/posts/types/dto';
+import { BlogViewDto } from '../../src/features/blogs/types/dto';
+import { PostViewDto } from '../../src/features/posts/types/dto';
 import { TestCommonUtils } from './test.common.utils';
+import { BlogCreateDto } from '../../src/features/blogs/dto/BlogCreateDto';
+import { PostCreateDto } from '../../src/features/posts/dto/PostCreateDto';
+import { PostCommentCreateDto } from '../../src/features/posts/dto/PostCommentCreateDto';
 
 export class TestCreateUtils extends TestCommonUtils {
   private config: AppTestProvider;
@@ -39,7 +42,7 @@ export class TestCreateUtils extends TestCommonUtils {
     return result.body;
   }
 
-  async createUser(model: UserCreateRequestDto): Promise<UserViewDto> {
+  async createUser(model: UserCreateRequestDto): Promise<UserViewModel> {
     const result = await this.config
       .getHttp()
       .post('/users')
@@ -55,7 +58,7 @@ export class TestCreateUtils extends TestCommonUtils {
     const result = await this.config
       .getHttp()
       .post(`/posts/${postId}/comments`)
-      .set('Authorization', 'Bearer ' + this.tokenCreator.createAccessToken(userId).token)
+      .set('Authorization', 'Bearer ' + this.createAccessToken(userId))
       .set('Content-Type', 'application/json')
       .send({
         ...model,
@@ -71,6 +74,10 @@ export class TestCreateUtils extends TestCommonUtils {
       password,
     };
   }
+
+  createAccessToken(userId: string): string {
+    return this.tokenCreator.createAccessToken(userId).token;
+  }
 }
 
 export type BlogCreationTestModel = BlogCreateDto;
@@ -82,22 +89,22 @@ export const validBlogData: BlogCreationTestModel = {
   name: 'Taras',
   description: 'valid',
   websiteUrl: 'https://app.by',
-};
+} as BlogCreationTestModel;
 
 export const validPostData: PostCreationTestModel = {
   title: 'valid title',
   shortDescription: 'valid short description',
   content: 'valid content',
-};
+} as PostCreationTestModel;
 
 export const validUserData: UserCreationTestModel = {
   login: 'taras',
   email: 'taras@gmail.com',
   password: 'Q12345q',
-};
+} as UserCreationTestModel;
 
 export const validCommentData: CommentCreationTestModel = {
   content: 'valid content of comment by lorem ipsum',
-};
+} as CommentCreationTestModel;
 
 export const authBasic64 = Buffer.from('admin:qwerty').toString('base64');

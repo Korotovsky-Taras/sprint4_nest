@@ -20,7 +20,7 @@ export type CommentMongoType = WithId<IComment>;
 export type CommentDocumentType = HydratedDocument<IComment, ICommentMethods>;
 
 export interface ICommentMethods {
-  updateLike(userId: string, likeStatus: LikeStatus);
+  updateLike(userId: string, userLogin: string, likeStatus: LikeStatus);
 }
 
 export interface ICommentModel extends Model<CommentDocumentType, ICommentMethods> {

@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { IBlog } from '../types/dao';
-import { BlogCreateDto } from '../types/dto';
+import { BlogCreateDto } from '../dto/BlogCreateDto';
 
 @Schema({ timestamps: true })
 export class Blog implements IBlog {

@@ -3,9 +3,9 @@ import { IUsersController } from '../types/common';
 import { UserServiceError, UsersService } from '../domain/users.service';
 import { UsersQueryRepository } from '../dao/users.query.repository';
 import { UsersDataMapper } from './users.dm';
-import { UserCreateRequestDto, UserListViewDto, UserPaginationQueryDto, UserViewDto } from '../types/dto';
+import { UserCreateRequestDto, UserListViewDto, UserPaginationQueryDto, UserViewModel } from '../types/dto';
 import { Status } from '../../../application/utils/types';
-import { ServiceResult } from '../../../application/errors/ServiceResult';
+import { ServiceResult } from '../../../application/core/ServiceResult';
 
 @Injectable()
 @Controller('users')
@@ -23,8 +23,8 @@ export class UsersController implements IUsersController {
 
   @Post()
   @HttpCode(Status.CREATED)
-  async createUser(@Body() input: UserCreateRequestDto): Promise<UserViewDto> {
-    const result: ServiceResult<UserViewDto> = await this.usersService.createUser(input, true);
+  async createUser(@Body() input: UserCreateRequestDto): Promise<UserViewModel> {
+    const result: ServiceResult<UserViewModel> = await this.usersService.createUser(input, true);
     if (result.hasErrorCode(UserServiceError.USER_ALREADY_REGISTER)) {
       throw new BadRequestException();
     }

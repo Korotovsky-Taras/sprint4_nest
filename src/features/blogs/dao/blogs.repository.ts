@@ -4,16 +4,17 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Blog } from './blogs.schema';
 import { BlogMapperType, IBlogsRepository } from '../types/common';
 import { BlogDocumentType, IBlogModel } from '../types/dao';
-import { BlogCreateDto, BlogUpdateDto } from '../types/dto';
+import { BlogCreateDto } from '../dto/BlogCreateDto';
+import { BlogUpdateDto } from '../dto/BlogUpdateDto';
 
 @Injectable()
 export class BlogsRepository implements IBlogsRepository {
   constructor(@InjectModel(Blog.name) private blogModel: IBlogModel) {}
 
-  async createBlog<T>(input: BlogCreateDto, dto: BlogMapperType<T>): Promise<T> {
+  async createBlog<T>(input: BlogCreateDto, mapper: BlogMapperType<T>): Promise<T> {
     const model: BlogDocumentType = this.blogModel.createBlog(input);
     await this.saveDoc(model);
-    return dto(model);
+    return mapper(model);
   }
 
   async updateBlogById(id: string, input: BlogUpdateDto): Promise<boolean> {

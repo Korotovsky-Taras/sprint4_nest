@@ -1,11 +1,11 @@
 import { UserIdReq, WithPagination } from '../../../application/utils/types';
 import { CommentMongoType, IComment } from './dao';
 import { IRepository, IService } from '../../types';
-import { CommentLikeStatusInputDto, CommentPaginationRepositoryDto, CommentUpdateDto, CommentViewDto } from './dto';
-import { PostCommentCreateDto } from '../../posts/types/dto';
+import { CommentLikeStatusInputModel, CommentPaginationRepositoryDto, CommentUpdateDto, CommentViewDto } from './dto';
 import { Request } from 'express';
 import { LikeStatusUpdateDto } from '../../likes/types';
-import { ServiceResult } from '../../../application/errors/ServiceResult';
+import { ServiceResult } from '../../../application/core/ServiceResult';
+import { PostCommentCreateDto } from '../../posts/dto/PostCommentCreateDto';
 
 export type CommentMapperType<T> = (comment: CommentMongoType, userId: UserIdReq) => T;
 export type CommentListMapperType<T> = (comment: CommentMongoType[], userId: UserIdReq) => T[];
@@ -13,8 +13,8 @@ export type CommentListMapperType<T> = (comment: CommentMongoType[], userId: Use
 export interface ICommentsService extends IService {
   updateCommentById(commentId: string, userId: UserIdReq, model: CommentUpdateDto): Promise<void>;
   deleteCommentById(commentId: string, userId: string | null): Promise<void>;
-  createComment<T>(postId: string, userId: UserIdReq, model: PostCommentCreateDto, dto: CommentMapperType<T>): Promise<ServiceResult<T>>;
-  updateLikeStatus(userId: UserIdReq, model: CommentLikeStatusInputDto): Promise<void>;
+  createComment<T>(postId: string, userId: UserIdReq, model: PostCommentCreateDto, mapper: CommentMapperType<T>): Promise<ServiceResult<T>>;
+  updateLikeStatus(userId: UserIdReq, model: CommentLikeStatusInputModel): Promise<ServiceResult>;
 }
 
 export interface ICommentsController {
@@ -33,8 +33,8 @@ export interface ICommentsQueryRepository {
     userId: UserIdReq,
     filter: Partial<CommentMongoType>,
     query: CommentPaginationRepositoryDto,
-    dto: CommentListMapperType<T>,
+    mapper: CommentListMapperType<T>,
   ): Promise<WithPagination<T>>;
   isUserCommentOwner(commentId: string, userId: string): Promise<boolean>;
-  getCommentById<T>(userId: UserIdReq, id: string, dto: CommentMapperType<T>): Promise<T | null>;
+  getCommentById<T>(userId: UserIdReq, id: string, mapper: CommentMapperType<T>): Promise<T | null>;
 }

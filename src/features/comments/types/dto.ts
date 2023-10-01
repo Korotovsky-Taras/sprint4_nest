@@ -10,7 +10,7 @@ export type CommentCreateDto = Pick<IComment, 'postId' | 'content' | 'commentato
 
 export type CommentUpdateDto = Pick<IComment, 'content'>;
 
-export type CommentLikeStatusInputDto = {
+export type CommentLikeStatusInputModel = {
   commentId: string;
   status: LikeStatus;
 };

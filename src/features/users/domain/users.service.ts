@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { IUsersService } from '../types/common';
-import { UserCreateRequestDto, UserViewDto } from '../types/dto';
+import { UserCreateRequestDto, UserViewModel } from '../types/dto';
 import { UsersRepository } from '../dao/users.repository';
 import { UsersQueryRepository } from '../dao/users.query.repository';
 import { UsersDataMapper } from '../api/users.dm';
@@ -11,8 +11,7 @@ import { IUserModel, UserDocumentType } from '../types/dao';
 import { DeleteResult, ObjectId } from 'mongodb';
 import { MailSender } from '../../../application/mailSender';
 import { AuthConfirmationCodeDto, AuthNewPasswordInputDto, AuthResendingEmailInputDto } from '../../auth/types/dto';
-import { ServiceEmptyResult } from '../../../application/errors/ServiceEmptyResult';
-import { ServiceResult } from '../../../application/errors/ServiceResult';
+import { ServiceResult } from '../../../application/core/ServiceResult';
 
 @Injectable()
 export class UsersService extends AbstractUsersService implements IUsersService {
@@ -30,14 +29,15 @@ export class UsersService extends AbstractUsersService implements IUsersService 
     return result.deletedCount === 1;
   }
 
-  async createUser(model: UserCreateRequestDto, isUserConfirmed: boolean): Promise<ServiceResult<UserViewDto>> {
-    const result = new ServiceResult<UserViewDto>();
+  async createUser(model: UserCreateRequestDto, isUserConfirmed: boolean): Promise<ServiceResult<UserViewModel>> {
+    const result = new ServiceResult<UserViewModel>();
     const isUserRegistered = await this.usersQueryRepo.isUserExistByLoginOrEmail(model.login, model.email);
 
     if (isUserRegistered) {
       result.addError({
         code: UserServiceError.USER_ALREADY_REGISTER,
       });
+      return result;
     }
 
     const user: UserDocumentType = this.userModel.createUser({
@@ -58,8 +58,8 @@ export class UsersService extends AbstractUsersService implements IUsersService 
     return result;
   }
 
-  async verifyConfirmationCode(model: AuthConfirmationCodeDto): Promise<ServiceEmptyResult> {
-    const result = new ServiceEmptyResult();
+  async verifyConfirmationCode(model: AuthConfirmationCodeDto): Promise<ServiceResult> {
+    const result = new ServiceResult();
     const user: UserDocumentType | null = await this.userModel
       .findOne({
         'authConfirmation.code': model.code,
@@ -70,10 +70,11 @@ export class UsersService extends AbstractUsersService implements IUsersService 
       result.addError({
         code: UserServiceError.AUTH_CONFIRMATION_INVALID,
       });
-    } else {
-      user.setAuthConfirmed(true);
-      await this.usersRepo.saveDoc(user);
+      return result;
     }
+
+    user.setAuthConfirmed(true);
+    await this.usersRepo.saveDoc(user);
 
     return result;
   }
@@ -101,8 +102,8 @@ export class UsersService extends AbstractUsersService implements IUsersService 
     }
   }
 
-  async recoverPasswordWithConfirmationCode(model: AuthNewPasswordInputDto): Promise<ServiceEmptyResult> {
-    const result = new ServiceEmptyResult();
+  async recoverPasswordWithConfirmationCode(model: AuthNewPasswordInputDto): Promise<ServiceResult> {
+    const result = new ServiceResult();
     const user: UserDocumentType | null = await this.userModel
       .findOne({
         'passConfirmation.code': model.recoveryCode,

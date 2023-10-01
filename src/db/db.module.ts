@@ -3,6 +3,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { appConfig } from '../application/utils/config';
 import { ServerApiVersion } from 'mongodb';
 import { Connection } from 'mongoose';
+import { DBService } from './DBService';
 
 @Module({
   imports: [
@@ -27,5 +28,6 @@ import { Connection } from 'mongoose';
       },
     }),
   ],
+  providers: [DBService],
 })
 export class DbModule {}

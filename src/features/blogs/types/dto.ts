@@ -1,12 +1,5 @@
 import { IBlog } from './dao';
-import { IPost } from '../../posts/types/dao';
 import { EnhancedOmit, PaginationQueryModel, WithPaginationQuery } from '../../../application/utils/types';
-
-export type BlogCreateDto = Pick<IBlog, 'name' | 'description' | 'websiteUrl'>;
-
-export type BlogPostCreateDto = Pick<IPost, 'title' | 'shortDescription' | 'content'>;
-
-export type BlogUpdateDto = Pick<IBlog, 'name' | 'description' | 'websiteUrl'>;
 
 export type BlogViewDto = Pick<IBlog, 'name' | 'description' | 'websiteUrl' | 'isMembership'> & { id: string; createdAt: string };
 

@@ -4,7 +4,7 @@ import {
   UserMeViewDto,
   UserPaginationQueryDto,
   UserPaginationRepositoryDto,
-  UserViewDto,
+  UserViewModel,
   UserWithConfirmedViewDto,
 } from '../types/dto';
 import { UserMongoType } from '../types/dao';
@@ -28,7 +28,7 @@ export class UsersDataMapper {
       email: input.email,
     };
   }
-  static toUserView(input: UserMongoType): UserViewDto {
+  static toUserView(input: UserMongoType): UserViewModel {
     return {
       id: input._id.toString(),
       login: input.login,
@@ -44,7 +44,7 @@ export class UsersDataMapper {
       email: input.email,
     };
   }
-  static toUsersView(list: UserMongoType[]): UserViewDto[] {
+  static toUsersView(list: UserMongoType[]): UserViewModel[] {
     return list.map((item) => {
       return UsersDataMapper.toUserView(item);
     });

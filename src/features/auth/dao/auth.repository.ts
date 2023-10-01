@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { AuthSession } from './auth.schema';
 import { AuthSessionDocumentType, IAuthSessionModel } from '../types/dao';
 import { IAuthSessionRepository } from '../types/common';
-import { AuthSessionCreateDto, AuthSessionRemoveDto, AuthSessionUpdateDto } from '../types/dto';
+import { AuthSessionCreateDto, AuthSessionInfoDto, AuthSessionUpdateDto } from '../types/dto';
 import { DeleteResult } from 'mongodb';
 
 @Injectable()
@@ -16,7 +16,7 @@ export class AuthSessionRepository implements IAuthSessionRepository {
     return session._id.toString();
   }
 
-  async deleteSession(input: AuthSessionRemoveDto): Promise<boolean> {
+  async deleteSession(input: AuthSessionInfoDto): Promise<boolean> {
     const res: DeleteResult = await this.authSessionModel.deleteOne({ userId: input.userId, deviceId: input.deviceId }).exec();
     return res.deletedCount === 1;
   }
@@ -35,7 +35,7 @@ export class AuthSessionRepository implements IAuthSessionRepository {
     return true;
   }
 
-  async deleteAllSessions(model: AuthSessionRemoveDto): Promise<boolean> {
+  async deleteAllSessions(model: AuthSessionInfoDto): Promise<boolean> {
     const result: DeleteResult = await this.authSessionModel
       .deleteMany({
         deviceId: { $ne: model.deviceId },

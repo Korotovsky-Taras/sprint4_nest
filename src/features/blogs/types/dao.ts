@@ -1,6 +1,6 @@
 import { WithId } from 'mongodb';
-import { BlogCreateDto } from './dto';
 import { HydratedDocument, Model } from 'mongoose';
+import { BlogCreateDto } from '../dto/BlogCreateDto';
 
 export interface IBlog {
   name: string;

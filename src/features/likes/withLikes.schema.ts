@@ -48,17 +48,18 @@ export class WithLikes {
     createdAt: string;
   }[];
 
-  updateLike(userId: string, likeStatus: LikeStatus) {
+  updateLike(userId: string, userLogin: string, likeStatus: LikeStatus) {
     // Обновляем или устанавливаем лайк
     const likeIndex = this.likes.findIndex((like: Like) => like.userId === userId);
+    const likeCreatedAt = toIsoString(new Date());
     if (likeIndex >= 0) {
       this.likes[likeIndex].status = likeStatus;
-      this.likes[likeIndex].createdAt = toIsoString(new Date());
+      this.likes[likeIndex].createdAt = likeCreatedAt;
     } else {
       this.likes.push({
         userId: userId,
         status: likeStatus,
-        createdAt: toIsoString(new Date()),
+        createdAt: likeCreatedAt,
       });
     }
 
@@ -73,5 +74,20 @@ export class WithLikes {
         this.likesInfo.dislikesCount++;
       }
     });
+
+    //Обновляем список последних лайков
+    const lastLikesIds = this.lastLikes.map((like) => like.userId);
+    if (lastLikesIds.includes(userId) && likeStatus === LikeStatus.DISLIKE) {
+      this.lastLikes = this.lastLikes.filter((like) => like.userId != userId);
+    } else if (likeStatus === LikeStatus.LIKE && !lastLikesIds.includes(userId)) {
+      this.lastLikes.unshift({
+        userId: userId,
+        userLogin: userLogin,
+        createdAt: likeCreatedAt,
+      });
+      if (this.lastLikes.length > 3) {
+        this.lastLikes.length = 3;
+      }
+    }
   }
 }

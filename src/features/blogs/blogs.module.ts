@@ -6,6 +6,7 @@ import { BlogsQueryRepository } from './dao/blogs.query.repository';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Blog, BlogSchema } from './dao/blogs.schema';
 import { PostsModule } from '../posts/posts.module';
+import { IsBlogIdExistValidator } from '../../application/decorators/validation/IsBlogExist';
 
 @Module({
   imports: [
@@ -18,7 +19,7 @@ import { PostsModule } from '../posts/posts.module';
     forwardRef(() => PostsModule),
   ],
   controllers: [BlogsController],
-  providers: [BlogsService, BlogsRepository, BlogsQueryRepository],
+  providers: [BlogsService, BlogsRepository, BlogsQueryRepository, IsBlogIdExistValidator],
   exports: [BlogsRepository, BlogsQueryRepository],
 })
 export class BlogsModule {}

@@ -1,12 +1,13 @@
-import { Body, Controller, Delete, Get, HttpCode, Injectable, NotFoundException, Param, Put, Req } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Injectable, NotFoundException, Param, Put, Req, UnauthorizedException } from '@nestjs/common';
 import { ICommentsController } from '../types/common';
-import { CommentsService } from '../domain/comments.service';
+import { CommentServiceError, CommentsService } from '../domain/comments.service';
 import { CommentsQueryRepository } from '../dao/comments.query.repository';
 import { CommentUpdateDto, CommentViewDto } from '../types/dto';
 import { Request } from 'express';
 import { CommentsDataMapper } from './comments.dm';
 import { Status } from '../../../application/utils/types';
 import { LikeStatusUpdateDto } from '../../likes/types';
+import { ServiceResult } from '../../../application/core/ServiceResult';
 
 @Injectable()
 @Controller('comments')
@@ -35,10 +36,18 @@ export class CommentsController implements ICommentsController {
   @Put(':id/like-status')
   @HttpCode(Status.NO_CONTENT)
   async updateCommentLikeStatus(@Param('id') commentId: string, @Body() input: LikeStatusUpdateDto, @Req() req: Request): Promise<void> {
-    await this.commentsService.updateLikeStatus(req.userId, {
+    const result: ServiceResult = await this.commentsService.updateLikeStatus(req.userId, {
       commentId: commentId,
       status: input.likeStatus,
     });
+
+    if (result.hasErrorCode(CommentServiceError.USER_ID_REQUIRED) || result.hasErrorCode(CommentServiceError.USER_NOT_FOUND)) {
+      throw new UnauthorizedException();
+    }
+
+    if (result.hasErrorCode(CommentServiceError.COMMENT_NOT_FOUND)) {
+      throw new NotFoundException();
+    }
   }
 
   @Delete(':id')

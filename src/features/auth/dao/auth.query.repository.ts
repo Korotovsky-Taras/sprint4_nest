@@ -8,15 +8,15 @@ import { AuthSessionMongoType, IAuthSessionModel } from '../types/dao';
 export class AuthSessionQueryRepository implements IAuthSessionQueryRepository {
   constructor(@InjectModel(AuthSession.name) private authSessionModel: IAuthSessionModel) {}
 
-  async getAll<T>(userId: string, dto: AuthSessionListMapperType<T>): Promise<T[]> {
+  async getAll<T>(userId: string, mapper: AuthSessionListMapperType<T>): Promise<T[]> {
     const sessions: AuthSessionMongoType[] = await this.authSessionModel.find({ userId }).lean();
-    return dto(sessions);
+    return mapper(sessions);
   }
-  async getSessionByUserIdDeviceId<T>(userId: string, deviceId: string, dto: AuthSessionMapperType<T>): Promise<T | null> {
+  async getSessionByUserIdDeviceId<T>(userId: string, deviceId: string, mapper: AuthSessionMapperType<T>): Promise<T | null> {
     const query = this.authSessionModel.where({ userId, deviceId });
     const session: AuthSessionMongoType | null = await query.findOne().lean();
     if (session) {
-      return dto(session);
+      return mapper(session);
     }
     return null;
   }
@@ -25,11 +25,11 @@ export class AuthSessionQueryRepository implements IAuthSessionQueryRepository {
     const session: AuthSessionMongoType | null = await query.findOne().lean();
     return session !== null;
   }
-  async getSessionByDeviceId<T>(deviceId: string, dto: AuthSessionMapperType<T>): Promise<T | null> {
+  async getSessionByDeviceId<T>(deviceId: string, mapper: AuthSessionMapperType<T>): Promise<T | null> {
     const query = this.authSessionModel.where({ deviceId });
     const session: AuthSessionMongoType | null = await query.findOne().lean();
     if (session) {
-      return dto(session);
+      return mapper(session);
     }
     return null;
   }

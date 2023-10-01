@@ -1,9 +1,9 @@
-import { ForbiddenException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { CommentMapperType, ICommentsService } from '../types/common';
 import { UserIdReq } from '../../../application/utils/types';
-import { CommentLikeStatusInputDto, CommentUpdateDto } from '../types/dto';
+import { CommentLikeStatusInputModel, CommentUpdateDto } from '../types/dto';
 import { CommentDocumentType, ICommentModel } from '../types/dao';
-import { PostCommentCreateDto, PostViewDto } from '../../posts/types/dto';
+import { PostViewDto } from '../../posts/types/dto';
 import { ObjectId } from 'mongodb';
 import { InjectModel } from '@nestjs/mongoose';
 import { Comment } from '../dao/comments.schema';
@@ -12,9 +12,11 @@ import { CommentsQueryRepository } from '../dao/comments.query.repository';
 import { PostsQueryRepository } from '../../posts/dao/posts.query.repository';
 import { PostsDataMapper } from '../../posts/api/posts.dm';
 import { UsersQueryRepository } from '../../users/dao/users.query.repository';
-import { UserViewDto } from '../../users/types/dto';
+import { UserViewModel } from '../../users/types/dto';
 import { UsersDataMapper } from '../../users/api/users.dm';
-import { ServiceResult } from '../../../application/errors/ServiceResult';
+import { ServiceResult } from '../../../application/core/ServiceResult';
+import { PostCommentCreateDto } from '../../posts/dto/PostCommentCreateDto';
+import { validateOrRejectDto } from '../../../application/utils/validateOrRejectDto';
 
 @Injectable()
 export class CommentsService implements ICommentsService {
@@ -68,7 +70,9 @@ export class CommentsService implements ICommentsService {
     }
   }
 
-  async createComment<T>(postId: string, userId: UserIdReq, model: PostCommentCreateDto, dto: CommentMapperType<T>): Promise<ServiceResult<T>> {
+  async createComment<T>(postId: string, userId: UserIdReq, dto: PostCommentCreateDto, mapper: CommentMapperType<T>): Promise<ServiceResult<T>> {
+    await validateOrRejectDto(dto, PostCommentCreateDto);
+
     const postExist: boolean = await this.postsQueryRepo.isPostExist(postId);
     const result = new ServiceResult<T>();
 
@@ -83,7 +87,7 @@ export class CommentsService implements ICommentsService {
         code: CommentServiceError.POST_NOT_FOUND,
       });
     } else {
-      const user: UserViewDto | null = await this.usersQueryRepo.getUserById(userId, UsersDataMapper.toUserView);
+      const user: UserViewModel | null = await this.usersQueryRepo.getUserById(userId, UsersDataMapper.toUserView);
 
       if (!user) {
         result.addError({
@@ -101,7 +105,7 @@ export class CommentsService implements ICommentsService {
         } else {
           const comment: CommentDocumentType = this.commentModel.createComment({
             postId: post.id,
-            content: model.content,
+            content: dto.content,
             commentatorInfo: {
               userId: user.id,
               userLogin: user.login,
@@ -109,7 +113,7 @@ export class CommentsService implements ICommentsService {
           });
           await this.commentsRepo.saveDoc(comment);
 
-          result.setData(dto(comment, userId));
+          result.setData(mapper(comment, userId));
         }
       }
     }
@@ -117,30 +121,45 @@ export class CommentsService implements ICommentsService {
     return result;
   }
 
-  async updateLikeStatus(userId: UserIdReq, model: CommentLikeStatusInputDto): Promise<void> {
+  async updateLikeStatus(userId: UserIdReq, model: CommentLikeStatusInputModel): Promise<ServiceResult> {
+    const result = new ServiceResult();
+
     if (userId === null) {
-      throw new UnauthorizedException();
+      result.addError({
+        code: CommentServiceError.USER_ID_REQUIRED,
+      });
+      return result;
     }
 
-    const userExist: boolean = await this.usersQueryRepo.isUserExist(userId);
+    const userModel: UserViewModel | null = await this.usersQueryRepo.getUserById(userId, UsersDataMapper.toUserView);
 
-    if (!userExist) {
-      throw new UnauthorizedException();
+    if (userModel === null) {
+      result.addError({
+        code: CommentServiceError.USER_NOT_FOUND,
+      });
+      return result;
     }
 
     const comment: CommentDocumentType | null = await this.commentModel.findOne({ _id: new ObjectId(model.commentId) }).exec();
 
-    if (!comment) {
-      throw new NotFoundException();
+    if (comment === null) {
+      result.addError({
+        code: CommentServiceError.COMMENT_NOT_FOUND,
+      });
+      return result;
     }
 
-    comment.updateLike(userId, model.status);
+    comment.updateLike(userModel.id, userModel.login, model.status);
 
     await this.commentsRepo.saveDoc(comment);
+
+    return result;
   }
 }
 
 export enum CommentServiceError {
   POST_NOT_FOUND = 1,
   USER_NOT_FOUND = 2,
+  USER_ID_REQUIRED = 3,
+  COMMENT_NOT_FOUND = 4,
 }

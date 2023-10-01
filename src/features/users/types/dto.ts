@@ -5,7 +5,7 @@ export type UserCreateRequestDto = Pick<IUser, 'login' | 'email'> & { password: 
 
 export type UserCreateInputDto = Pick<IUser, 'login' | 'email' | 'password' | 'authConfirmation'>;
 
-export type UserViewDto = Pick<IUser, 'login' | 'email'> & { id: string; createdAt: string };
+export type UserViewModel = Pick<IUser, 'login' | 'email'> & { id: string; createdAt: string };
 
 export type UserAuthDto = Pick<IUser, 'login' | 'email' | 'password'> & { id: string };
 
@@ -15,7 +15,7 @@ export type UserWithConfirmedViewDto = Pick<IUser, 'login' | 'email'> & { id: st
 
 export type UserAuthWithConfirmationDto = UserAuthDto & { confirmationCode: string; confirmed: boolean };
 
-export type UserListViewDto = WithPagination<UserViewDto>;
+export type UserListViewDto = WithPagination<UserViewModel>;
 
 export type UserPaginationQueryDto = PaginationQueryModel<IUser> & {
   searchLoginTerm?: string;

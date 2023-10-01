@@ -1,18 +1,41 @@
-import { BadRequestException, Body, Controller, Delete, Get, HttpCode, Injectable, NotFoundException, Param, Post, Put, Query, Req } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  Injectable,
+  NotFoundException,
+  Param,
+  Post,
+  Put,
+  Query,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { IPostsController } from '../types/common';
-import { PostsService } from '../domain/posts.service';
+import { PostLikeServiceError, PostsService } from '../domain/posts.service';
 import { PostsDataMapper } from './posts.dm';
 import { PostsQueryRepository } from '../dao/posts.query.repository';
 import { IPost } from '../types/dao';
-import { PostCommentCreateDto, PostCreateDto, PostUpdateDto, PostViewDto } from '../types/dto';
+import { PostViewDto } from '../types/dto';
 import { Request } from 'express';
 import { CommentViewDto } from '../../comments/types/dto';
 import { CommentServiceError, CommentsService } from '../../comments/domain/comments.service';
 import { CommentsQueryRepository } from '../../comments/dao/comments.query.repository';
 import { CommentsDataMapper } from '../../comments/api/comments.dm';
 import { IComment } from '../../comments/types/dao';
-import { ServiceResult } from '../../../application/errors/ServiceResult';
+import { ServiceResult } from '../../../application/core/ServiceResult';
 import { PaginationQueryModel, Status, WithPagination } from '../../../application/utils/types';
+import { AuthTokenGuard } from '../../../application/guards/AuthTokenGuard';
+import { SetTokenGuardParams } from '../../../application/decorators/skipTokenError';
+import { PostCreateDto } from '../dto/PostCreateDto';
+import { AuthBasicGuard } from '../../../application/guards/AuthBasicGuard';
+import { PostUpdateDto } from '../dto/PostUpdateDto';
+import { PostCommentCreateDto } from '../dto/PostCommentCreateDto';
+import { LikeStatusUpdateDto } from '../../likes/dto/LikeStatusUpdateDto';
+import { GetUserId } from '../../../application/decorators/params/getUserId';
 
 @Injectable()
 @Controller('posts')
@@ -25,13 +48,17 @@ export class PostsController implements IPostsController {
   ) {}
 
   @Get()
+  @SetTokenGuardParams({ throwError: false })
+  @UseGuards(AuthTokenGuard)
   async getAll(@Query() query: PaginationQueryModel<IPost>, @Req() req: Request): Promise<WithPagination<PostViewDto>> {
     return await this.postsQueryRepository.getPosts(req.userId, {}, PostsDataMapper.toRepoQuery(query), PostsDataMapper.toPostsView);
   }
 
   @Get(':id')
+  @SetTokenGuardParams({ throwError: false })
+  @UseGuards(AuthTokenGuard)
   @HttpCode(Status.OK)
-  async getPost(@Param('id') postId: string, @Body() input: PostCreateDto, @Req() req: Request): Promise<PostViewDto> {
+  async getPost(@Param('id') postId: string, @Req() req: Request): Promise<PostViewDto> {
     const post: PostViewDto | null = await this.postsQueryRepository.getPostById(req.userId, postId, PostsDataMapper.toPostView);
     if (post) {
       return post;
@@ -40,6 +67,7 @@ export class PostsController implements IPostsController {
   }
 
   @Post()
+  @UseGuards(AuthBasicGuard)
   @HttpCode(Status.CREATED)
   async createPost(@Body() input: PostCreateDto, @Req() req: Request): Promise<PostViewDto> {
     const post: PostViewDto | null = await this.postsService.createPost(req.userId, input);
@@ -50,6 +78,7 @@ export class PostsController implements IPostsController {
   }
 
   @Put(':id')
+  @UseGuards(AuthBasicGuard)
   @HttpCode(Status.NO_CONTENT)
   async updatePost(@Param('id') postId: string, @Body() input: PostUpdateDto): Promise<void> {
     const postExist: boolean = await this.postsQueryRepository.isPostExist(postId);
@@ -60,6 +89,7 @@ export class PostsController implements IPostsController {
   }
 
   @Delete(':id')
+  @UseGuards(AuthBasicGuard)
   @HttpCode(Status.NO_CONTENT)
   async deletePost(@Param('id') postId: string): Promise<void> {
     const postExist: boolean = await this.postsQueryRepository.isPostExist(postId);
@@ -70,6 +100,8 @@ export class PostsController implements IPostsController {
   }
 
   @Get('/:id/comments')
+  @SetTokenGuardParams({ throwError: false })
+  @UseGuards(AuthTokenGuard)
   @HttpCode(Status.OK)
   async getComments(@Param('id') postId: string, @Query() query: PaginationQueryModel<IComment>, @Req() req: Request): Promise<WithPagination<CommentViewDto>> {
     const postExist: boolean = await this.postsQueryRepository.isPostExist(postId);
@@ -80,6 +112,7 @@ export class PostsController implements IPostsController {
   }
 
   @Post('/:id/comments')
+  @UseGuards(AuthTokenGuard)
   @HttpCode(Status.CREATED)
   async createComment(@Param('id') postId: string, @Body() input: PostCommentCreateDto, @Req() req: Request): Promise<CommentViewDto> {
     const result: ServiceResult<CommentViewDto> = await this.commentsService.createComment(postId, req.userId, input, CommentsDataMapper.toCommentView);
@@ -89,5 +122,22 @@ export class PostsController implements IPostsController {
     }
 
     return result.getData();
+  }
+
+  @Put('/:id/like-status')
+  @UseGuards(AuthTokenGuard)
+  @HttpCode(Status.NO_CONTENT)
+  async updateCommentLikeStatus(@Param('id') postId: string, @Body() input: LikeStatusUpdateDto, @GetUserId() userId: string): Promise<void> {
+    const result: ServiceResult = await this.postsService.updateLikeStatus({
+      postId: postId,
+      userId: userId,
+      status: input.likeStatus,
+    });
+    if (result.hasErrorCode(PostLikeServiceError.POST_NO_FOUND)) {
+      throw new NotFoundException();
+    }
+    if (result.hasErrorCode(PostLikeServiceError.UNAUTHORIZED)) {
+      throw new NotFoundException();
+    }
   }
 }

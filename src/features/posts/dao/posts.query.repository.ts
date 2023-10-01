@@ -22,10 +22,10 @@ export class PostsQueryRepository implements IPostsQueryRepository {
     });
   }
 
-  async getPostById<T>(userId: UserIdReq, id: string, dto: PostMapperType<T>): Promise<T | null> {
+  async getPostById<T>(userId: UserIdReq, id: string, mapper: PostMapperType<T>): Promise<T | null> {
     const post: PostMongoType | null = await this.postModel.findById(id).lean();
     if (post) {
-      return dto(post, userId);
+      return mapper(post, userId);
     }
     return null;
   }

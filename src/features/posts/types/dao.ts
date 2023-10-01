@@ -1,7 +1,7 @@
 import { HydratedDocument, Model } from 'mongoose';
 import { WithId } from 'mongodb';
-import { PostCreateDto } from './dto';
 import { IWithLikes, LikeStatus } from '../../likes/types';
+import { PostCreateModel } from './dto';
 
 export interface IPost extends IWithLikes {
   title: string;
@@ -17,9 +17,9 @@ export type PostMongoType = WithId<IPost>;
 export type PostDocumentType = HydratedDocument<IPost, IPostMethods>;
 
 export interface IPostMethods {
-  updateLike(userId: string, likeStatus: LikeStatus);
+  updateLike(userId: string, userLogin: string, likeStatus: LikeStatus);
 }
 
 export interface IPostModel extends Model<PostDocumentType, IPostMethods> {
-  createPost(input: PostCreateDto): PostDocumentType;
+  createPost(input: PostCreateModel): PostDocumentType;
 }

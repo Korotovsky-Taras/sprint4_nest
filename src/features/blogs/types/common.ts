@@ -1,10 +1,13 @@
-import { BlogCreateDto, BlogPaginationQueryDto, BlogPostCreateDto, BlogUpdateDto, BlogViewDto } from './dto';
+import { BlogPaginationQueryDto, BlogViewDto } from './dto';
 import { BlogMongoType, IBlog } from './dao';
 import { Request } from 'express';
 import { PostPaginationQueryDto, PostViewDto } from '../../posts/types/dto';
 import { IRepository, IService } from '../../types';
-import { ServiceResult } from '../../../application/errors/ServiceResult';
+import { ServiceResult } from '../../../application/core/ServiceResult';
 import { UserIdReq, WithPagination, WithPaginationQuery } from '../../../application/utils/types';
+import { BlogPostCreateDto } from '../dto/BlogPostCreateDto';
+import { BlogCreateDto } from '../dto/BlogCreateDto';
+import { BlogUpdateDto } from '../dto/BlogUpdateDto';
 
 export type BlogMapperType<T> = (blog: BlogMongoType) => T;
 export type BlogListMapperType<T> = (blog: BlogMongoType[]) => T[];

@@ -1,15 +1,21 @@
-import { Body, Controller, Delete, Get, HttpCode, Injectable, NotFoundException, Param, Post, Put, Query, Req } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Injectable, NotFoundException, Param, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
 import { BlogsDataMapper } from './blogs.dm';
 import { BlogServiceError, BlogsService } from '../domain/blogs.service';
 import { BlogsQueryRepository } from '../dao/blogs.query.repository';
 import { Request } from 'express';
 import { IBlogsController } from '../types/common';
-import { BlogCreateDto, BlogPaginationQueryDto, BlogPostCreateDto, BlogUpdateDto, BlogViewDto } from '../types/dto';
+import { BlogPaginationQueryDto, BlogViewDto } from '../types/dto';
 import { PostsDataMapper } from '../../posts/api/posts.dm';
 import { PostsQueryRepository } from '../../posts/dao/posts.query.repository';
 import { PostPaginationQueryDto, PostViewDto } from '../../posts/types/dto';
-import { ServiceResult } from '../../../application/errors/ServiceResult';
+import { ServiceResult } from '../../../application/core/ServiceResult';
 import { Status, WithPagination } from '../../../application/utils/types';
+import { AuthTokenGuard } from '../../../application/guards/AuthTokenGuard';
+import { AuthBasicGuard } from '../../../application/guards/AuthBasicGuard';
+import { BlogPostCreateDto } from '../dto/BlogPostCreateDto';
+import { BlogCreateDto } from '../dto/BlogCreateDto';
+import { BlogUpdateDto } from '../dto/BlogUpdateDto';
+import { SetTokenGuardParams } from '../../../application/decorators/skipTokenError';
 
 @Injectable()
 @Controller('blogs')
@@ -37,12 +43,15 @@ export class BlogsController implements IBlogsController {
   }
 
   @Post()
+  @UseGuards(AuthBasicGuard)
   @HttpCode(Status.CREATED)
   async createBlog(@Body() input: BlogCreateDto): Promise<BlogViewDto> {
     return await this.blogsService.createBlog(input);
   }
 
   @Get('/:id/posts')
+  @SetTokenGuardParams({ throwError: false })
+  @UseGuards(AuthTokenGuard)
   @HttpCode(Status.OK)
   async getBlogPosts(@Param('id') blogId: string, @Query() query: PostPaginationQueryDto, @Req() req: Request): Promise<WithPagination<PostViewDto>> {
     const blog: BlogViewDto | null = await this.blogsQueryRepo.getBlogById(blogId, BlogsDataMapper.toBlogView);
@@ -53,6 +62,7 @@ export class BlogsController implements IBlogsController {
   }
 
   @Post('/:id/posts')
+  @UseGuards(AuthBasicGuard)
   @HttpCode(Status.CREATED)
   async createBlogPost(@Param('id') blogId: string, @Body() input: BlogPostCreateDto, @Req() req: Request): Promise<PostViewDto> {
     const result: ServiceResult<PostViewDto> = await this.blogsService.createPost(req.userId, blogId, {
@@ -69,6 +79,7 @@ export class BlogsController implements IBlogsController {
   }
 
   @Put(':id')
+  @UseGuards(AuthBasicGuard)
   @HttpCode(Status.NO_CONTENT)
   async updateBlog(@Param('id') blogId: string, @Body() input: BlogUpdateDto) {
     const result: ServiceResult<boolean> = await this.blogsService.updateBlogById(blogId, input);
@@ -79,6 +90,7 @@ export class BlogsController implements IBlogsController {
   }
 
   @Delete(':id')
+  @UseGuards(AuthBasicGuard)
   @HttpCode(Status.NO_CONTENT)
   async deleteBlog(@Param('id') blogId: string) {
     const result: ServiceResult<boolean> = await this.blogsService.deleteBlogById(blogId);

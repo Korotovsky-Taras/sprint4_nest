@@ -1,11 +1,11 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { PostCreateDto } from '../types/dto';
+import { PostCreateModel } from '../types/dto';
 import { IPost } from '../types/dao';
 import { WithLikes } from '../../likes/withLikes.schema';
 
 @Schema({ timestamps: true })
 export class Post extends WithLikes implements IPost {
-  constructor(input: PostCreateDto) {
+  constructor(input: PostCreateModel) {
     super();
     this.blogId = input.blogId;
     this.blogName = input.blogName;
@@ -27,7 +27,7 @@ export class Post extends WithLikes implements IPost {
 
   createdAt: Date;
 
-  static createPost(input: PostCreateDto) {
+  static createPost(input: PostCreateModel) {
     return new this(input);
   }
 }
