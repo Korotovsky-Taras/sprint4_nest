@@ -1,14 +1,14 @@
 import { useTestDescribeConfig } from './utils/useTestDescribeConfig';
 import { TestCreateUtils } from './utils/test.create.utils';
-import { BlogViewDto } from '../src/features/blogs/types/dto';
-import { PostViewDto } from '../src/features/posts/types/dto';
+import { BlogViewModel } from '../src/features/blogs/types/dto';
+import { PostViewModel } from '../src/features/posts/types/dto';
 import { UserViewModel } from '../src/features/users/types/dto';
 import { Status } from '../src/application/utils/types';
 import { LikeStatus } from '../src/features/likes/types';
 import { ObjectId } from 'mongodb';
 
-let blog: BlogViewDto | null = null;
-let post: PostViewDto | null = null;
+let blog: BlogViewModel | null = null;
+let post: PostViewModel | null = null;
 let user: UserViewModel | null = null;
 
 describe('posts testing', () => {

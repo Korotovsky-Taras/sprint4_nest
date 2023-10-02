@@ -6,7 +6,9 @@ export type PostCreateModel = Pick<IPost, 'title' | 'shortDescription' | 'conten
 
 export type PostUpdateModel = Pick<IPost, 'title' | 'shortDescription' | 'content' | 'blogId'>;
 
-export type PostViewDto = WithExtendedLikes<Pick<IPost, 'title' | 'shortDescription' | 'content' | 'blogId' | 'blogName'> & { id: string; createdAt: string }>;
+export type PostViewModel = WithExtendedLikes<
+  Pick<IPost, 'title' | 'shortDescription' | 'content' | 'blogId' | 'blogName'> & { id: string; createdAt: string }
+>;
 
 export type PostLikeStatusInputModel = {
   postId: string;

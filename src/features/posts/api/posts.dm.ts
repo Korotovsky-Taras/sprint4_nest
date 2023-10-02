@@ -1,4 +1,4 @@
-import { PostPaginationQueryDto, PostPaginationRepositoryDto, PostViewDto } from '../types/dto';
+import { PostPaginationQueryDto, PostPaginationRepositoryDto, PostViewModel } from '../types/dto';
 import { PostMongoType } from '../types/dao';
 import { LastLike, Like, LikesExtendedInfo, LikeStatus } from '../../likes/types';
 import { withExternalDirection, withExternalNumber, withExternalString } from '../../../application/utils/withExternalQuery';
@@ -13,13 +13,13 @@ const initialQuery: PostPaginationRepositoryDto = {
 };
 
 export class PostsDataMapper {
-  static toPostsView(items: PostMongoType[], userId: UserIdReq): PostViewDto[] {
+  static toPostsView(items: PostMongoType[], userId: UserIdReq): PostViewModel[] {
     return items.map((item) => {
       return PostsDataMapper.toPostView(item, userId);
     });
   }
 
-  static toPostView(item: PostMongoType, userId: UserIdReq): PostViewDto {
+  static toPostView(item: PostMongoType, userId: UserIdReq): PostViewModel {
     return {
       id: item._id.toString(),
       title: item.title,

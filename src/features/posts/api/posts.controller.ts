@@ -19,9 +19,9 @@ import { PostLikeServiceError, PostsService } from '../domain/posts.service';
 import { PostsDataMapper } from './posts.dm';
 import { PostsQueryRepository } from '../dao/posts.query.repository';
 import { IPost } from '../types/dao';
-import { PostViewDto } from '../types/dto';
+import { PostViewModel } from '../types/dto';
 import { Request } from 'express';
-import { CommentViewDto } from '../../comments/types/dto';
+import { CommentViewModel } from '../../comments/types/dto';
 import { CommentServiceError, CommentsService } from '../../comments/domain/comments.service';
 import { CommentsQueryRepository } from '../../comments/dao/comments.query.repository';
 import { CommentsDataMapper } from '../../comments/api/comments.dm';
@@ -50,7 +50,7 @@ export class PostsController implements IPostsController {
   @Get()
   @SetTokenGuardParams({ throwError: false })
   @UseGuards(AuthTokenGuard)
-  async getAll(@Query() query: PaginationQueryModel<IPost>, @Req() req: Request): Promise<WithPagination<PostViewDto>> {
+  async getAll(@Query() query: PaginationQueryModel<IPost>, @Req() req: Request): Promise<WithPagination<PostViewModel>> {
     return await this.postsQueryRepository.getPosts(req.userId, {}, PostsDataMapper.toRepoQuery(query), PostsDataMapper.toPostsView);
   }
 
@@ -58,8 +58,8 @@ export class PostsController implements IPostsController {
   @SetTokenGuardParams({ throwError: false })
   @UseGuards(AuthTokenGuard)
   @HttpCode(Status.OK)
-  async getPost(@Param('id') postId: string, @Req() req: Request): Promise<PostViewDto> {
-    const post: PostViewDto | null = await this.postsQueryRepository.getPostById(req.userId, postId, PostsDataMapper.toPostView);
+  async getPost(@Param('id') postId: string, @Req() req: Request): Promise<PostViewModel> {
+    const post: PostViewModel | null = await this.postsQueryRepository.getPostById(req.userId, postId, PostsDataMapper.toPostView);
     if (post) {
       return post;
     }
@@ -69,8 +69,8 @@ export class PostsController implements IPostsController {
   @Post()
   @UseGuards(AuthBasicGuard)
   @HttpCode(Status.CREATED)
-  async createPost(@Body() input: PostCreateDto, @Req() req: Request): Promise<PostViewDto> {
-    const post: PostViewDto | null = await this.postsService.createPost(req.userId, input);
+  async createPost(@Body() input: PostCreateDto, @Req() req: Request): Promise<PostViewModel> {
+    const post: PostViewModel | null = await this.postsService.createPost(req.userId, input);
     if (post) {
       return post;
     }
@@ -103,7 +103,11 @@ export class PostsController implements IPostsController {
   @SetTokenGuardParams({ throwError: false })
   @UseGuards(AuthTokenGuard)
   @HttpCode(Status.OK)
-  async getComments(@Param('id') postId: string, @Query() query: PaginationQueryModel<IComment>, @Req() req: Request): Promise<WithPagination<CommentViewDto>> {
+  async getComments(
+    @Param('id') postId: string,
+    @Query() query: PaginationQueryModel<IComment>,
+    @Req() req: Request,
+  ): Promise<WithPagination<CommentViewModel>> {
     const postExist: boolean = await this.postsQueryRepository.isPostExist(postId);
     if (!postExist) {
       throw new NotFoundException();
@@ -114,8 +118,8 @@ export class PostsController implements IPostsController {
   @Post('/:id/comments')
   @UseGuards(AuthTokenGuard)
   @HttpCode(Status.CREATED)
-  async createComment(@Param('id') postId: string, @Body() input: PostCommentCreateDto, @Req() req: Request): Promise<CommentViewDto> {
-    const result: ServiceResult<CommentViewDto> = await this.commentsService.createComment(postId, req.userId, input, CommentsDataMapper.toCommentView);
+  async createComment(@Param('id') postId: string, @Body() input: PostCommentCreateDto, @Req() req: Request): Promise<CommentViewModel> {
+    const result: ServiceResult<CommentViewModel> = await this.commentsService.createComment(postId, req.userId, input, CommentsDataMapper.toCommentView);
 
     if (result.hasErrorCode(CommentServiceError.POST_NOT_FOUND) || result.hasErrorCode(CommentServiceError.USER_NOT_FOUND)) {
       throw new NotFoundException();

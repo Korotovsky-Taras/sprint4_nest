@@ -1,9 +1,9 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { CommentMapperType, ICommentsService } from '../types/common';
 import { UserIdReq } from '../../../application/utils/types';
-import { CommentLikeStatusInputModel, CommentUpdateDto } from '../types/dto';
+import { CommentLikeStatusInputModel } from '../types/dto';
 import { CommentDocumentType, ICommentModel } from '../types/dao';
-import { PostViewDto } from '../../posts/types/dto';
+import { PostViewModel } from '../../posts/types/dto';
 import { ObjectId } from 'mongodb';
 import { InjectModel } from '@nestjs/mongoose';
 import { Comment } from '../dao/comments.schema';
@@ -17,6 +17,7 @@ import { UsersDataMapper } from '../../users/api/users.dm';
 import { ServiceResult } from '../../../application/core/ServiceResult';
 import { PostCommentCreateDto } from '../../posts/dto/PostCommentCreateDto';
 import { validateOrRejectDto } from '../../../application/utils/validateOrRejectDto';
+import { CommentUpdateDto } from '../dto/CommentUpdateDto';
 
 @Injectable()
 export class CommentsService implements ICommentsService {
@@ -28,39 +29,57 @@ export class CommentsService implements ICommentsService {
     private readonly postsQueryRepo: PostsQueryRepository,
   ) {}
 
-  //TODO ошибки выкидывает контроллер
-  async updateCommentById(commentId: string, userId: UserIdReq, model: CommentUpdateDto): Promise<void> {
+  async updateCommentById(commentId: string, userId: UserIdReq, dto: CommentUpdateDto): Promise<ServiceResult> {
+    await validateOrRejectDto(dto, CommentUpdateDto);
+
+    const result = new ServiceResult();
+
     const comment: boolean = await this.commentsQueryRepo.isCommentExist(commentId);
 
     if (!comment || !userId) {
-      throw new NotFoundException();
+      result.addError({
+        code: CommentServiceError.COMMENT_NOT_FOUND,
+      });
+      return result;
     }
 
     const isUserCommentOwner: boolean = await this.commentsQueryRepo.isUserCommentOwner(commentId, userId);
 
     if (!isUserCommentOwner) {
-      throw new ForbiddenException();
+      result.addError({
+        code: CommentServiceError.COMMENT_ACCESS_DENIED,
+      });
+      return result;
     }
 
-    const isUpdated: boolean = await this.commentsRepo.updateCommentById(commentId, model);
+    const isUpdated: boolean = await this.commentsRepo.updateCommentById(commentId, dto);
 
     if (isUpdated) {
       //TODO не обновилось по другим причинам?
     }
+
+    return result;
   }
 
-  //TODO ошибки выкидывает контроллер
-  async deleteCommentById(commentId: string, userId: string | null): Promise<void> {
+  async deleteCommentById(commentId: string, userId: string | null): Promise<ServiceResult> {
+    const result = new ServiceResult();
+
     const comment: boolean = await this.commentsQueryRepo.isCommentExist(commentId);
 
     if (!comment || !userId) {
-      throw new NotFoundException();
+      result.addError({
+        code: CommentServiceError.COMMENT_NOT_FOUND,
+      });
+      return result;
     }
 
     const isUserCommentOwner: boolean = await this.commentsQueryRepo.isUserCommentOwner(commentId, userId);
 
     if (!isUserCommentOwner) {
-      throw new ForbiddenException();
+      result.addError({
+        code: CommentServiceError.COMMENT_ACCESS_DENIED,
+      });
+      return result;
     }
 
     const isDeleted: boolean = await this.commentsRepo.deleteCommentById(commentId);
@@ -68,6 +87,7 @@ export class CommentsService implements ICommentsService {
     if (!isDeleted) {
       //TODO не обновилось по другим причинам?
     }
+    return result;
   }
 
   async createComment<T>(postId: string, userId: UserIdReq, dto: PostCommentCreateDto, mapper: CommentMapperType<T>): Promise<ServiceResult<T>> {
@@ -95,7 +115,7 @@ export class CommentsService implements ICommentsService {
           code: CommentServiceError.USER_NOT_FOUND,
         });
       } else {
-        const post: PostViewDto | null = await this.postsQueryRepo.getPostById(userId, postId, PostsDataMapper.toPostView);
+        const post: PostViewModel | null = await this.postsQueryRepo.getPostById(userId, postId, PostsDataMapper.toPostView);
 
         if (!post) {
           result.addError({
@@ -162,4 +182,5 @@ export enum CommentServiceError {
   USER_NOT_FOUND = 2,
   USER_ID_REQUIRED = 3,
   COMMENT_NOT_FOUND = 4,
+  COMMENT_ACCESS_DENIED = 5,
 }

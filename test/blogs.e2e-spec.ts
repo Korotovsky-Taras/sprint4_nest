@@ -1,8 +1,8 @@
 import { useTestDescribeConfig } from './utils/useTestDescribeConfig';
 
 import { UserViewModel } from '../src/features/users/types/dto';
-import { BlogViewDto } from '../src/features/blogs/types/dto';
-import { PostViewDto } from '../src/features/posts/types/dto';
+import { BlogViewModel } from '../src/features/blogs/types/dto';
+import { PostViewModel } from '../src/features/posts/types/dto';
 import { Status } from '../src/application/utils/types';
 import { authBasic64, TestCreateUtils, validBlogData, validPostData } from './utils/test.create.utils';
 
@@ -41,7 +41,7 @@ describe('blogs testing', () => {
         .send(validBlogData)
         .expect(Status.CREATED);
 
-      const { id }: Pick<BlogViewDto, 'id'> = result.body;
+      const { id }: Pick<BlogViewModel, 'id'> = result.body;
 
       createdBlogId = id;
 
@@ -83,7 +83,7 @@ describe('blogs testing', () => {
         })
         .expect(Status.CREATED);
 
-      const { id }: Pick<PostViewDto, 'id'> = result.body;
+      const { id }: Pick<PostViewModel, 'id'> = result.body;
 
       createdPostId = id;
 

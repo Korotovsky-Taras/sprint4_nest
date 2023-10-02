@@ -3,8 +3,8 @@ import { BlogsRepository } from '../dao/blogs.repository';
 import { BlogsQueryRepository } from '../dao/blogs.query.repository';
 import { BlogsDataMapper } from '../api/blogs.dm';
 import { IBlogService } from '../types/common';
-import { BlogViewDto } from '../types/dto';
-import { PostViewDto } from '../../posts/types/dto';
+import { BlogViewModel } from '../types/dto';
+import { PostViewModel } from '../../posts/types/dto';
 import { PostsDataMapper } from '../../posts/api/posts.dm';
 import { PostsRepository } from '../../posts/dao/posts.repository';
 import { ServiceResult } from '../../../application/core/ServiceResult';
@@ -22,16 +22,16 @@ export class BlogsService implements IBlogService {
     private readonly postsRepo: PostsRepository,
   ) {}
 
-  async createBlog(dto: BlogCreateDto): Promise<BlogViewDto> {
+  async createBlog(dto: BlogCreateDto): Promise<BlogViewModel> {
     await validateOrRejectDto(dto, BlogCreateDto);
     return await this.blogsRepo.createBlog(dto, BlogsDataMapper.toBlogView);
   }
 
-  async createPost(userId: UserIdReq, blogId: string, dto: BlogPostCreateDto): Promise<ServiceResult<PostViewDto>> {
+  async createPost(userId: UserIdReq, blogId: string, dto: BlogPostCreateDto): Promise<ServiceResult<PostViewModel>> {
     await validateOrRejectDto(dto, BlogPostCreateDto);
 
-    const blog: BlogViewDto | null = await this.blogsQueryRepo.getBlogById(blogId, BlogsDataMapper.toBlogView);
-    const result = new ServiceResult<PostViewDto>();
+    const blog: BlogViewModel | null = await this.blogsQueryRepo.getBlogById(blogId, BlogsDataMapper.toBlogView);
+    const result = new ServiceResult<PostViewModel>();
 
     if (!blog) {
       result.addError({
@@ -41,7 +41,7 @@ export class BlogsService implements IBlogService {
       return result;
     }
 
-    const post: PostViewDto = await this.postsRepo.createPost(
+    const post: PostViewModel = await this.postsRepo.createPost(
       userId,
       {
         title: dto.title,
@@ -60,7 +60,7 @@ export class BlogsService implements IBlogService {
   async updateBlogById(blogId: string, dto: BlogUpdateDto): Promise<ServiceResult<boolean>> {
     await validateOrRejectDto(dto, BlogUpdateDto);
 
-    const blog: BlogViewDto | null = await this.blogsQueryRepo.getBlogById(blogId, BlogsDataMapper.toBlogView);
+    const blog: BlogViewModel | null = await this.blogsQueryRepo.getBlogById(blogId, BlogsDataMapper.toBlogView);
     const result = new ServiceResult<boolean>();
 
     if (!blog) {
@@ -78,7 +78,7 @@ export class BlogsService implements IBlogService {
   }
 
   async deleteBlogById(blogId: string): Promise<ServiceResult<boolean>> {
-    const blog: BlogViewDto | null = await this.blogsQueryRepo.getBlogById(blogId, BlogsDataMapper.toBlogView);
+    const blog: BlogViewModel | null = await this.blogsQueryRepo.getBlogById(blogId, BlogsDataMapper.toBlogView);
     const result = new ServiceResult<boolean>();
 
     if (!blog) {

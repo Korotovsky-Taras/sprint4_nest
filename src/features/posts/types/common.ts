@@ -1,8 +1,8 @@
-import { PostCreateModel, PostLikeStatusInputModel, PostPaginationRepositoryDto, PostViewDto } from './dto';
+import { PostCreateModel, PostLikeStatusInputModel, PostPaginationRepositoryDto, PostViewModel } from './dto';
 import { IPost, PostMongoType } from './dao';
 import { IRepository, IService } from '../../types';
 import { Request } from 'express';
-import { CommentViewDto } from '../../comments/types/dto';
+import { CommentViewModel } from '../../comments/types/dto';
 import { IComment } from '../../comments/types/dao';
 import { PaginationQueryModel, UserIdReq, WithPagination } from '../../../application/utils/types';
 import { PostCreateDto } from '../dto/PostCreateDto';
@@ -14,20 +14,20 @@ export type PostMapperType<T> = (post: PostMongoType, userId: UserIdReq) => T;
 export type PostListMapperType<T> = (post: PostMongoType[], userId: UserIdReq) => T[];
 
 export interface IPostsService extends IService {
-  createPost(userId: UserIdReq, model: PostCreateDto): Promise<PostViewDto | null>;
+  createPost(userId: UserIdReq, model: PostCreateDto): Promise<PostViewModel | null>;
   updatePostById(blogId: string, model: PostUpdateDto): Promise<boolean>;
   updateLikeStatus(input: PostLikeStatusInputModel): Promise<ServiceResult>;
   deletePostById(blogId: string): Promise<boolean>;
 }
 
 export interface IPostsController {
-  getAll(query: PaginationQueryModel<IPost>, req: Request): Promise<WithPagination<PostViewDto>>;
-  getPost(postId: string, req: Request): Promise<PostViewDto>;
-  createPost(input: PostCreateDto, req: Request): Promise<PostViewDto>;
+  getAll(query: PaginationQueryModel<IPost>, req: Request): Promise<WithPagination<PostViewModel>>;
+  getPost(postId: string, req: Request): Promise<PostViewModel>;
+  createPost(input: PostCreateDto, req: Request): Promise<PostViewModel>;
   updatePost(postId: string, input: PostUpdateDto): Promise<void>;
   deletePost(postId: string): Promise<void>;
-  getComments(postId: string, query: PaginationQueryModel<IComment>, req: Request): Promise<WithPagination<CommentViewDto>>;
-  createComment(postId: string, input: PostCommentCreateDto, req: Request): Promise<CommentViewDto>;
+  getComments(postId: string, query: PaginationQueryModel<IComment>, req: Request): Promise<WithPagination<CommentViewModel>>;
+  createComment(postId: string, input: PostCommentCreateDto, req: Request): Promise<CommentViewModel>;
 }
 
 export interface IPostsRepository extends IRepository<IPost> {

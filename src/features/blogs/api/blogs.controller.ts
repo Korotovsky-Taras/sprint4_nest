@@ -4,10 +4,10 @@ import { BlogServiceError, BlogsService } from '../domain/blogs.service';
 import { BlogsQueryRepository } from '../dao/blogs.query.repository';
 import { Request } from 'express';
 import { IBlogsController } from '../types/common';
-import { BlogPaginationQueryDto, BlogViewDto } from '../types/dto';
+import { BlogPaginationQueryDto, BlogViewModel } from '../types/dto';
 import { PostsDataMapper } from '../../posts/api/posts.dm';
 import { PostsQueryRepository } from '../../posts/dao/posts.query.repository';
-import { PostPaginationQueryDto, PostViewDto } from '../../posts/types/dto';
+import { PostPaginationQueryDto, PostViewModel } from '../../posts/types/dto';
 import { ServiceResult } from '../../../application/core/ServiceResult';
 import { Status, WithPagination } from '../../../application/utils/types';
 import { AuthTokenGuard } from '../../../application/guards/AuthTokenGuard';
@@ -28,14 +28,14 @@ export class BlogsController implements IBlogsController {
 
   @Get()
   @HttpCode(Status.OK)
-  async getAll(@Query() query: BlogPaginationQueryDto): Promise<WithPagination<BlogViewDto>> {
+  async getAll(@Query() query: BlogPaginationQueryDto): Promise<WithPagination<BlogViewModel>> {
     return await this.blogsQueryRepo.getBlogs(BlogsDataMapper.toRepoQuery(query), BlogsDataMapper.toBlogsView);
   }
 
   @Get('/:id')
   @HttpCode(Status.OK)
-  async getBlog(@Param('id') blogId: string): Promise<BlogViewDto> {
-    const blog: BlogViewDto | null = await this.blogsQueryRepo.getBlogById(blogId, BlogsDataMapper.toBlogView);
+  async getBlog(@Param('id') blogId: string): Promise<BlogViewModel> {
+    const blog: BlogViewModel | null = await this.blogsQueryRepo.getBlogById(blogId, BlogsDataMapper.toBlogView);
     if (blog) {
       return blog;
     }
@@ -45,7 +45,7 @@ export class BlogsController implements IBlogsController {
   @Post()
   @UseGuards(AuthBasicGuard)
   @HttpCode(Status.CREATED)
-  async createBlog(@Body() input: BlogCreateDto): Promise<BlogViewDto> {
+  async createBlog(@Body() input: BlogCreateDto): Promise<BlogViewModel> {
     return await this.blogsService.createBlog(input);
   }
 
@@ -53,8 +53,8 @@ export class BlogsController implements IBlogsController {
   @SetTokenGuardParams({ throwError: false })
   @UseGuards(AuthTokenGuard)
   @HttpCode(Status.OK)
-  async getBlogPosts(@Param('id') blogId: string, @Query() query: PostPaginationQueryDto, @Req() req: Request): Promise<WithPagination<PostViewDto>> {
-    const blog: BlogViewDto | null = await this.blogsQueryRepo.getBlogById(blogId, BlogsDataMapper.toBlogView);
+  async getBlogPosts(@Param('id') blogId: string, @Query() query: PostPaginationQueryDto, @Req() req: Request): Promise<WithPagination<PostViewModel>> {
+    const blog: BlogViewModel | null = await this.blogsQueryRepo.getBlogById(blogId, BlogsDataMapper.toBlogView);
     if (blog) {
       return await this.postsQueryRepository.getPosts(req.userId, { blogId }, PostsDataMapper.toRepoQuery(query), PostsDataMapper.toPostsView);
     }
@@ -64,8 +64,8 @@ export class BlogsController implements IBlogsController {
   @Post('/:id/posts')
   @UseGuards(AuthBasicGuard)
   @HttpCode(Status.CREATED)
-  async createBlogPost(@Param('id') blogId: string, @Body() input: BlogPostCreateDto, @Req() req: Request): Promise<PostViewDto> {
-    const result: ServiceResult<PostViewDto> = await this.blogsService.createPost(req.userId, blogId, {
+  async createBlogPost(@Param('id') blogId: string, @Body() input: BlogPostCreateDto, @Req() req: Request): Promise<PostViewModel> {
+    const result: ServiceResult<PostViewModel> = await this.blogsService.createPost(req.userId, blogId, {
       title: input.title,
       shortDescription: input.shortDescription,
       content: input.content,

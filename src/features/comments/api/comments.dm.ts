@@ -1,6 +1,6 @@
 import { CommentMongoType } from '../types/dao';
 import { UserIdReq } from '../../../application/utils/types';
-import { CommentPaginationQueryDto, CommentPaginationRepositoryDto, CommentViewDto } from '../types/dto';
+import { CommentPaginationQueryDto, CommentPaginationRepositoryDto, CommentViewModel } from '../types/dto';
 import { toIsoString } from '../../../application/utils/date';
 import { withExternalDirection, withExternalNumber, withExternalString } from '../../../application/utils/withExternalQuery';
 import { Like, LikeStatus } from '../../likes/types';
@@ -13,12 +13,15 @@ const initialQuery: CommentPaginationRepositoryDto = {
 };
 
 export class CommentsDataMapper {
-  static toCommentView(comment: CommentMongoType, userId: UserIdReq): CommentViewDto {
+  static toCommentView(comment: CommentMongoType, userId: UserIdReq): CommentViewModel {
     const myLike = comment.likes.find((like: Like) => like.userId === userId);
     return {
       id: comment._id.toString(),
       content: comment.content,
-      commentatorInfo: comment.commentatorInfo,
+      commentatorInfo: {
+        userId: comment.commentatorInfo.userId,
+        userLogin: comment.commentatorInfo.userLogin,
+      },
       createdAt: toIsoString(comment.createdAt),
       likesInfo: {
         likesCount: comment.likesInfo.likesCount,
@@ -28,7 +31,7 @@ export class CommentsDataMapper {
     };
   }
 
-  static toCommentsView(list: CommentMongoType[], userId: UserIdReq): CommentViewDto[] {
+  static toCommentsView(list: CommentMongoType[], userId: UserIdReq): CommentViewModel[] {
     return list.map((comment) => {
       return CommentsDataMapper.toCommentView(comment, userId);
     });

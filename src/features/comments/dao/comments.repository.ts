@@ -3,8 +3,8 @@ import { ICommentsRepository } from '../types/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Comment } from './comments.schema';
 import { CommentDocumentType, ICommentModel } from '../types/dao';
-import { CommentUpdateDto } from '../types/dto';
 import { DeleteResult, ObjectId, UpdateResult } from 'mongodb';
+import { CommentUpdateDto } from '../dto/CommentUpdateDto';
 
 @Injectable()
 export class CommentsRepository implements ICommentsRepository {

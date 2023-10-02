@@ -1,4 +1,4 @@
-import { BlogPaginationQueryDto, BlogPaginationRepositoryDto, BlogViewDto } from '../types/dto';
+import { BlogPaginationQueryDto, BlogPaginationRepositoryDto, BlogViewModel } from '../types/dto';
 import { BlogMongoType } from '../types/dao';
 import { withExternalDirection, withExternalNumber, withExternalString, withExternalTerm } from '../../../application/utils/withExternalQuery';
 import { toIsoString } from '../../../application/utils/date';
@@ -14,13 +14,13 @@ const initialQuery: BlogPaginationRepositoryDto = {
 export class BlogsDataMapper {
   constructor() {}
 
-  static toBlogsView(items: BlogMongoType[]): BlogViewDto[] {
+  static toBlogsView(items: BlogMongoType[]): BlogViewModel[] {
     return items.map((item) => {
       return BlogsDataMapper.toBlogView(item);
     });
   }
 
-  static toBlogView(item: BlogMongoType): BlogViewDto {
+  static toBlogView(item: BlogMongoType): BlogViewModel {
     return {
       id: item._id.toString(),
       name: item.name,

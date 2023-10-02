@@ -8,14 +8,12 @@ export type CommentCreateInputDto = Pick<IComment, 'postId' | 'content' | 'comme
 
 export type CommentCreateDto = Pick<IComment, 'postId' | 'content' | 'commentatorInfo'>;
 
-export type CommentUpdateDto = Pick<IComment, 'content'>;
-
 export type CommentLikeStatusInputModel = {
   commentId: string;
   status: LikeStatus;
 };
 
-export type CommentViewDto = WithLikes<Pick<IComment, 'content' | 'commentatorInfo'> & { id: string; createdAt: string }>;
+export type CommentViewModel = WithLikes<Pick<IComment, 'content' | 'commentatorInfo'> & { id: string; createdAt: string }>;
 
 export type CommentPaginationQueryDto = PaginationQueryModel<IComment>;
 

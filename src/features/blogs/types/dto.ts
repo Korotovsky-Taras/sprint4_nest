@@ -1,7 +1,7 @@
 import { IBlog } from './dao';
 import { EnhancedOmit, PaginationQueryModel, WithPaginationQuery } from '../../../application/utils/types';
 
-export type BlogViewDto = Pick<IBlog, 'name' | 'description' | 'websiteUrl' | 'isMembership'> & { id: string; createdAt: string };
+export type BlogViewModel = Pick<IBlog, 'name' | 'description' | 'websiteUrl' | 'isMembership'> & { id: string; createdAt: string };
 
 export type BlogPaginationQueryDto = PaginationQueryModel<IBlog> & {
   searchNameTerm?: string;

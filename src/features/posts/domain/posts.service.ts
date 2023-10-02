@@ -2,9 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { PostsRepository } from '../dao/posts.repository';
 import { PostsQueryRepository } from '../dao/posts.query.repository';
 import { BlogsQueryRepository } from '../../blogs/dao/blogs.query.repository';
-import { PostLikeStatusInputModel, PostViewDto } from '../types/dto';
+import { PostLikeStatusInputModel, PostViewModel } from '../types/dto';
 import { BlogsDataMapper } from '../../blogs/api/blogs.dm';
-import { BlogViewDto } from '../../blogs/types/dto';
+import { BlogViewModel } from '../../blogs/types/dto';
 import { PostsDataMapper } from '../api/posts.dm';
 import { UserIdReq } from '../../../application/utils/types';
 import { IPostsService } from '../types/common';
@@ -30,10 +30,10 @@ export class PostsService implements IPostsService {
     private readonly usersQueryRepo: UsersQueryRepository,
   ) {}
 
-  async createPost(userId: UserIdReq, dto: PostCreateDto): Promise<PostViewDto | null> {
+  async createPost(userId: UserIdReq, dto: PostCreateDto): Promise<PostViewModel | null> {
     await validateOrRejectDto(dto, PostCreateDto);
 
-    const blog: BlogViewDto | null = await this.blogsQueryRepo.getBlogById(dto.blogId, BlogsDataMapper.toBlogView);
+    const blog: BlogViewModel | null = await this.blogsQueryRepo.getBlogById(dto.blogId, BlogsDataMapper.toBlogView);
     if (blog) {
       return this.postsRepo.createPost(
         userId,

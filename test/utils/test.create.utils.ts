@@ -1,9 +1,9 @@
 import { AppTestProvider } from './useTestDescribeConfig';
 import { UserCreateRequestDto, UserViewModel } from '../../src/features/users/types/dto';
 import { AuthTokenCreator } from '../../src/features/auth/utils/tokenCreator';
-import { CommentCreateRequestDto, CommentViewDto } from '../../src/features/comments/types/dto';
-import { BlogViewDto } from '../../src/features/blogs/types/dto';
-import { PostViewDto } from '../../src/features/posts/types/dto';
+import { CommentCreateRequestDto, CommentViewModel } from '../../src/features/comments/types/dto';
+import { BlogViewModel } from '../../src/features/blogs/types/dto';
+import { PostViewModel } from '../../src/features/posts/types/dto';
 import { TestCommonUtils } from './test.common.utils';
 import { BlogCreateDto } from '../../src/features/blogs/dto/BlogCreateDto';
 import { PostCreateDto } from '../../src/features/posts/dto/PostCreateDto';
@@ -19,7 +19,7 @@ export class TestCreateUtils extends TestCommonUtils {
     this.tokenCreator = new AuthTokenCreator();
   }
 
-  async createBlog(userId: string, model: BlogCreationTestModel = validBlogData): Promise<BlogViewDto> {
+  async createBlog(userId: string, model: BlogCreationTestModel = validBlogData): Promise<BlogViewModel> {
     const result = await this.config
       .getHttp()
       .post('/blogs')
@@ -29,7 +29,7 @@ export class TestCreateUtils extends TestCommonUtils {
     return result.body;
   }
 
-  async createPost(userId: string, blogId: string, model: PostCreationTestModel = validPostData): Promise<PostViewDto> {
+  async createPost(userId: string, blogId: string, model: PostCreationTestModel = validPostData): Promise<PostViewModel> {
     const result = await this.config
       .getHttp()
       .post('/posts')
@@ -54,7 +54,7 @@ export class TestCreateUtils extends TestCommonUtils {
     return result.body;
   }
 
-  async createComment(postId: string, userId: string, model: CommentCreationTestModel = validCommentData): Promise<CommentViewDto> {
+  async createComment(postId: string, userId: string, model: CommentCreationTestModel = validCommentData): Promise<CommentViewModel> {
     const result = await this.config
       .getHttp()
       .post(`/posts/${postId}/comments`)
