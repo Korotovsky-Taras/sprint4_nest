@@ -19,6 +19,20 @@ describe('auth testing', () => {
     refreshToken = null;
   });
 
+  it('should return 401 if wrong password or email', async () => {
+    const fakeUserModel = utils.createNewUserModel();
+
+    await config
+      .getHttp()
+      .post(`/auth/login`)
+      .set('Content-Type', 'application/json')
+      .send({
+        loginOrEmail: fakeUserModel.login,
+        password: fakeUserModel.password,
+      })
+      .expect(Status.UNATHORIZED);
+  });
+
   it('should return accessToken ', async () => {
     if (!userModel) {
       return;
