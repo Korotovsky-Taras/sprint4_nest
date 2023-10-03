@@ -153,7 +153,7 @@ describe('auth testing', () => {
       .expect(Status.NO_CONTENT);
   });
 
-  it('DELETE/:id -> should return error if auth credentials is incorrect', async () => {
+  it('POST, DELETE/:id -> should return error if auth credentials is incorrect', async () => {
     await config
       .getHttp()
       .post('/users')
@@ -163,9 +163,21 @@ describe('auth testing', () => {
       })
       .expect(Status.UNATHORIZED);
 
+    await config
+      .getHttp()
+      .post('/users')
+      .set('Content-Type', 'application/json')
+      .set('Authorization', 'Basic 123:123')
+      .send({
+        ...utils.createNewUserModel(),
+      })
+      .expect(Status.UNATHORIZED);
+
     const user = await utils.createUser(utils.createNewUserModel());
 
     await config.getHttp().delete(`/users/${user.id}`).set('Content-Type', 'application/json').expect(Status.UNATHORIZED);
+
+    await config.getHttp().delete(`/users/${user.id}`).set('Content-Type', 'application/json').set('Authorization', 'Basic 123:123').expect(Status.UNATHORIZED);
   });
 
   it('DELETE/:id -> should return error id param not found', async () => {
