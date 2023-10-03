@@ -38,11 +38,12 @@ export class UsersController implements IUsersController {
   @UseGuards(AuthBasicGuard)
   @HttpCode(Status.NO_CONTENT)
   async deleteUser(@Param('id') userId: string) {
-    const isDeleted: boolean = await this.usersService.deleteUser(userId);
+    const userExist: boolean = await this.usersQueryRepo.isUserExist(userId);
 
-    if (!isDeleted) {
+    if (!userExist) {
       throw new NotFoundException();
-      //TODO как обрабатывать?
     }
+
+    await this.usersService.deleteUser(userId);
   }
 }
