@@ -3,7 +3,7 @@ import { IUsersController } from '../types/common';
 import { UserServiceError, UsersService } from '../domain/users.service';
 import { UsersQueryRepository } from '../dao/users.query.repository';
 import { UsersDataMapper } from './users.dm';
-import { UserListViewDto, UserPaginationQueryDto, UserViewModel } from '../types/dto';
+import { UserListViewModel, UserPaginationQueryModel, UserViewModel } from '../types/dto';
 import { Status } from '../../../application/utils/types';
 import { ServiceResult } from '../../../application/core/ServiceResult';
 import { AuthBasicGuard } from '../../../application/guards/AuthBasicGuard';
@@ -19,7 +19,7 @@ export class UsersController implements IUsersController {
 
   @Get()
   @HttpCode(Status.OK)
-  async getAll(@Query() query: UserPaginationQueryDto): Promise<UserListViewDto> {
+  async getAll(@Query() query: UserPaginationQueryModel): Promise<UserListViewModel> {
     return await this.usersQueryRepo.getUsers(UsersDataMapper.toRepoQuery(query), UsersDataMapper.toUsersView);
   }
 

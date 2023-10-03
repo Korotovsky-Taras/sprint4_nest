@@ -15,9 +15,9 @@ export type UserWithConfirmedViewDto = Pick<IUser, 'login' | 'email'> & { id: st
 
 export type UserAuthWithConfirmationDto = UserAuthDto & { confirmationCode: string; confirmed: boolean };
 
-export type UserListViewDto = WithPagination<UserViewModel>;
+export type UserListViewModel = WithPagination<UserViewModel>;
 
-export type UserPaginationQueryDto = PaginationQueryModel<IUser> & {
+export type UserPaginationQueryModel = PaginationQueryModel<IUser> & {
   searchLoginTerm?: string;
   searchEmailTerm?: string;
 };

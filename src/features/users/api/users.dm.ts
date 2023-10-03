@@ -2,7 +2,7 @@ import {
   UserAuthDto,
   UserAuthWithConfirmationDto,
   UserMeViewDto,
-  UserPaginationQueryDto,
+  UserPaginationQueryModel,
   UserPaginationRepositoryDto,
   UserViewModel,
   UserWithConfirmedViewDto,
@@ -63,7 +63,7 @@ export class UsersDataMapper {
       confirmationCode: userModel.authConfirmation.code,
     };
   }
-  static toRepoQuery(query: UserPaginationQueryDto): UserPaginationRepositoryDto {
+  static toRepoQuery(query: UserPaginationQueryModel): UserPaginationRepositoryDto {
     return {
       searchLoginTerm: withExternalTerm(initialQuery.searchLoginTerm, query.searchLoginTerm),
       searchEmailTerm: withExternalTerm(initialQuery.searchEmailTerm, query.searchEmailTerm),

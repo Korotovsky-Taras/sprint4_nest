@@ -3,8 +3,8 @@ import { IRepository, IService } from '../../types';
 import {
   UserConfirmationCodeValidateResult,
   UserCreateModel,
-  UserListViewDto,
-  UserPaginationQueryDto,
+  UserListViewModel,
+  UserPaginationQueryModel,
   UserPaginationRepositoryDto,
   UserViewModel,
 } from './dto';
@@ -17,7 +17,7 @@ export type UserListMapperType<T> = (post: UserMongoType[]) => T[];
 export interface IUsersService extends IService {}
 
 export interface IUsersController {
-  getAll(query: UserPaginationQueryDto): Promise<UserListViewDto>;
+  getAll(query: UserPaginationQueryModel): Promise<UserListViewModel>;
   createUser(input: UserCreateModel): Promise<UserViewModel>;
   deleteUser(userId: string);
 }
