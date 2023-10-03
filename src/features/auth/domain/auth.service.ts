@@ -4,7 +4,7 @@ import { AuthSessionRepository } from '../dao/auth.repository';
 import { UsersQueryRepository } from '../../users/dao/users.query.repository';
 import { IAuthSessionService } from '../types/common';
 import { UsersDataMapper } from '../../users/api/users.dm';
-import { AuthLoginInputDto, AuthRefreshTokenInputDto, AuthSessionLogoutInputDto } from '../types/dto';
+import { AuthLoginInputModel, AuthRefreshTokenInputModel, AuthSessionInfoModel } from '../types/dto';
 import { AuthAccessTokenPass, AuthRefreshTokenPass, AuthTokens } from '../utils/tokenCreator.types';
 import { AuthTokenCreator } from '../utils/tokenCreator';
 import { UsersService } from '../../users/domain/users.service';
@@ -22,7 +22,7 @@ export class AuthSessionService implements IAuthSessionService {
     private readonly tokenCreator: AuthTokenCreator,
   ) {}
 
-  async login(model: AuthLoginInputDto): Promise<AuthTokens | null> {
+  async login(model: AuthLoginInputModel): Promise<AuthTokens | null> {
     const user = await this.usersQueryRepo.getUserByLoginOrEmail(model.loginOrEmail, model.loginOrEmail, UsersDataMapper.toUserAuthWithConfirmation);
 
     if (!user) {
@@ -62,7 +62,7 @@ export class AuthSessionService implements IAuthSessionService {
     };
   }
 
-  async logout(input: AuthSessionLogoutInputDto): Promise<boolean> {
+  async logout(input: AuthSessionInfoModel): Promise<boolean> {
     const userId = input.userId;
     const deviceId = input.deviceId;
     const isUserAuthConfirmed: boolean = await this.usersQueryRepo.isUserAuthConfirmed(userId);
@@ -74,7 +74,7 @@ export class AuthSessionService implements IAuthSessionService {
     return await this.sessionRepo.deleteSession({ userId, deviceId });
   }
 
-  async refreshTokens(model: AuthRefreshTokenInputDto): Promise<AuthTokens | null> {
+  async refreshTokens(model: AuthRefreshTokenInputModel): Promise<AuthTokens | null> {
     const userId = model.userId;
     const userAgent = model.userAgent;
     const deviceId = model.deviceId;

@@ -4,12 +4,10 @@ import { AuthDataMapper } from './auth.dm';
 import { Status } from '../../../application/utils/types';
 import { AuthSessionRepository } from '../dao/auth.repository';
 import { AuthSessionQueryRepository } from '../dao/auth.query.repository';
-import { AuthTokenGuard } from '../../../application/guards/AuthTokenGuard';
 import { GetUserId } from '../../../application/decorators/params/getUserId';
 import { AuthSessionGuard } from '../../../application/guards/AuthSessionGuard';
-import { AuthSessionInfoDto } from '../types/dto';
+import { AuthSessionInfoModel } from '../types/dto';
 import { GetAuthSessionInfo } from '../../../application/decorators/params/getAuthSessionInfo';
-import { SetTokenGuardParams } from '../../../application/decorators/skipTokenError';
 
 @Injectable()
 @Controller('security/devices')
@@ -21,8 +19,7 @@ export class AuthSecurityController {
   ) {}
 
   @Get()
-  @SetTokenGuardParams({ throwError: false })
-  @UseGuards(AuthTokenGuard)
+  @UseGuards(AuthSessionGuard)
   @HttpCode(Status.OK)
   async getAll(@GetUserId() userId: string) {
     return await this.authSessionQueryRepo.getAll(userId, AuthDataMapper.toSessionsView);
@@ -31,7 +28,7 @@ export class AuthSecurityController {
   @Delete()
   @UseGuards(AuthSessionGuard)
   @HttpCode(Status.NO_CONTENT)
-  async deleteAll(@GetAuthSessionInfo() sessionInfo: AuthSessionInfoDto) {
+  async deleteAll(@GetAuthSessionInfo() sessionInfo: AuthSessionInfoModel) {
     const isDeleted: boolean = await this.authSessionRepo.deleteAllSessions({
       userId: sessionInfo.userId,
       deviceId: sessionInfo.deviceId,
@@ -43,10 +40,10 @@ export class AuthSecurityController {
     }
   }
 
-  @Delete(':id')
+  @Delete('/:id')
   @UseGuards(AuthSessionGuard)
   @HttpCode(Status.NO_CONTENT)
-  async deleteDevice(@GetAuthSessionInfo() sessionInfo: AuthSessionInfoDto, @Param('id') sessionId: string) {
+  async deleteDevice(@GetAuthSessionInfo() sessionInfo: AuthSessionInfoModel, @Param('id') sessionId: string) {
     const session = await this.authSessionQueryRepo.getSessionByDeviceId(sessionId, AuthDataMapper.toUserSessionValidate);
 
     if (session === null) {
@@ -56,7 +53,10 @@ export class AuthSecurityController {
       throw new ForbiddenException();
     }
 
-    const isDeleted: boolean = await this.authSessionRepo.deleteSession(sessionInfo);
+    const isDeleted: boolean = await this.authSessionRepo.deleteSession({
+      userId: session.userId,
+      deviceId: session.deviceId,
+    });
 
     if (!isDeleted) {
       //TODO что делать в таком случаи?) надо ли его обрабатывать

@@ -3,7 +3,7 @@ import { Request, Response } from 'express';
 
 @Injectable()
 export class AuthHelper {
-  private sessionTokenName: string = 'sessionToken';
+  private sessionTokenName: string = 'refreshToken';
 
   applyRefreshToken(res: Response, refreshToken: string) {
     res.cookie(this.sessionTokenName, refreshToken, { httpOnly: true, secure: true });

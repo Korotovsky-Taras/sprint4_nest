@@ -5,8 +5,11 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { User, UserSchema } from './dao/users.schema';
 import { UsersRepository } from './dao/users.repository';
 import { UsersQueryRepository } from './dao/users.query.repository';
-import { MailSender } from '../../application/mailSender';
-import { MailAdapter } from '../../application/adapters/mail.adapter';
+import { IsUniqueUserEmailValidator } from '../../application/decorators/validation/IsUniqueUserEmail';
+import { IsAuthConfirmationCodeValidator } from '../../application/decorators/validation/IsAuthConfirmationCodeValid';
+import { IsAuthEmailResendingValidator } from '../../application/decorators/validation/IsAuthEmailResendingValid';
+import { IsUniqueUserLoginValidator } from '../../application/decorators/validation/IsUniqueUserLogin';
+import { SharedModule } from '../../shared.module';
 
 @Module({
   imports: [
@@ -16,9 +19,18 @@ import { MailAdapter } from '../../application/adapters/mail.adapter';
         schema: UserSchema,
       },
     ]),
+    SharedModule,
   ],
   controllers: [UsersController],
-  providers: [MailSender, MailAdapter, UsersService, UsersRepository, UsersQueryRepository],
+  providers: [
+    UsersService,
+    UsersRepository,
+    UsersQueryRepository,
+    IsUniqueUserEmailValidator,
+    IsUniqueUserLoginValidator,
+    IsAuthConfirmationCodeValidator,
+    IsAuthEmailResendingValidator,
+  ],
   exports: [UsersService, UsersRepository, UsersQueryRepository],
 })
 export class UsersModule {}

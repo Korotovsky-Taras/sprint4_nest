@@ -21,15 +21,18 @@ export class TestCookieUtils {
     this.tokenCreator = new AuthTokenCreator();
   }
 
-  refreshSessionCookie(cookie: Cookie | undefined, session: SessionUnit) {
+  refreshCookie(cookie: Cookie | undefined, session: SessionUnit) {
     if (!cookie || !cookie.value) {
-      throw Error('Refresh cookie error');
+      throw Error('Refresh cookie should not be empty');
     }
     const payload: AuthRefreshTokenPayload | null = this.tokenCreator.verifyRefreshToken(cookie.value);
-    if (payload) {
-      session.payload = payload;
-      session.refreshToken = cookie.value;
+
+    if (!payload) {
+      throw Error('Refresh token not verified');
     }
+
+    session.payload = payload;
+    session.refreshToken = cookie.value;
   }
 
   createCookie(cookieObj: Object): string {
@@ -38,6 +41,14 @@ export class TestCookieUtils {
         return name + '=' + value;
       })
       .join(';');
+  }
+
+  verifyRefreshToken(cookie: Cookie) {
+    return this.tokenCreator.verifyRefreshToken(cookie.value);
+  }
+
+  createRefreshToken(userId: string, deviceId: string) {
+    return this.tokenCreator.createRefreshToken(userId, deviceId);
   }
 
   extractCookie(res: Response, name: string): Cookie | undefined {

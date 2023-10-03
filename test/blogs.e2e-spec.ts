@@ -15,10 +15,11 @@ describe('blogs testing', () => {
   const utils = new TestCreateUtils(config);
 
   beforeAll(async () => {
+    await config.getModels().clearAll();
+
     createdBlogId = null;
     createdPostId = null;
     user = await utils.createUser(utils.createNewUserModel());
-    await config.getHttp().delete('/testing/all-data');
   });
 
   it('should return bad request', async () => {

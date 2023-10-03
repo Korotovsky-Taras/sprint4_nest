@@ -4,14 +4,7 @@ import { UsersQueryRepository } from '../../users/dao/users.query.repository';
 import { IAuthRouterController } from '../types/common';
 import { AuthSessionService } from '../domain/auth.service';
 import { AuthTokens } from '../utils/tokenCreator.types';
-import {
-  AuthConfirmationCodeDto,
-  AuthLoginInputDto,
-  AuthNewPasswordInputDto,
-  AuthRegisterInputDto,
-  AuthResendingEmailInputDto,
-  AuthSessionInfoDto,
-} from '../types/dto';
+import { AuthSessionInfoModel } from '../types/dto';
 import { Request, Response } from 'express';
 import { Status } from '../../../application/utils/types';
 import { UsersDataMapper } from '../../users/api/users.dm';
@@ -22,6 +15,13 @@ import { AuthSessionGuard } from '../../../application/guards/AuthSessionGuard';
 import { GetAuthSessionInfo } from '../../../application/decorators/params/getAuthSessionInfo';
 import { AuthTokenGuard } from '../../../application/guards/AuthTokenGuard';
 import { GetUserId } from '../../../application/decorators/params/getUserId';
+import { RateLimiterGuard } from '../../../application/guards/RateLimiterGuard';
+import { AuthLoginInputDto } from '../dto/AuthLoginInputDto';
+import { AuthRegistrationDto } from '../dto/AuthRegistrationDto';
+import { AuthConfirmationCodeDto } from '../dto/AuthConfirmationCodeDto';
+import { AuthResendingEmailDto } from '../dto/AuthResendingEmailDto';
+import { AuthPasswordRecoveryDto } from '../dto/AuthPasswordRecoveryDto';
+import { AuthNewPasswordDto } from '../dto/AuthNewPasswordDto';
 
 @Injectable()
 @Controller('auth')
@@ -34,6 +34,7 @@ export class AuthController implements IAuthRouterController {
   ) {}
 
   @Post('login')
+  @UseGuards(RateLimiterGuard)
   @HttpCode(Status.OK)
   async login(@Body() input: AuthLoginInputDto, @Req() req: Request, @Res() res: Response) {
     const auth: AuthTokens | null = await this.authService.login({
@@ -49,26 +50,26 @@ export class AuthController implements IAuthRouterController {
 
     this.authHelper.applyRefreshToken(res, auth.refreshToken);
 
-    return {
+    res.status(Status.OK).send({
       accessToken: auth.accessToken,
-    };
+    });
   }
 
   @Post('logout')
   @UseGuards(AuthSessionGuard)
   @HttpCode(Status.NO_CONTENT)
-  async logout(@GetAuthSessionInfo() authSession: AuthSessionInfoDto, @Res() res: Response) {
+  async logout(@GetAuthSessionInfo() authSession: AuthSessionInfoModel, @Res() res: Response) {
     const isLogout: boolean = await this.authService.logout(authSession);
     if (isLogout) {
       this.authHelper.clearRefreshToken(res);
-      res.sendStatus(Status.NO_CONTENT);
     }
+    res.sendStatus(Status.NO_CONTENT);
   }
 
   @Post('refresh-token')
   @UseGuards(AuthSessionGuard)
   @HttpCode(Status.OK)
-  async refreshToken(@GetAuthSessionInfo() authSession: AuthSessionInfoDto, @Req() req: Request, @Res() res: Response) {
+  async refreshToken(@GetAuthSessionInfo() authSession: AuthSessionInfoModel, @Req() req: Request, @Res() res: Response) {
     const auth: AuthTokens | null = await this.authService.refreshTokens({
       userId: authSession.userId,
       deviceId: authSession.deviceId,
@@ -80,7 +81,7 @@ export class AuthController implements IAuthRouterController {
     }
     this.authHelper.applyRefreshToken(res, auth.refreshToken);
 
-    res.send({
+    res.status(Status.OK).send({
       accessToken: auth.accessToken,
     });
   }
@@ -98,15 +99,17 @@ export class AuthController implements IAuthRouterController {
   }
 
   @Post('registration')
+  @UseGuards(RateLimiterGuard)
   @HttpCode(Status.NO_CONTENT)
-  async registration(@Body() input: AuthRegisterInputDto) {
-    const result: ServiceResult<UserViewModel> = await this.userService.createUser(input, false);
+  async registration(@Body() input: AuthRegistrationDto) {
+    const result: ServiceResult<UserViewModel> = await this.userService.createUserWithConfirmation(input);
     if (result.hasErrorCode(UserServiceError.USER_ALREADY_REGISTER)) {
       throw new BadRequestException();
     }
   }
 
   @Post('registration-confirmation')
+  @UseGuards(RateLimiterGuard)
   @HttpCode(Status.NO_CONTENT)
   async registrationConfirmation(@Body() input: AuthConfirmationCodeDto) {
     const result: ServiceResult = await this.userService.verifyConfirmationCode(input);
@@ -116,20 +119,23 @@ export class AuthController implements IAuthRouterController {
   }
 
   @Post('registration-email-resending')
+  @UseGuards(RateLimiterGuard)
   @HttpCode(Status.NO_CONTENT)
-  async registrationEmailResending(@Body() input: AuthResendingEmailInputDto) {
+  async registrationEmailResending(@Body() input: AuthResendingEmailDto) {
     await this.userService.tryResendConfirmationCode(input);
   }
 
   @Post('password-recovery')
+  @UseGuards(RateLimiterGuard)
   @HttpCode(Status.NO_CONTENT)
-  async passwordRecovery(@Body() input: AuthResendingEmailInputDto) {
+  async passwordRecovery(@Body() input: AuthPasswordRecoveryDto) {
     await this.userService.tryResendPasswordRecoverCode(input);
   }
 
   @Post('new-password')
+  @UseGuards(RateLimiterGuard)
   @HttpCode(Status.NO_CONTENT)
-  async recoverPasswordWithConfirmationCode(@Body() input: AuthNewPasswordInputDto) {
+  async recoverPasswordWithConfirmationCode(@Body() input: AuthNewPasswordDto) {
     const result: ServiceResult = await this.userService.recoverPasswordWithConfirmationCode(input);
     if (result.hasErrorCode(UserServiceError.PASS_CONFIRMATION_INVALID)) {
       throw new BadRequestException();

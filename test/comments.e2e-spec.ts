@@ -17,6 +17,8 @@ describe('comments testing', () => {
   const utils = new TestCreateUtils(config);
 
   beforeAll(async () => {
+    await config.getModels().clearAll();
+
     user = await utils.createUser(utils.createNewUserModel());
     blog = await utils.createBlog(user.id);
     post = await utils.createPost(user.id, blog.id);

@@ -3,25 +3,25 @@ import { InjectModel } from '@nestjs/mongoose';
 import { AuthSession } from './auth.schema';
 import { AuthSessionDocumentType, IAuthSessionModel } from '../types/dao';
 import { IAuthSessionRepository } from '../types/common';
-import { AuthSessionCreateDto, AuthSessionInfoDto, AuthSessionUpdateDto } from '../types/dto';
+import { AuthSessionCreateModel, AuthSessionInfoModel, AuthSessionUpdateModel } from '../types/dto';
 import { DeleteResult } from 'mongodb';
 
 @Injectable()
 export class AuthSessionRepository implements IAuthSessionRepository {
   constructor(@InjectModel(AuthSession.name) private authSessionModel: IAuthSessionModel) {}
 
-  async createSession(input: AuthSessionCreateDto): Promise<string> {
+  async createSession(input: AuthSessionCreateModel): Promise<string> {
     const session = this.authSessionModel.createAuthSession(input);
     await this.saveDoc(session);
     return session._id.toString();
   }
 
-  async deleteSession(input: AuthSessionInfoDto): Promise<boolean> {
+  async deleteSession(input: AuthSessionInfoModel): Promise<boolean> {
     const res: DeleteResult = await this.authSessionModel.deleteOne({ userId: input.userId, deviceId: input.deviceId }).exec();
     return res.deletedCount === 1;
   }
 
-  async updateSession(deviceId: string, input: AuthSessionUpdateDto): Promise<boolean> {
+  async updateSession(deviceId: string, input: AuthSessionUpdateModel): Promise<boolean> {
     const session: AuthSessionDocumentType | null = await this.authSessionModel.findOne({ deviceId }).exec();
 
     if (!session) {
@@ -35,7 +35,7 @@ export class AuthSessionRepository implements IAuthSessionRepository {
     return true;
   }
 
-  async deleteAllSessions(model: AuthSessionInfoDto): Promise<boolean> {
+  async deleteAllSessions(model: AuthSessionInfoModel): Promise<boolean> {
     const result: DeleteResult = await this.authSessionModel
       .deleteMany({
         deviceId: { $ne: model.deviceId },

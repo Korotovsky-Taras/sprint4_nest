@@ -1,8 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { IAuthSession } from '../types/dao';
-import { AuthSessionCreateDto, AuthSessionUpdateDto } from '../types/dto';
+import { AuthSessionCreateModel, AuthSessionUpdateModel } from '../types/dto';
 
-@Schema({ _id: false })
+@Schema()
 export class AuthSession implements IAuthSession {
   @Prop({ required: true })
   deviceId: string;
@@ -22,7 +22,7 @@ export class AuthSession implements IAuthSession {
   @Prop({ required: true })
   lastActiveDate: Date;
 
-  constructor(input: AuthSessionCreateDto) {
+  constructor(input: AuthSessionCreateModel) {
     this.deviceId = input.deviceId;
     this.userId = input.userId;
     this.userAgent = input.userAgent;
@@ -31,14 +31,14 @@ export class AuthSession implements IAuthSession {
     this.lastActiveDate = input.lastActiveDate;
   }
 
-  updateSession(input: AuthSessionUpdateDto) {
+  updateSession(input: AuthSessionUpdateModel) {
     this.ip = input.ip;
     this.userAgent = input.userAgent;
     this.uuid = input.uuid;
     this.lastActiveDate = input.lastActiveDate;
   }
 
-  static createAuthSession(input: AuthSessionCreateDto) {
+  static createAuthSession(input: AuthSessionCreateModel) {
     return new this(input);
   }
 }

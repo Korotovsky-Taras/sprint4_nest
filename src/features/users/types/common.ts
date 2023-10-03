@@ -2,7 +2,7 @@ import { IUser, UserMongoType } from './dao';
 import { IRepository, IService } from '../../types';
 import {
   UserConfirmationCodeValidateResult,
-  UserCreateRequestDto,
+  UserCreateModel,
   UserListViewDto,
   UserPaginationQueryDto,
   UserPaginationRepositoryDto,
@@ -18,7 +18,7 @@ export interface IUsersService extends IService {}
 
 export interface IUsersController {
   getAll(query: UserPaginationQueryDto): Promise<UserListViewDto>;
-  createUser(input: UserCreateRequestDto): Promise<UserViewModel>;
+  createUser(input: UserCreateModel): Promise<UserViewModel>;
   deleteUser(userId: string);
 }
 

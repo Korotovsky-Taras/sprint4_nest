@@ -1,5 +1,5 @@
 import { AppTestProvider } from './useTestDescribeConfig';
-import { UserCreateRequestDto, UserViewModel } from '../../src/features/users/types/dto';
+import { UserCreateModel, UserViewModel } from '../../src/features/users/types/dto';
 import { AuthTokenCreator } from '../../src/features/auth/utils/tokenCreator';
 import { CommentCreateRequestDto, CommentViewModel } from '../../src/features/comments/types/dto';
 import { BlogViewModel } from '../../src/features/blogs/types/dto';
@@ -42,7 +42,7 @@ export class TestCreateUtils extends TestCommonUtils {
     return result.body;
   }
 
-  async createUser(model: UserCreateRequestDto): Promise<UserViewModel> {
+  async createUser(model: UserCreateModel): Promise<UserViewModel> {
     const result = await this.config
       .getHttp()
       .post('/users')
@@ -50,7 +50,7 @@ export class TestCreateUtils extends TestCommonUtils {
       .set('Content-Type', 'application/json')
       .send({
         ...model,
-      } as UserCreateRequestDto);
+      } as UserCreateModel);
     return result.body;
   }
 
@@ -83,7 +83,7 @@ export class TestCreateUtils extends TestCommonUtils {
 export type BlogCreationTestModel = BlogCreateDto;
 export type PostCreationTestModel = Omit<PostCreateDto, 'blogId' | 'blogName'>;
 export type CommentCreationTestModel = PostCommentCreateDto;
-export type UserCreationTestModel = UserCreateRequestDto;
+export type UserCreationTestModel = UserCreateModel;
 
 export const validBlogData: BlogCreationTestModel = {
   name: 'Taras',

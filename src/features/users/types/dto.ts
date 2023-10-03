@@ -1,7 +1,7 @@
 import { IUser } from './dao';
 import { EnhancedOmit, PaginationQueryModel, WithPagination, WithPaginationQuery } from '../../../application/utils/types';
 
-export type UserCreateRequestDto = Pick<IUser, 'login' | 'email'> & { password: string };
+export type UserCreateModel = Pick<IUser, 'login' | 'email'> & { password: string };
 
 export type UserCreateInputDto = Pick<IUser, 'login' | 'email' | 'password' | 'authConfirmation'>;
 

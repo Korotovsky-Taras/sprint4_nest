@@ -1,5 +1,5 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
-import { RateLimiterCounter, ReteLimiter } from '../rateLimiter';
+import { RateLimiter, RateLimiterCounter } from '../rateLimiter';
 import { AuthHelper } from '../authHelper';
 import { RateLimiterError } from '../core/RateLimiterError';
 
@@ -10,7 +10,7 @@ export class RateLimiterGuard implements CanActivate {
 
   constructor(
     private authHelper: AuthHelper,
-    private rateLimiter: ReteLimiter,
+    private rateLimiter: RateLimiter,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {

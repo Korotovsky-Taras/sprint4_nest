@@ -1,13 +1,13 @@
 import { Module } from '@nestjs/common';
-import { BlogsRepository } from '../blogs/dao/blogs.repository';
-import { PostsRepository } from '../posts/dao/posts.repository';
-import { CommentsRepository } from '../comments/dao/comments.repository';
-import { UsersRepository } from '../users/dao/users.repository';
 import { TestsController } from './api/tests.controller';
-import { AuthSessionRepository } from '../auth/dao/auth.repository';
+import { BlogsModule } from '../blogs/blogs.module';
+import { PostsModule } from '../posts/posts.module';
+import { UsersModule } from '../users/users.module';
+import { CommentsModule } from '../comments/comments.module';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
-  imports: [BlogsRepository, PostsRepository, UsersRepository, CommentsRepository, AuthSessionRepository],
+  imports: [BlogsModule, PostsModule, UsersModule, CommentsModule, AuthModule],
   controllers: [TestsController],
 })
 export class TestsModule {}

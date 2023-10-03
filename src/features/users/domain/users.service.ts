@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { IUsersService } from '../types/common';
-import { UserCreateRequestDto, UserViewModel } from '../types/dto';
+import { UserCreateModel, UserViewModel } from '../types/dto';
 import { UsersRepository } from '../dao/users.repository';
 import { UsersQueryRepository } from '../dao/users.query.repository';
 import { UsersDataMapper } from '../api/users.dm';
@@ -10,8 +10,14 @@ import { User } from '../dao/users.schema';
 import { IUserModel, UserDocumentType } from '../types/dao';
 import { DeleteResult, ObjectId } from 'mongodb';
 import { MailSender } from '../../../application/mailSender';
-import { AuthConfirmationCodeDto, AuthNewPasswordInputDto, AuthResendingEmailInputDto } from '../../auth/types/dto';
 import { ServiceResult } from '../../../application/core/ServiceResult';
+import { AuthRegistrationDto } from '../../auth/dto/AuthRegistrationDto';
+import { validateOrRejectDto } from '../../../application/utils/validateOrRejectDto';
+import { AuthConfirmationCodeDto } from '../../auth/dto/AuthConfirmationCodeDto';
+import { AuthResendingEmailDto } from '../../auth/dto/AuthResendingEmailDto';
+import { AuthPasswordRecoveryDto } from '../../auth/dto/AuthPasswordRecoveryDto';
+import { AuthNewPasswordDto } from '../../auth/dto/AuthNewPasswordDto';
+import { AuthUserCreateDto } from '../../auth/dto/AuthUserCreateDto';
 
 @Injectable()
 export class UsersService extends AbstractUsersService implements IUsersService {
@@ -29,7 +35,7 @@ export class UsersService extends AbstractUsersService implements IUsersService 
     return result.deletedCount === 1;
   }
 
-  async createUser(model: UserCreateRequestDto, isUserConfirmed: boolean): Promise<ServiceResult<UserViewModel>> {
+  private async createUser(model: UserCreateModel, isUserConfirmed: boolean): Promise<ServiceResult<UserViewModel>> {
     const result = new ServiceResult<UserViewModel>();
     const isUserRegistered = await this.usersQueryRepo.isUserExistByLoginOrEmail(model.login, model.email);
 
@@ -58,11 +64,23 @@ export class UsersService extends AbstractUsersService implements IUsersService 
     return result;
   }
 
-  async verifyConfirmationCode(model: AuthConfirmationCodeDto): Promise<ServiceResult> {
+  async createConfirmedUser(dto: AuthUserCreateDto): Promise<ServiceResult<UserViewModel>> {
+    await validateOrRejectDto(dto, AuthUserCreateDto);
+    return this.createUser(dto, true);
+  }
+
+  async createUserWithConfirmation(dto: AuthRegistrationDto): Promise<ServiceResult<UserViewModel>> {
+    await validateOrRejectDto(dto, AuthRegistrationDto);
+    return this.createUser(dto, false);
+  }
+
+  async verifyConfirmationCode(dto: AuthConfirmationCodeDto): Promise<ServiceResult> {
+    await validateOrRejectDto(dto, AuthConfirmationCodeDto);
+
     const result = new ServiceResult();
     const user: UserDocumentType | null = await this.userModel
       .findOne({
-        'authConfirmation.code': model.code,
+        'authConfirmation.code': dto.code,
       })
       .exec();
 
@@ -79,8 +97,10 @@ export class UsersService extends AbstractUsersService implements IUsersService 
     return result;
   }
 
-  async tryResendConfirmationCode(input: AuthResendingEmailInputDto): Promise<void> {
-    const user: UserDocumentType | null = await this.userModel.findOne({ email: input.email }).exec();
+  async tryResendConfirmationCode(dto: AuthResendingEmailDto): Promise<void> {
+    await validateOrRejectDto(dto, AuthResendingEmailDto);
+
+    const user: UserDocumentType | null = await this.userModel.findOne({ email: dto.email }).exec();
 
     if (user && !user.isAuthConfirmed()) {
       user.setAuthConfirmation(this._createUserConfirmation());
@@ -91,8 +111,10 @@ export class UsersService extends AbstractUsersService implements IUsersService 
     }
   }
 
-  async tryResendPasswordRecoverCode(input: AuthResendingEmailInputDto): Promise<void> {
-    const user: UserDocumentType | null = await this.userModel.findOne({ email: input.email }).exec();
+  async tryResendPasswordRecoverCode(dto: AuthPasswordRecoveryDto): Promise<void> {
+    await validateOrRejectDto(dto, AuthPasswordRecoveryDto);
+
+    const user: UserDocumentType | null = await this.userModel.findOne({ email: dto.email }).exec();
     if (user) {
       user.setPassConfirmation(this._createUserConfirmation());
 
@@ -102,11 +124,13 @@ export class UsersService extends AbstractUsersService implements IUsersService 
     }
   }
 
-  async recoverPasswordWithConfirmationCode(model: AuthNewPasswordInputDto): Promise<ServiceResult> {
+  async recoverPasswordWithConfirmationCode(dto: AuthNewPasswordDto): Promise<ServiceResult> {
+    await validateOrRejectDto(dto, AuthNewPasswordDto);
+
     const result = new ServiceResult();
     const user: UserDocumentType | null = await this.userModel
       .findOne({
-        'passConfirmation.code': model.recoveryCode,
+        'passConfirmation.code': dto.recoveryCode,
       })
       .exec();
 
@@ -115,7 +139,7 @@ export class UsersService extends AbstractUsersService implements IUsersService 
         code: UserServiceError.PASS_CONFIRMATION_INVALID,
       });
     } else {
-      user.password = this._hashPassword(model.newPassword);
+      user.password = this._hashPassword(dto.newPassword);
       user.setPassConfirmed(true);
       await this.usersRepo.saveDoc(user);
     }

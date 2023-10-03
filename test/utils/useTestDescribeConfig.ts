@@ -3,29 +3,65 @@ import { agent, SuperAgentTest } from 'supertest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppModule } from '../../src/app.module';
 import { useAppSettings } from '../../src/application/utils/useAppSettings';
-import { DBService } from '../../src/db/DBService';
+import { IUserModel } from '../../src/features/users/types/dao';
+import { getModelToken } from '@nestjs/mongoose';
+import { User } from '../../src/features/users/dao/users.schema';
+import { Blog } from '../../src/features/blogs/dao/blogs.schema';
+import { Comment } from '../../src/features/comments/dao/comments.schema';
+import { Post } from '../../src/features/posts/dao/posts.schema';
+import { AuthSession } from '../../src/features/auth/dao/auth.schema';
+import { IAuthSessionModel } from '../../src/features/auth/types/dao';
+import { ICommentModel } from '../../src/features/comments/types/dao';
+import { IBlogModel } from '../../src/features/blogs/types/dao';
+import { TestingModels } from './testing.models';
+import { IPostModel } from '../../src/features/posts/types/dao';
 
 export type AppTestProvider = {
   getApp(): INestApplication;
   getHttp(): SuperAgentTest;
+  getModels(): TestingModels;
 };
 
 export function useTestDescribeConfig(): AppTestProvider {
   let app: INestApplication;
   let http: SuperAgentTest;
+  let models: TestingModels;
 
   beforeAll(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
+    const moduleRef: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
+      providers: [
+        {
+          provide: getModelToken(User.name),
+          useValue: User,
+        },
+        {
+          provide: getModelToken(Blog.name),
+          useValue: Blog,
+        },
+        {
+          provide: getModelToken(Post.name),
+          useValue: Post,
+        },
+        {
+          provide: getModelToken(Comment.name),
+          useValue: Comment,
+        },
+        {
+          provide: getModelToken(AuthSession.name),
+          useValue: AuthSession,
+        },
+      ],
     }).compile();
-    app = moduleFixture.createNestApplication();
+    app = moduleRef.createNestApplication();
 
-    const connection = moduleFixture.get<DBService>(DBService).getConnection();
+    const userModel = moduleRef.get<IUserModel>(getModelToken(User.name));
+    const blogModel = moduleRef.get<IBlogModel>(getModelToken(Blog.name));
+    const postModel = moduleRef.get<IPostModel>(getModelToken(Post.name));
+    const commentModel = moduleRef.get<ICommentModel>(getModelToken(Comment.name));
+    const authModel = moduleRef.get<IAuthSessionModel>(getModelToken(AuthSession.name));
 
-    for (const key in connection.collections) {
-      // TODO надо убедиться что здесь не будет запросов в продакшин базу
-      await connection.collections[key].deleteMany({});
-    }
+    models = new TestingModels(blogModel, postModel, commentModel, userModel, authModel);
 
     useAppSettings(app);
     await app.init();
@@ -42,6 +78,9 @@ export function useTestDescribeConfig(): AppTestProvider {
     },
     getHttp(): SuperAgentTest {
       return http;
+    },
+    getModels(): TestingModels {
+      return models;
     },
   };
 }

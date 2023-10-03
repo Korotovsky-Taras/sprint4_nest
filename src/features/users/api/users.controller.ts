@@ -1,11 +1,13 @@
-import { BadRequestException, Body, Controller, Delete, Get, HttpCode, Injectable, NotFoundException, Param, Post, Query } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, HttpCode, Injectable, NotFoundException, Param, Post, Query, UseGuards } from '@nestjs/common';
 import { IUsersController } from '../types/common';
 import { UserServiceError, UsersService } from '../domain/users.service';
 import { UsersQueryRepository } from '../dao/users.query.repository';
 import { UsersDataMapper } from './users.dm';
-import { UserCreateRequestDto, UserListViewDto, UserPaginationQueryDto, UserViewModel } from '../types/dto';
+import { UserListViewDto, UserPaginationQueryDto, UserViewModel } from '../types/dto';
 import { Status } from '../../../application/utils/types';
 import { ServiceResult } from '../../../application/core/ServiceResult';
+import { AuthBasicGuard } from '../../../application/guards/AuthBasicGuard';
+import { AuthUserCreateDto } from '../../auth/dto/AuthUserCreateDto';
 
 @Injectable()
 @Controller('users')
@@ -22,9 +24,10 @@ export class UsersController implements IUsersController {
   }
 
   @Post()
+  @UseGuards(AuthBasicGuard)
   @HttpCode(Status.CREATED)
-  async createUser(@Body() input: UserCreateRequestDto): Promise<UserViewModel> {
-    const result: ServiceResult<UserViewModel> = await this.usersService.createUser(input, true);
+  async createUser(@Body() input: AuthUserCreateDto): Promise<UserViewModel> {
+    const result: ServiceResult<UserViewModel> = await this.usersService.createConfirmedUser(input);
     if (result.hasErrorCode(UserServiceError.USER_ALREADY_REGISTER)) {
       throw new BadRequestException();
     }

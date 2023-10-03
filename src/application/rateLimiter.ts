@@ -7,8 +7,12 @@ export type RateLimiterCounter = {
 };
 
 @Injectable()
-export class ReteLimiter {
-  constructor(private readonly redis = new Map<string, RateLimiterCounter>()) {}
+export class RateLimiter {
+  private readonly redis: Map<string, RateLimiterCounter>;
+
+  constructor() {
+    this.redis = new Map<string, RateLimiterCounter>();
+  }
 
   getCounter(key: string): RateLimiterCounter | undefined {
     return this.redis.get(key);
@@ -42,5 +46,3 @@ export class ReteLimiter {
     return -1;
   }
 }
-
-export const rateLimiter = new ReteLimiter();
