@@ -12,6 +12,7 @@ export class AuthUserCreateDto {
   @IsEmail()
   email: string;
 
+  @IsNotEmptyString()
   @MinLength(PASSWORD_MIN)
   @MaxLength(PASSWORD_MAX)
   password: string;
