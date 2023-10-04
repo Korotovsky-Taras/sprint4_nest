@@ -18,17 +18,20 @@ export class ServerExceptionFilter implements ExceptionFilter {
     const path = request.url;
     const timestamp = toIsoString(new Date());
 
-    if (this.isDevMode) {
-      const commonData = { timestamp, path };
+    // if (this.isDevMode) {
+    const commonData = { timestamp, path };
 
-      if (exception instanceof HttpException && exception.getStatus()) {
-        const responseData = exception.getStatus() >= 500 ? { stack: exception.stack?.toString(), ...commonData } : commonData;
-        return response.status(exception.getStatus()).json(responseData);
-      }
-
-      return response.status(Status.UNHANDLED).json(commonData);
+    if (exception instanceof HttpException && exception.getStatus()) {
+      const responseData = exception.getStatus() >= 500 ? { stack: exception.stack?.toString(), ...commonData } : commonData;
+      console.log({ responseData });
+      return response.status(exception.getStatus()).json(responseData);
     }
 
-    response.sendStatus(Status.UNHANDLED);
+    console.log({ commonData });
+    return response.status(Status.UNHANDLED).json(commonData);
+
+    // }
+    //
+    // response.sendStatus(Status.UNHANDLED);
   }
 }
