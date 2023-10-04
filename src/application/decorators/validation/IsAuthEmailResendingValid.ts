@@ -10,9 +10,9 @@ export class IsAuthEmailResendingValidator implements ValidatorConstraintInterfa
   async validate(email: string) {
     const user = await this.usersQueryRepo.getUserByFilter({ email }, UsersDataMapper.toUserWithAuthConfirmation);
     if (!user) {
-      throw Error('email doesnt exist');
+      return false; //email doesnt exist
     } else if (user.confirmed) {
-      throw Error('email already confirmed');
+      return false; //email already confirmed
     }
     return true;
   }

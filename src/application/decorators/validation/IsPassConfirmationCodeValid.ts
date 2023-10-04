@@ -9,9 +9,9 @@ export class IsPassConfirmationCodeValidator implements ValidatorConstraintInter
   async validate(code: string) {
     const result = await this.usersQueryRepo.getPassConfirmationValidation(code);
     if (!result || result.isConfirmed) {
-      throw Error('code is not valid');
+      return false; //code is not valid
     } else if (result.isExpired) {
-      throw Error('code is expired');
+      return false; //code is expired
     }
     return true;
   }
