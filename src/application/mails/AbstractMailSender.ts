@@ -26,7 +26,7 @@ export abstract class AbstractMailSender {
 
   protected async sendMail(data: MailSenderData): Promise<boolean> {
     if (!this.isValidConfig(data)) {
-      throw Error('GMailSender');
+      throw Error('MailSender error: provided data not valid');
     }
 
     try {

@@ -19,6 +19,11 @@ export class GMailSender extends AbstractMailSender {
   configTransporter(): nodemailer.Transporter {
     return nodemailer.createTransport({
       service: 'gmail',
+      secure: false,
+      port: 25, //?
+      tls: {
+        rejectUnauthorized: false,
+      },
       auth: { user: appConfig.gmailAdapterUser, pass: appConfig.gmailAdapterPass },
     });
   }
