@@ -109,7 +109,7 @@ export class UsersService extends AbstractUsersService implements IUsersService 
 
       await this.usersRepo.saveDoc(user);
 
-      this.mailSender.sendRegistrationMail(user.email, user.authConfirmation.code).catch((e) => console.log(e));
+      await this.mailSender.sendRegistrationMail(user.email, user.authConfirmation.code).catch((e) => console.log(e));
     }
   }
 
@@ -122,7 +122,7 @@ export class UsersService extends AbstractUsersService implements IUsersService 
 
       await this.usersRepo.saveDoc(user);
 
-      this.mailSender.sendPasswordRecoveryMail(user.email, user.passConfirmation.code).catch((e) => console.log(e));
+      await this.mailSender.sendPasswordRecoveryMail(user.email, user.passConfirmation.code).catch((e) => console.log(e));
     }
   }
 
