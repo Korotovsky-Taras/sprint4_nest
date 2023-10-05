@@ -54,7 +54,7 @@ export class UsersService extends AbstractUsersService implements IUsersService 
     });
 
     if (!isUserConfirmed) {
-      this.mailSender.sendRegistrationMail(user.email, user.authConfirmation.code).then();
+      this.mailSender.sendRegistrationMail(user.email, user.authConfirmation.code).catch((e) => console.log(e));
     }
 
     await this.usersRepo.saveDoc(user);

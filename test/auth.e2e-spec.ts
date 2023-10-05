@@ -19,6 +19,124 @@ describe('auth testing', () => {
     refreshToken = null;
   });
 
+  it('POST - auth/registration -> should return 404 if dto incorrect', async () => {
+    const usrModel1 = utils.createNewUserModel();
+    const usrModel2 = utils.createNewUserModel();
+
+    await utils.createUser(usrModel1);
+    await utils.createUser(usrModel2);
+
+    //попытка регистрации существующего login
+    const regModel = utils.createNewUserModel();
+    const res1 = await config
+      .getHttp()
+      .post(`/auth/registration`)
+      .set('Content-Type', 'application/json')
+      .send({
+        login: usrModel1.login,
+        email: regModel.email,
+        password: regModel.password,
+      })
+      .expect(Status.BAD_REQUEST);
+
+    expect(res1.body).toEqual({
+      errorsMessages: [
+        {
+          message: expect.any(String),
+          field: 'login',
+        },
+      ],
+    });
+
+    //попытка регистрации существующего email
+    const res2 = await config
+      .getHttp()
+      .post(`/auth/registration`)
+      .set('Content-Type', 'application/json')
+      .send({
+        login: regModel.login,
+        email: usrModel1.email,
+        password: regModel.password,
+      })
+      .expect(Status.BAD_REQUEST);
+
+    expect(res2.body).toEqual({
+      errorsMessages: [
+        {
+          message: expect.any(String),
+          field: 'email',
+        },
+      ],
+    });
+  });
+
+  it('POST - auth/registration -> should create user with confirmation code', async () => {
+    const usrModel = utils.createNewUserModel();
+
+    await config
+      .getHttp()
+      .post(`/auth/registration`)
+      .set('Content-Type', 'application/json')
+      .send({
+        login: usrModel.login,
+        email: usrModel.email,
+        password: usrModel.password,
+      })
+      .expect(Status.NO_CONTENT);
+
+    const result = await config
+      .getModels()
+      .getUserModel()
+      .findOne({ login: usrModel?.login })
+      .exec();
+
+    expect(result).not.toBeUndefined();
+    expect(result?.authConfirmation.confirmed).toBeFalsy();
+    expect(result?.authConfirmation.code).not.toBeUndefined();
+  });
+
+  it('POST - auth/registration -> confirmation -> should confirm code', async () => {
+    const usrModel = utils.createNewUserModel();
+
+    await config
+      .getHttp()
+      .post(`/auth/registration`)
+      .set('Content-Type', 'application/json')
+      .send({
+        login: usrModel.login,
+        email: usrModel.email,
+        password: usrModel.password,
+      })
+      .expect(Status.NO_CONTENT);
+
+    const result = await config
+      .getModels()
+      .getUserModel()
+      .findOne({ login: usrModel?.login })
+      .exec();
+
+    expect(result).not.toBeUndefined();
+    expect(result?.authConfirmation.confirmed).toBeFalsy();
+    expect(result?.authConfirmation.code).not.toBeUndefined();
+
+    await config
+      .getHttp()
+      .post(`/auth/registration-confirmation`)
+      .set('Content-Type', 'application/json')
+      .send({
+        code: result?.authConfirmation.code,
+      })
+      .expect(Status.NO_CONTENT);
+
+    const result2 = await config
+      .getModels()
+      .getUserModel()
+      .findOne({ login: usrModel?.login })
+      .exec();
+
+    expect(result2?.authConfirmation.confirmed).toBeTruthy();
+  });
+
   it('should return 401 if wrong password or email', async () => {
     const fakeUserModel = utils.createNewUserModel();
 
