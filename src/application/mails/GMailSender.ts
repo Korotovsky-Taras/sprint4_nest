@@ -28,7 +28,7 @@ export class GMailSender extends AbstractMailSender {
   async sendRegistrationMail(to: string, code: string): Promise<boolean> {
     const url = `${appConfig.gmailClientUrl}?code=${code}`;
     const html = this.registrationConfirmationTmpl({ url });
-    return await this.sendMail({
+    return this.sendMail({
       to,
       title: 'Auth',
       subject: 'confirm registration',
@@ -39,7 +39,7 @@ export class GMailSender extends AbstractMailSender {
   async sendPasswordRecoveryMail(to: string, code: string): Promise<boolean> {
     const url = `${appConfig.gmailClientUrl}?recoveryCode=${code}`;
     const html = this.passwordConfirmationTmpl({ url });
-    return await this.sendMail({
+    return this.sendMail({
       to,
       title: 'Auth',
       subject: 'confirm registration',

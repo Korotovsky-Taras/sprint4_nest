@@ -1,10 +1,10 @@
-import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
+import { CanActivate, ExecutionContext, Injectable, Scope, UnauthorizedException } from '@nestjs/common';
 import { AuthTokenCreator } from '../../features/auth/utils/tokenCreator';
 import { getRequestAuthorization } from './utils/getRequestAuthorization';
 import { Reflector } from '@nestjs/core';
 import { TokenGuardParamType } from '../decorators/skipTokenError';
 
-@Injectable()
+@Injectable({ scope: Scope.REQUEST })
 export class AuthTokenGuard implements CanActivate {
   private throwError: boolean = true;
   private tokenCreator: AuthTokenCreator;
