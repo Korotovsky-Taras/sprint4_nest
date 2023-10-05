@@ -10,22 +10,19 @@ export class GMailSender extends AbstractMailSender {
   private readonly registrationConfirmationTmpl: handlebars.TemplateDelegate;
 
   constructor() {
-    super();
-
+    super(
+      nodemailer.createTransport({
+        service: 'gmail',
+        secure: false,
+        port: 25, //?
+        tls: {
+          rejectUnauthorized: false,
+        },
+        auth: { user: appConfig.gmailAdapterUser, pass: appConfig.gmailAdapterPass },
+      }),
+    );
     this.passwordConfirmationTmpl = this.loadTemplate('passwordConfirmation.hbs');
     this.registrationConfirmationTmpl = this.loadTemplate('registrationConfirmation.hbs');
-  }
-
-  configTransporter(): nodemailer.Transporter {
-    return nodemailer.createTransport({
-      service: 'gmail',
-      secure: false,
-      port: 25, //?
-      tls: {
-        rejectUnauthorized: false,
-      },
-      auth: { user: appConfig.gmailAdapterUser, pass: appConfig.gmailAdapterPass },
-    });
   }
 
   async sendRegistrationMail(to: string, code: string): Promise<boolean> {

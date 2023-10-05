@@ -16,13 +16,7 @@ export type MailSenderData = {
 
 @Injectable()
 export abstract class AbstractMailSender {
-  protected transporter: nodemailer.Transporter;
-
-  protected constructor() {
-    this.transporter = this.configTransporter();
-  }
-
-  abstract configTransporter(): nodemailer.Transporter;
+  protected constructor(protected transporter: nodemailer.Transporter) {}
 
   protected async sendMail(data: MailSenderData): Promise<boolean> {
     if (!this.isValidConfig(data)) {
