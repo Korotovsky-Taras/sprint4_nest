@@ -19,8 +19,6 @@ export class GMailSender extends AbstractMailSender {
   configTransporter(): nodemailer.Transporter {
     return nodemailer.createTransport({
       service: 'gmail',
-      host: 'smtp.gmail.com',
-      secure: true,
       auth: { user: appConfig.gmailAdapterUser, pass: appConfig.gmailAdapterPass },
     });
   }
@@ -28,7 +26,7 @@ export class GMailSender extends AbstractMailSender {
   async sendRegistrationMail(to: string, code: string): Promise<boolean> {
     const url = `${appConfig.gmailClientUrl}?code=${code}`;
     const html = this.registrationConfirmationTmpl({ url });
-    return this.sendGmail({
+    return this.sendMail({
       to,
       title: 'Auth',
       subject: 'confirm registration',
@@ -39,7 +37,7 @@ export class GMailSender extends AbstractMailSender {
   async sendPasswordRecoveryMail(to: string, code: string): Promise<boolean> {
     const url = `${appConfig.gmailClientUrl}?recoveryCode=${code}`;
     const html = this.passwordConfirmationTmpl({ url });
-    return this.sendGmail({
+    return this.sendMail({
       to,
       title: 'Auth',
       subject: 'confirm registration',

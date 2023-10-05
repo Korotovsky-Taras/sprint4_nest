@@ -24,7 +24,7 @@ export abstract class AbstractMailSender {
 
   abstract configTransporter(): nodemailer.Transporter;
 
-  protected async sendGmail(data: MailSenderData): Promise<boolean> {
+  protected async sendMail(data: MailSenderData): Promise<boolean> {
     if (!this.isValidConfig(data)) {
       throw Error('GMailSender');
     }
@@ -38,6 +38,8 @@ export abstract class AbstractMailSender {
       };
 
       const result: SMTPTransport.SentMessageInfo = await this.transporter.sendMail(mail);
+
+      console.log({ emailResult: result });
 
       return result.accepted.includes(data.to);
     } catch (e: any) {
