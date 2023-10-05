@@ -7,6 +7,7 @@ if (process.env.NODE_ENV != 'production') {
 }
 
 export const appConfig: AppConfig = {
+  isDevMode: process.env.DEV_MODE === 'true' || process.env.NODE_ENV != 'production',
   port: Number(process.env.PORT) || 80,
   authLogin: process.env.AUTH_LOGIN || 'admin',
   authPassword: process.env.AUTH_PASSWORD || 'admin',
@@ -19,6 +20,7 @@ export const appConfig: AppConfig = {
 };
 
 type AppConfig = {
+  isDevMode: boolean;
   port: number;
   authLogin: string;
   authPassword: string;

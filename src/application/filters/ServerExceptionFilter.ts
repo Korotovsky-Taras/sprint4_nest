@@ -2,13 +2,14 @@ import { ArgumentsHost, Catch, ExceptionFilter, HttpException } from '@nestjs/co
 import { Request, Response } from 'express';
 import { toIsoString } from '../utils/date';
 import { Status } from '../utils/types';
+import { appConfig } from '../utils/config';
 
 @Catch()
 export class ServerExceptionFilter implements ExceptionFilter {
   private readonly isDevMode;
 
   constructor() {
-    this.isDevMode = process.env.NODE_ENV != 'production';
+    this.isDevMode = appConfig.isDevMode;
   }
 
   catch(exception: Error | HttpException, host: ArgumentsHost) {
@@ -18,20 +19,17 @@ export class ServerExceptionFilter implements ExceptionFilter {
     const path = request.url;
     const timestamp = toIsoString(new Date());
 
-    // if (this.isDevMode) {
-    const commonData = { timestamp, path };
+    if (this.isDevMode) {
+      const commonData = { timestamp, path };
 
-    if (exception instanceof HttpException && exception.getStatus()) {
-      const responseData = exception.getStatus() >= 500 ? { stack: exception.stack?.toString(), ...commonData } : commonData;
-      console.log({ status: exception.getStatus(), responseData });
-      return response.status(exception.getStatus()).json(responseData);
+      if (exception instanceof HttpException && exception.getStatus()) {
+        const responseData = exception.getStatus() >= 500 ? { stack: exception.stack?.toString(), ...commonData } : commonData;
+        return response.status(exception.getStatus()).json(responseData);
+      }
+
+      return response.status(Status.UNHANDLED).json(commonData);
     }
 
-    console.log({ commonData, stack: exception.stack?.toString() });
-    return response.status(Status.UNHANDLED).json(commonData);
-
-    // }
-    //
-    // response.sendStatus(Status.UNHANDLED);
+    response.sendStatus(Status.UNHANDLED);
   }
 }
