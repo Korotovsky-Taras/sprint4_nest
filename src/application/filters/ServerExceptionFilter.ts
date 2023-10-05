@@ -23,11 +23,11 @@ export class ServerExceptionFilter implements ExceptionFilter {
 
     if (exception instanceof HttpException && exception.getStatus()) {
       const responseData = exception.getStatus() >= 500 ? { stack: exception.stack?.toString(), ...commonData } : commonData;
-      console.log({ responseData });
+      console.log({ status: exception.getStatus(), responseData });
       return response.status(exception.getStatus()).json(responseData);
     }
 
-    console.log({ commonData });
+    console.log({ commonData, stack: exception.stack?.toString() });
     return response.status(Status.UNHANDLED).json(commonData);
 
     // }
