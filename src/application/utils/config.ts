@@ -12,6 +12,7 @@ export const appConfig: AppConfig = {
   authPassword: process.env.AUTH_PASSWORD || 'admin',
   tokenSecret: process.env.TOKEN_SK || 'secret',
   mongoUrl: process.env.MONGO_URL || 'mongodb://0.0.0.0:27017',
+  gmailClientUrl: process.env.MAIL_CLIENT_URL || '',
   gmailAdapterUser: process.env.MAIL_ADAPTER_USER || '',
   gmailAdapterPass: process.env.MAIL_ADAPTER_PASS || '',
   dbName: process.env.NODE_ENV || 'production',
@@ -24,6 +25,7 @@ type AppConfig = {
   tokenSecret: string;
   mongoUrl: string;
   dbName: string;
+  gmailClientUrl: string;
   gmailAdapterUser: string;
   gmailAdapterPass: string;
 };

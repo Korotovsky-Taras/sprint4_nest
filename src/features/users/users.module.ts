@@ -10,6 +10,7 @@ import { IsAuthConfirmationCodeValidator } from '../../application/decorators/va
 import { IsAuthEmailResendingValidator } from '../../application/decorators/validation/IsAuthEmailResendingValid';
 import { IsUniqueUserLoginValidator } from '../../application/decorators/validation/IsUniqueUserLogin';
 import { SharedModule } from '../../shared.module';
+import { GMailSender } from '../../application/mails/GMailSender';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { SharedModule } from '../../shared.module';
     IsUniqueUserLoginValidator,
     IsAuthConfirmationCodeValidator,
     IsAuthEmailResendingValidator,
+    GMailSender,
   ],
   exports: [UsersService, UsersRepository, UsersQueryRepository],
 })

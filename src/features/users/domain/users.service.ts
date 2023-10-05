@@ -9,7 +9,6 @@ import { InjectModel } from '@nestjs/mongoose';
 import { User } from '../dao/users.schema';
 import { IUserModel, UserDocumentType } from '../types/dao';
 import { DeleteResult, ObjectId } from 'mongodb';
-import { MailSender } from '../../../application/mailSender';
 import { ServiceResult } from '../../../application/core/ServiceResult';
 import { AuthRegistrationDto } from '../../auth/dto/AuthRegistrationDto';
 import { validateOrRejectDto } from '../../../application/utils/validateOrRejectDto';
@@ -18,6 +17,7 @@ import { AuthResendingEmailDto } from '../../auth/dto/AuthResendingEmailDto';
 import { AuthPasswordRecoveryDto } from '../../auth/dto/AuthPasswordRecoveryDto';
 import { AuthNewPasswordDto } from '../../auth/dto/AuthNewPasswordDto';
 import { AuthUserCreateDto } from '../../auth/dto/AuthUserCreateDto';
+import { GMailSender } from '../../../application/mails/GMailSender';
 
 @Injectable()
 export class UsersService extends AbstractUsersService implements IUsersService {
@@ -25,7 +25,7 @@ export class UsersService extends AbstractUsersService implements IUsersService 
     @InjectModel(User.name) private userModel: IUserModel,
     private readonly usersRepo: UsersRepository,
     private readonly usersQueryRepo: UsersQueryRepository,
-    private readonly mailSender: MailSender,
+    private readonly mailSender: GMailSender,
   ) {
     super();
   }
