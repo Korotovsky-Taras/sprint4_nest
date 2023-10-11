@@ -16,7 +16,6 @@ describe('blogs testing', () => {
 
   beforeAll(async () => {
     await config.getModels().clearAll();
-
     createdBlogId = null;
     createdPostId = null;
     user = await utils.createUser(utils.createNewUserModel());
