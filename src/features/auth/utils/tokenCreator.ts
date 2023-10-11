@@ -1,29 +1,37 @@
 import crypto from 'node:crypto';
 
 import { BinaryToTextEncoding, randomUUID } from 'crypto';
-import { appConfig } from '../../../application/utils/config';
+import { AppConfiguration, AppConfigurationAuth } from '../../../application/utils/config';
 import { toIsoString } from '../../../application/utils/date';
 import { AuthAccessTokenPass, AuthAccessTokenPayload, AuthRefreshTokenPass, AuthRefreshTokenPayload } from './tokenCreator.types';
 import { AuthTokenCreatorAbstract } from './tokenCreatorAbstract';
 import { withObjectValue } from '../../../application/utils/withUserId';
 import { Injectable } from '@nestjs/common';
-
-const { tokenSecret } = appConfig;
+import { ConfigService } from '@nestjs/config';
 
 const signatureDigest: BinaryToTextEncoding = 'base64url';
 
 @Injectable()
 export class AuthTokenCreator extends AuthTokenCreatorAbstract {
-  constructor() {
+  private readonly env: AppConfigurationAuth;
+
+  constructor(private readonly configService: ConfigService<AppConfiguration, true>) {
     super();
+
+    this.env = configService.get<AppConfigurationAuth>('auth');
   }
+
+  getAuthEnv(): AppConfigurationAuth {
+    return this.env;
+  }
+
   createAccessToken(userId: string): AuthAccessTokenPass {
     const expiredIn: Date = new Date();
     expiredIn.setTime(expiredIn.getTime() + 3 * 1000 * 60);
 
     const head = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'jwt' })).toString('base64');
     const body = Buffer.from(JSON.stringify({ userId, expiredIn: toIsoString(expiredIn) })).toString('base64');
-    const signature = crypto.createHmac('SHA256', tokenSecret).update(`${head}.${body}`).digest(signatureDigest);
+    const signature = crypto.createHmac('SHA256', this.env.TOKEN_SK).update(`${head}.${body}`).digest(signatureDigest);
 
     return {
       token: `${head}.${body}.${signature}`,
@@ -37,7 +45,7 @@ export class AuthTokenCreator extends AuthTokenCreatorAbstract {
 
     const head = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'jwt' })).toString('base64');
     const body = Buffer.from(JSON.stringify({ userId, expiredIn: toIsoString(expiredIn), deviceId, uuid })).toString('base64');
-    const signature = crypto.createHmac('SHA256', tokenSecret).update(`${head}.${body}`).digest(signatureDigest);
+    const signature = crypto.createHmac('SHA256', this.env.TOKEN_SK).update(`${head}.${body}`).digest(signatureDigest);
 
     return {
       token: `${head}.${body}.${signature}`,

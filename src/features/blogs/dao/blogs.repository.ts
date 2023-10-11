@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Blog } from './blogs.schema';
 import { BlogMapperType, IBlogsRepository } from '../types/common';
-import { BlogDocumentType, IBlogModel } from '../types/dao';
+import { BlogDocumentType, BlogMongoType, IBlogModel } from '../types/dao';
 import { BlogCreateDto } from '../dto/BlogCreateDto';
 import { BlogUpdateDto } from '../dto/BlogUpdateDto';
 
@@ -29,6 +29,13 @@ export class BlogsRepository implements IBlogsRepository {
       })
       .exec();
     return res.deletedCount > 0;
+  }
+
+  async getBlogById(id: string): Promise<BlogMongoType | null> {
+    // if (isValidObjectId(id)) {
+    return this.blogModel.findById(id).lean();
+    // }
+    // return null;
   }
 
   async saveDoc(doc: BlogDocumentType): Promise<void> {

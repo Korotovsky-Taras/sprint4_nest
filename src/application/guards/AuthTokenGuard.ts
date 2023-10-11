@@ -3,14 +3,19 @@ import { AuthTokenCreator } from '../../features/auth/utils/tokenCreator';
 import { getRequestAuthorization } from './utils/getRequestAuthorization';
 import { Reflector } from '@nestjs/core';
 import { TokenGuardParamType } from '../decorators/skipTokenError';
+import { ConfigService } from '@nestjs/config';
+import { AppConfiguration } from '../utils/config';
 
 @Injectable({ scope: Scope.REQUEST })
 export class AuthTokenGuard implements CanActivate {
   private throwError: boolean = true;
   private tokenCreator: AuthTokenCreator;
 
-  constructor(private readonly reflector: Reflector) {
-    this.tokenCreator = new AuthTokenCreator();
+  constructor(
+    private readonly reflector: Reflector,
+    private readonly configService: ConfigService<AppConfiguration, true>,
+  ) {
+    this.tokenCreator = new AuthTokenCreator(configService);
   }
 
   canActivate(context: ExecutionContext): boolean | Promise<boolean> {

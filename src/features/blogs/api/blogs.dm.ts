@@ -1,9 +1,9 @@
-import { BlogPaginationQueryDto, BlogPaginationRepositoryDto, BlogViewModel } from '../types/dto';
+import { BlogPaginationQueryModel, BlogPaginationRepositoryModel, BlogViewModel } from '../types/dto';
 import { BlogMongoType } from '../types/dao';
 import { withExternalDirection, withExternalNumber, withExternalString, withExternalTerm } from '../../../application/utils/withExternalQuery';
 import { toIsoString } from '../../../application/utils/date';
 
-const initialQuery: BlogPaginationRepositoryDto = {
+const initialQuery: BlogPaginationRepositoryModel = {
   sortBy: 'createdAt',
   searchNameTerm: null,
   sortDirection: 'desc',
@@ -31,7 +31,7 @@ export class BlogsDataMapper {
     };
   }
 
-  static toRepoQuery(query: BlogPaginationQueryDto): BlogPaginationRepositoryDto {
+  static toRepoQuery(query: BlogPaginationQueryModel): BlogPaginationRepositoryModel {
     return {
       sortBy: withExternalString(initialQuery.sortBy, query.sortBy),
       searchNameTerm: withExternalTerm(initialQuery.searchNameTerm, query.searchNameTerm),

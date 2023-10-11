@@ -2,7 +2,7 @@ import setCookie from 'set-cookie-parser';
 import { UUID } from 'crypto';
 import { Response } from 'supertest';
 import { AuthRefreshTokenPayload } from '../../src/features/auth/utils/tokenCreator.types';
-import { AuthTokenCreator } from '../../src/features/auth/utils/tokenCreator';
+import { AppTestProvider } from './useTestDescribeConfig';
 
 export type Cookie = {
   value: string;
@@ -15,17 +15,13 @@ export type SessionUnit = {
 };
 
 export class TestCookieUtils {
-  private tokenCreator: AuthTokenCreator;
-
-  constructor() {
-    this.tokenCreator = new AuthTokenCreator();
-  }
+  constructor(private readonly config: AppTestProvider) {}
 
   refreshCookie(cookie: Cookie | undefined, session: SessionUnit) {
     if (!cookie || !cookie.value) {
       throw Error('Refresh cookie should not be empty');
     }
-    const payload: AuthRefreshTokenPayload | null = this.tokenCreator.verifyRefreshToken(cookie.value);
+    const payload: AuthRefreshTokenPayload | null = this.config.getTokenCreator().verifyRefreshToken(cookie.value);
 
     if (!payload) {
       throw Error('Refresh token not verified');
@@ -44,11 +40,11 @@ export class TestCookieUtils {
   }
 
   verifyRefreshToken(cookie: Cookie) {
-    return this.tokenCreator.verifyRefreshToken(cookie.value);
+    return this.config.getTokenCreator().verifyRefreshToken(cookie.value);
   }
 
   createRefreshToken(userId: string, deviceId: string) {
-    return this.tokenCreator.createRefreshToken(userId, deviceId);
+    return this.config.getTokenCreator().createRefreshToken(userId, deviceId);
   }
 
   extractCookie(res: Response, name: string): Cookie | undefined {

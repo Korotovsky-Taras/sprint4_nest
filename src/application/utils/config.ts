@@ -1,33 +1,56 @@
-import env from 'dotenv';
+import { ServerApiVersion } from 'mongodb';
 
-if (process.env.NODE_ENV != 'production') {
-  env.config({ path: `.env.development` });
-} else {
-  env.config();
-}
-
-export const appConfig: AppConfig = {
-  isDevMode: process.env.DEV_MODE === 'true' || process.env.NODE_ENV != 'production',
-  port: Number(process.env.PORT) || 80,
-  authLogin: process.env.AUTH_LOGIN || 'admin',
-  authPassword: process.env.AUTH_PASSWORD || 'admin',
-  tokenSecret: process.env.TOKEN_SK || 'secret',
-  mongoUrl: process.env.MONGO_URL || 'mongodb://0.0.0.0:27017',
-  gmailClientUrl: process.env.MAIL_CLIENT_URL || '',
-  gmailAdapterUser: process.env.MAIL_ADAPTER_USER || '',
-  gmailAdapterPass: process.env.MAIL_ADAPTER_PASS || '',
-  dbName: process.env.NODE_ENV || 'production',
+export type AppConfigurationAuth = {
+  AUTH_LOGIN: string;
+  AUTH_PASSWORD: string;
+  TOKEN_SK: string;
 };
 
-type AppConfig = {
-  isDevMode: boolean;
-  port: number;
-  authLogin: string;
-  authPassword: string;
-  tokenSecret: string;
-  mongoUrl: string;
-  dbName: string;
-  gmailClientUrl: string;
-  gmailAdapterUser: string;
-  gmailAdapterPass: string;
+export type AppConfigurationMongo = {
+  URI: string;
+  DB_NAME: string;
+  DB_VER: ServerApiVersion;
+};
+
+export type AppConfigurationGmail = {
+  CLIENT_URL: string;
+  EMAIL: string;
+  PASSWORD: string;
+};
+
+export type AppConfiguration = {
+  IS_DEV_MODE: boolean;
+  PORT: number;
+  auth: AppConfigurationAuth;
+  mongo: AppConfigurationMongo;
+  gmail: AppConfigurationGmail;
+};
+
+export function getEnvFilePath() {
+  if (process.env.NODE_ENV !== 'production') {
+    return `.env.development`;
+  }
+  return '.env';
+}
+
+export const getConfiguration = (): AppConfiguration => {
+  return {
+    IS_DEV_MODE: process.env.DEV_MODE === 'true' || process.env.NODE_ENV !== 'production',
+    PORT: Number(process.env.PORT) || 80,
+    auth: {
+      AUTH_LOGIN: process.env.AUTH_LOGIN || '',
+      AUTH_PASSWORD: process.env.AUTH_PASSWORD || '',
+      TOKEN_SK: process.env.TOKEN_SK || 'secret',
+    },
+    mongo: {
+      URI: process.env.MONGO_URL || 'mongodb://0.0.0.0:27017',
+      DB_NAME: process.env.NODE_ENV || 'development',
+      DB_VER: ServerApiVersion.v1,
+    },
+    gmail: {
+      CLIENT_URL: process.env.MAIL_CLIENT_URL || '',
+      EMAIL: process.env.MAIL_ADAPTER_USER || '',
+      PASSWORD: process.env.MAIL_ADAPTER_PASS || '',
+    },
+  };
 };

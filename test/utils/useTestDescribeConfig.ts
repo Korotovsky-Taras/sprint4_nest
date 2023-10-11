@@ -15,17 +15,20 @@ import { ICommentModel } from '../../src/features/comments/types/dao';
 import { IBlogModel } from '../../src/features/blogs/types/dao';
 import { TestingModels } from './testing.models';
 import { IPostModel } from '../../src/features/posts/types/dao';
+import { AuthTokenCreator } from '../../src/features/auth/utils/tokenCreator';
 
 export type AppTestProvider = {
   getApp(): INestApplication;
   getHttp(): SuperAgentTest;
   getModels(): TestingModels;
+  getTokenCreator(): AuthTokenCreator;
 };
 
 export function useTestDescribeConfig(): AppTestProvider {
   let app: INestApplication;
   let http: SuperAgentTest;
   let models: TestingModels;
+  let tokenCreator: AuthTokenCreator;
 
   beforeAll(async () => {
     const moduleRef: TestingModule = await Test.createTestingModule({
@@ -53,7 +56,10 @@ export function useTestDescribeConfig(): AppTestProvider {
         },
       ],
     }).compile();
+
     app = moduleRef.createNestApplication();
+
+    tokenCreator = moduleRef.get<AuthTokenCreator>(AuthTokenCreator) as AuthTokenCreator;
 
     const userModel = moduleRef.get<IUserModel>(getModelToken(User.name));
     const blogModel = moduleRef.get<IBlogModel>(getModelToken(Blog.name));
@@ -81,6 +87,9 @@ export function useTestDescribeConfig(): AppTestProvider {
     },
     getModels(): TestingModels {
       return models;
+    },
+    getTokenCreator(): AuthTokenCreator {
+      return tokenCreator;
     },
   };
 }

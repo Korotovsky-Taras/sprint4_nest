@@ -1,12 +1,10 @@
 import { useTestDescribeConfig } from './utils/useTestDescribeConfig';
 import { authBasic64, TestCreateUtils } from './utils/test.create.utils';
 import { Status } from '../src/application/utils/types';
-import { TestCookieUtils } from './utils/test.cookie.utils';
 
 describe('auth testing', () => {
   const config = useTestDescribeConfig();
   const utils = new TestCreateUtils(config);
-  const cookieUtils = new TestCookieUtils();
 
   beforeAll(async () => {
     await config.getModels().clearAll();

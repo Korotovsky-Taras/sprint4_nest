@@ -1,14 +1,14 @@
 import crypto from 'node:crypto';
 
 import { BinaryToTextEncoding } from 'crypto';
-import { appConfig } from '../../../application/utils/config';
+import { AppConfigurationAuth } from '../../../application/utils/config';
 import { AuthTokenParts } from './tokenCreator.types';
-
-const { tokenSecret } = appConfig;
 
 const signatureDigest: BinaryToTextEncoding = 'base64url';
 
-export class AuthTokenCreatorAbstract {
+export abstract class AuthTokenCreatorAbstract {
+  abstract getAuthEnv(): AppConfigurationAuth;
+
   _verifyToken<T extends { expiredIn: string }>(token: string, payloadAction: (body: string) => T | null): T | null {
     const tokenParts: AuthTokenParts | null = this._getTokenParts(token);
 
@@ -47,7 +47,7 @@ export class AuthTokenCreatorAbstract {
   }
 
   _isValidTokenSignature(tokenParts: AuthTokenParts): boolean {
-    const signature = crypto.createHmac('SHA256', tokenSecret).update(`${tokenParts.head}.${tokenParts.body}`).digest(signatureDigest);
+    const signature = crypto.createHmac('SHA256', this.getAuthEnv().TOKEN_SK).update(`${tokenParts.head}.${tokenParts.body}`).digest(signatureDigest);
     return signature === tokenParts.signature;
   }
 

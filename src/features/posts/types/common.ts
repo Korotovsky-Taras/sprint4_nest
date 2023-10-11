@@ -1,4 +1,4 @@
-import { PostCreateModel, PostLikeStatusInputModel, PostPaginationRepositoryDto, PostViewModel } from './dto';
+import { PostCreateModel, PostLikeStatusInputModel, PostPaginationRepositoryModel, PostViewModel } from './dto';
 import { IPost, PostMongoType } from './dao';
 import { IRepository, IService } from '../../types';
 import { Request } from 'express';
@@ -40,7 +40,7 @@ export interface IPostsQueryRepository {
   getPosts<T>(
     userId: string | null,
     filter: Partial<PostMongoType>,
-    query: PostPaginationRepositoryDto,
+    query: PostPaginationRepositoryModel,
     mapper: PostListMapperType<T>,
   ): Promise<WithPagination<T>>;
   getPostById<T>(userId: UserIdReq, id: string, mapper: PostMapperType<T>): Promise<T | null>;

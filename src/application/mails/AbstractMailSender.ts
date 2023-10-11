@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import nodemailer from 'nodemailer';
-import { appConfig } from '../utils/config';
 import Mail from 'nodemailer/lib/mailer';
 import SMTPTransport from 'nodemailer/lib/smtp-transport';
 import path from 'node:path';
@@ -16,7 +15,9 @@ export type MailSenderData = {
 
 @Injectable()
 export abstract class AbstractMailSender {
-  protected constructor(private readonly transporter: nodemailer.Transporter) {}
+  protected constructor() {}
+
+  abstract getTransporter(): nodemailer.Transporter;
 
   protected async sendMail(data: MailSenderData): Promise<boolean> {
     if (!this.isValidConfig(data)) {
@@ -25,23 +26,19 @@ export abstract class AbstractMailSender {
 
     try {
       const mail: Mail.Options = {
-        from: this.createFromTitle(data.title),
+        from: data.title,
         to: data.to,
         html: data.html,
         subject: data.subject,
       };
 
-      const result: SMTPTransport.SentMessageInfo = await this.transporter.sendMail(mail);
+      const result: SMTPTransport.SentMessageInfo = await this.getTransporter().sendMail(mail);
 
       return result.accepted.includes(data.to);
     } catch (e: any) {
       console.log(`MailSender error: ${e}`);
       return false;
     }
-  }
-
-  protected createFromTitle(title: string) {
-    return `${title} <${appConfig.gmailAdapterUser}>`;
   }
 
   protected loadTemplate(templateName: string): handlebars.TemplateDelegate {

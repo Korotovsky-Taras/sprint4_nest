@@ -1,9 +1,16 @@
 import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
-import { appConfig } from '../utils/config';
+import { AppConfiguration, AppConfigurationAuth } from '../utils/config';
 import { getRequestAuthorization } from './utils/getRequestAuthorization';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthBasicGuard implements CanActivate {
+  private env: AppConfigurationAuth;
+
+  constructor(private readonly configService: ConfigService<AppConfiguration, true>) {
+    this.env = configService.get<AppConfigurationAuth>('auth');
+  }
+
   canActivate(context: ExecutionContext): boolean | Promise<boolean> {
     const request = context.switchToHttp().getRequest();
 
@@ -26,8 +33,7 @@ export class AuthBasicGuard implements CanActivate {
     const authData = atob(basicAuth);
     if (authData.includes(':')) {
       const [login, password] = authData.split(':');
-      const { authLogin, authPassword } = appConfig;
-      if (login.toLowerCase() === authLogin.toLowerCase() && password.toLowerCase() === authPassword.toLowerCase()) {
+      if (login === this.env.AUTH_LOGIN && password === this.env.AUTH_PASSWORD) {
         return true;
       }
     }

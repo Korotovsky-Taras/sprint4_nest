@@ -3,6 +3,7 @@ import { AuthTokenCreator } from '../../features/auth/utils/tokenCreator';
 import { AuthSessionQueryRepository } from '../../features/auth/dao/auth.query.repository';
 import { AuthHelper } from '../authHelper';
 import { AuthDataMapper } from '../../features/auth/api/auth.dm';
+import { AuthRefreshTokenPayload } from '../../features/auth/utils/tokenCreator.types';
 
 @Injectable()
 export class AuthSessionGuard implements CanActivate {
@@ -21,7 +22,7 @@ export class AuthSessionGuard implements CanActivate {
       throw new UnauthorizedException();
     }
 
-    const tokenPass = this.tokenCreator.verifyRefreshToken(refreshToken);
+    const tokenPass: AuthRefreshTokenPayload | null = this.tokenCreator.verifyRefreshToken(refreshToken);
 
     if (tokenPass == null) {
       throw new UnauthorizedException();

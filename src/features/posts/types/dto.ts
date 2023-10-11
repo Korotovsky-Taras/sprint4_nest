@@ -16,6 +16,6 @@ export type PostLikeStatusInputModel = {
   status: LikeStatus;
 };
 
-export type PostPaginationQueryDto = PaginationQueryModel<IPost>;
+export type PostPaginationQueryModel = PaginationQueryModel<IPost>;
 
-export type PostPaginationRepositoryDto = WithPaginationQuery<IPost>;
+export type PostPaginationRepositoryModel = WithPaginationQuery<IPost>;

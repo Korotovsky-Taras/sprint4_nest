@@ -1,11 +1,11 @@
-import { PostPaginationQueryDto, PostPaginationRepositoryDto, PostViewModel } from '../types/dto';
+import { PostPaginationQueryModel, PostPaginationRepositoryModel, PostViewModel } from '../types/dto';
 import { PostMongoType } from '../types/dao';
 import { LastLike, Like, LikesExtendedInfo, LikeStatus } from '../../likes/types';
 import { withExternalDirection, withExternalNumber, withExternalString } from '../../../application/utils/withExternalQuery';
 import { UserIdReq } from '../../../application/utils/types';
 import { toIsoString } from '../../../application/utils/date';
 
-const initialQuery: PostPaginationRepositoryDto = {
+const initialQuery: PostPaginationRepositoryModel = {
   sortBy: 'createdAt',
   sortDirection: 'desc',
   pageNumber: 1,
@@ -32,7 +32,7 @@ export class PostsDataMapper {
     };
   }
 
-  static toRepoQuery(query: PostPaginationQueryDto): PostPaginationRepositoryDto {
+  static toRepoQuery(query: PostPaginationQueryModel): PostPaginationRepositoryModel {
     return {
       sortBy: withExternalString(initialQuery.sortBy, query.sortBy),
       sortDirection: withExternalDirection(initialQuery.sortDirection, query.sortDirection),

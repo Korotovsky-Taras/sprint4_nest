@@ -9,7 +9,7 @@ let refreshToken: string | null = null;
 describe('auth testing', () => {
   const config = useTestDescribeConfig();
   const utils = new TestCreateUtils(config);
-  const cookieUtils = new TestCookieUtils();
+  const cookieUtils = new TestCookieUtils(config);
 
   beforeAll(async () => {
     await config.getModels().clearAll();

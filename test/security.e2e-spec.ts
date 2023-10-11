@@ -27,7 +27,7 @@ function getUser1Session(index: number): SessionUnit {
 describe('security testing', () => {
   const config = useTestDescribeConfig();
   const utils = new TestCreateUtils(config);
-  const cookieUtils = new TestCookieUtils();
+  const cookieUtils = new TestCookieUtils(config);
 
   beforeAll(async () => {
     await config.getModels().clearAll();

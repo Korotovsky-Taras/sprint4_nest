@@ -3,12 +3,12 @@ import { EnhancedOmit, PaginationQueryModel, WithPaginationQuery } from '../../.
 
 export type BlogViewModel = Pick<IBlog, 'name' | 'description' | 'websiteUrl' | 'isMembership'> & { id: string; createdAt: string };
 
-export type BlogPaginationQueryDto = PaginationQueryModel<IBlog> & {
+export type BlogPaginationQueryModel = PaginationQueryModel<IBlog> & {
   searchNameTerm?: string;
 };
 
-export type BlogPaginationRepositoryDto = EnhancedOmit<WithPaginationQuery<IBlog>, 'searchNameTerm'> & {
+export type BlogPaginationRepositoryModel = EnhancedOmit<WithPaginationQuery<IBlog>, 'searchNameTerm'> & {
   searchNameTerm: string | null;
 };
 
-export type BlogQueryDto = WithPaginationQuery<IBlog> & { searchNameTerm: string | null };
+export type BlogQueryModel = WithPaginationQuery<IBlog> & { searchNameTerm: string | null };

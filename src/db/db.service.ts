@@ -3,7 +3,7 @@ import { InjectConnection } from '@nestjs/mongoose';
 import { Connection } from 'mongoose';
 
 @Injectable()
-export class DBService {
+export class DbService {
   constructor(@InjectConnection() private connection: Connection) {}
 
   getConnection() {

@@ -1,3 +1,5 @@
+import { configModule } from './app.configuration';
+
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { UserDeviceMiddleware } from './middlewares/user-device.middleware';
 import { AppController } from './app.controller';
@@ -12,7 +14,7 @@ import { SharedModule } from './shared.module';
 import { TestsModule } from './features/tests/tests.module';
 
 @Module({
-  imports: [DbModule, SharedModule, BlogsModule, PostsModule, CommentsModule, UsersModule, AuthModule, TestsModule],
+  imports: [configModule, DbModule, SharedModule, BlogsModule, PostsModule, CommentsModule, UsersModule, AuthModule, TestsModule],
   controllers: [AppController],
   providers: [AppService],
 })

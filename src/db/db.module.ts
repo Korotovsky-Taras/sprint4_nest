@@ -1,33 +1,41 @@
 import { Logger, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { appConfig } from '../application/utils/config';
-import { ServerApiVersion } from 'mongodb';
+import { AppConfiguration } from '../application/utils/config';
 import { Connection } from 'mongoose';
-import { DBService } from './DBService';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { DbService } from './db.service';
 
 @Module({
   imports: [
-    MongooseModule.forRoot(appConfig.mongoUrl, {
-      w: 'majority',
-      retryWrites: true,
-      maxPoolSize: 20,
-      dbName: appConfig.dbName,
-      serverApi: {
-        version: ServerApiVersion.v1,
-        strict: true,
-        deprecationErrors: true,
-      },
-      connectionFactory: (connection: Connection) => {
-        if (connection.readyState === 1) {
-          Logger.log('DB connected');
-        }
-        connection.on('disconnected', () => {
-          Logger.log('DB disconnected');
-        });
-        return connection;
+    MongooseModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService<AppConfiguration, true>) => {
+        const mongoEnvs = configService.get('mongo', { infer: true });
+        return {
+          uri: mongoEnvs.URI,
+          w: 'majority',
+          retryWrites: true,
+          maxPoolSize: 20,
+          dbName: mongoEnvs.DB_NAME,
+          serverApi: {
+            version: mongoEnvs.DB_VER,
+            strict: true,
+            deprecationErrors: true,
+          },
+          connectionFactory: (connection: Connection) => {
+            if (connection.readyState === 1) {
+              Logger.log('DB connected');
+            }
+            connection.on('disconnected', () => {
+              Logger.log('DB disconnected');
+            });
+            return connection;
+          },
+        };
       },
     }),
   ],
-  providers: [DBService],
+  providers: [DbService],
 })
 export class DbModule {}

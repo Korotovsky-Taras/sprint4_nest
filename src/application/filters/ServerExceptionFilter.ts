@@ -1,33 +1,28 @@
-import { ArgumentsHost, Catch, ExceptionFilter, HttpException } from '@nestjs/common';
+import { ArgumentsHost, Catch, ExceptionFilter, HttpException, Logger } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { toIsoString } from '../utils/date';
 import { Status } from '../utils/types';
-import { appConfig } from '../utils/config';
+import { ConfigService } from '@nestjs/config';
 
 @Catch()
 export class ServerExceptionFilter implements ExceptionFilter {
-  private readonly isDevMode;
-
-  constructor() {
-    this.isDevMode = appConfig.isDevMode;
-  }
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly logger: Logger,
+  ) {}
 
   catch(exception: Error | HttpException, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
     const path = request.url;
-    const timestamp = toIsoString(new Date());
+    const method = request.method;
 
-    if (this.isDevMode) {
-      const commonData = { timestamp, path };
+    if (!(exception instanceof HttpException) || exception.getStatus() >= 500) {
+      this.logger.error(`[${method}] ${path}`, exception.stack);
+    }
 
-      if (exception instanceof HttpException && exception.getStatus()) {
-        const responseData = exception.getStatus() >= 500 ? { stack: exception.stack?.toString(), ...commonData } : commonData;
-        return response.status(exception.getStatus()).json(responseData);
-      }
-
-      return response.status(Status.UNHANDLED).json(commonData);
+    if (exception instanceof HttpException) {
+      return response.sendStatus(exception.getStatus());
     }
 
     response.sendStatus(Status.UNHANDLED);

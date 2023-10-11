@@ -7,9 +7,12 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { Blog, BlogSchema } from './dao/blogs.schema';
 import { PostsModule } from '../posts/posts.module';
 import { IsBlogIdExistValidator } from '../../application/decorators/validation/IsBlogExist';
+import { blogCases } from './use-cases';
+import { CqrsModule } from '@nestjs/cqrs';
 
 @Module({
   imports: [
+    CqrsModule,
     MongooseModule.forFeature([
       {
         name: Blog.name,
@@ -19,7 +22,7 @@ import { IsBlogIdExistValidator } from '../../application/decorators/validation/
     forwardRef(() => PostsModule),
   ],
   controllers: [BlogsController],
-  providers: [BlogsService, BlogsRepository, BlogsQueryRepository, IsBlogIdExistValidator],
+  providers: [BlogsService, BlogsRepository, BlogsQueryRepository, IsBlogIdExistValidator, ...blogCases],
   exports: [BlogsRepository, BlogsQueryRepository],
 })
 export class BlogsModule {}

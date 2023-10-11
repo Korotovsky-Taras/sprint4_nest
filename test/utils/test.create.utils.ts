@@ -1,6 +1,5 @@
 import { AppTestProvider } from './useTestDescribeConfig';
 import { UserCreateModel, UserViewModel } from '../../src/features/users/types/dto';
-import { AuthTokenCreator } from '../../src/features/auth/utils/tokenCreator';
 import { CommentCreateRequestDto, CommentViewModel } from '../../src/features/comments/types/dto';
 import { BlogViewModel } from '../../src/features/blogs/types/dto';
 import { PostViewModel } from '../../src/features/posts/types/dto';
@@ -10,13 +9,11 @@ import { PostCreateDto } from '../../src/features/posts/dto/PostCreateDto';
 import { PostCommentCreateDto } from '../../src/features/posts/dto/PostCommentCreateDto';
 
 export class TestCreateUtils extends TestCommonUtils {
-  private config: AppTestProvider;
-  private tokenCreator: AuthTokenCreator;
+  private readonly config: AppTestProvider;
 
   constructor(config: AppTestProvider) {
     super();
     this.config = config;
-    this.tokenCreator = new AuthTokenCreator();
   }
 
   async createBlog(userId: string, model: BlogCreationTestModel = validBlogData): Promise<BlogViewModel> {
@@ -76,7 +73,8 @@ export class TestCreateUtils extends TestCommonUtils {
   }
 
   createAccessToken(userId: string): string {
-    return this.tokenCreator.createAccessToken(userId).token;
+    const tokenCreator = this.config.getTokenCreator();
+    return tokenCreator.createAccessToken(userId).token;
   }
 }
 
