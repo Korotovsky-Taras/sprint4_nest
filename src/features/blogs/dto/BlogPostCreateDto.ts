@@ -1,15 +1,17 @@
-import { IsString, Length } from 'class-validator';
+import { MaxLength } from 'class-validator';
+import { IsNotEmptyString } from '../../../application/decorators/validation/IsNotEmptyString';
+import { POST_CONTENT_MAX, POST_DESCRIPTION_MAX, POST_TITLE_MAX } from '../../posts/dto/dto.variables';
 
 export class BlogPostCreateDto {
-  @IsString()
-  @Length(1, 30)
+  @IsNotEmptyString()
+  @MaxLength(POST_TITLE_MAX)
   title: string;
 
-  @IsString()
-  @Length(1, 100)
+  @IsNotEmptyString()
+  @MaxLength(POST_DESCRIPTION_MAX)
   shortDescription: string;
 
-  @IsString()
-  @Length(1, 1000)
+  @IsNotEmptyString()
+  @MaxLength(POST_CONTENT_MAX)
   content: string;
 }

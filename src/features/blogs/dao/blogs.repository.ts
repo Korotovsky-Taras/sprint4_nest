@@ -6,6 +6,7 @@ import { BlogMapperType, IBlogsRepository } from '../types/common';
 import { BlogDocumentType, BlogMongoType, IBlogModel } from '../types/dao';
 import { BlogCreateDto } from '../dto/BlogCreateDto';
 import { BlogUpdateDto } from '../dto/BlogUpdateDto';
+import { isValidObjectId } from 'mongoose';
 
 @Injectable()
 export class BlogsRepository implements IBlogsRepository {
@@ -32,10 +33,10 @@ export class BlogsRepository implements IBlogsRepository {
   }
 
   async getBlogById(id: string): Promise<BlogMongoType | null> {
-    // if (isValidObjectId(id)) {
+    if (!isValidObjectId(id)) {
+      return null;
+    }
     return this.blogModel.findById(id).lean();
-    // }
-    // return null;
   }
 
   async saveDoc(doc: BlogDocumentType): Promise<void> {

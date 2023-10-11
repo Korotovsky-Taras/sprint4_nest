@@ -26,7 +26,7 @@ describe('blogs testing', () => {
     expect(user).not.toBeNull();
 
     if (user) {
-      await config.getHttp().get('/blogs/1').expect(Status.UNHANDLED);
+      await config.getHttp().get('/blogs/1').expect(Status.NOT_FOUND);
     }
   });
 
@@ -72,33 +72,44 @@ describe('blogs testing', () => {
     expect(user).not.toBeNull();
     expect(createdBlogId).not.toBeNull();
 
-    if (user) {
-      const result = await config
-        .getHttp()
-        .post('/posts')
-        .set('Authorization', 'Basic ' + authBasic64)
-        .set('Content-Type', 'application/json')
-        .send({
-          ...validPostData,
-          blogId: createdBlogId,
-        })
-        .expect(Status.CREATED);
-
-      const { id }: Pick<PostViewModel, 'id'> = result.body;
-
-      createdPostId = id;
-
-      expect(result.body).toEqual({
-        id: expect.any(String),
-        blogName: expect.any(String),
-        title: validPostData.title,
-        shortDescription: validPostData.shortDescription,
-        content: validPostData.content,
-        blogId: createdBlogId,
-        createdAt: expect.any(String),
-        extendedLikesInfo: expect.any(Object),
-      });
+    if (!user) {
+      return;
     }
+    const result1 = await config
+      .getHttp()
+      .post('/posts')
+      .set('Authorization', 'Basic ' + authBasic64)
+      .set('Content-Type', 'application/json')
+      .send({
+        ...validPostData,
+        blogId: createdBlogId,
+      })
+      .expect(Status.CREATED);
+
+    const { id }: Pick<PostViewModel, 'id'> = result1.body;
+
+    createdPostId = id;
+
+    expect(result1.body).toEqual({
+      id: expect.any(String),
+      blogName: expect.any(String),
+      title: validPostData.title,
+      shortDescription: validPostData.shortDescription,
+      content: validPostData.content,
+      blogId: createdBlogId,
+      createdAt: expect.any(String),
+      extendedLikesInfo: expect.any(Object),
+    });
+
+    await config
+      .getHttp()
+      .post(`/blogs/${createdBlogId}/posts`)
+      .set('Authorization', 'Basic ' + authBasic64)
+      .set('Content-Type', 'application/json')
+      .send({
+        ...validPostData,
+      })
+      .expect(Status.CREATED);
   });
 
   it('should update post', async () => {

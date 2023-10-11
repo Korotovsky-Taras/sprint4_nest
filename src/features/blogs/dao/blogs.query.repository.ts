@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 
-import { FilterQuery, Model } from 'mongoose';
+import { FilterQuery, isValidObjectId, Model } from 'mongoose';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Blog } from './blogs.schema';
@@ -23,9 +23,9 @@ export class BlogsQueryRepository implements IBlogsQueryRepository {
   }
 
   async getBlogById<T>(id: string, mapper: BlogMapperType<T>): Promise<T | null> {
-    // if (!isValidObjectId(id)) {
-    //   return null;
-    // }
+    if (!isValidObjectId(id)) {
+      return null;
+    }
     const blog: BlogMongoType | null = await this.blogModel.findById(id).lean();
     if (blog) {
       return mapper(blog);

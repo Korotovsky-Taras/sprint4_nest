@@ -72,13 +72,9 @@ export class BlogsController implements IBlogsController {
   @Post('/:id/posts')
   @UseGuards(AuthBasicGuard)
   @HttpCode(Status.CREATED)
-  async createBlogPost(@Param('id') blogId: string, @Body() input: BlogPostCreateDto, @Req() req: Request): Promise<PostViewModel> {
+  async createBlogPost(@Param('id') blogId: string, @Body() dto: BlogPostCreateDto, @Req() req: Request): Promise<PostViewModel> {
     const result: ServiceResult<PostViewModel> = await this.commandBus.execute<CreatePostCommand, ServiceResult<PostViewModel>>(
-      new CreatePostCommand(req.userId, blogId, {
-        title: input.title,
-        shortDescription: input.shortDescription,
-        content: input.content,
-      }),
+      new CreatePostCommand(req.userId, blogId, dto),
     );
 
     if (result.hasErrorCode(BlogServiceError.BLOG_NOT_FOUND)) {
