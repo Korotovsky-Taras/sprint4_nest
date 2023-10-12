@@ -1,4 +1,4 @@
-import { IUser, UserMongoType } from './dao';
+import { IUser, UserDocumentType, UserMongoType } from './dao';
 import { IRepository, IService } from '../../types';
 import {
   UserConfirmationCodeValidateResult,
@@ -22,12 +22,16 @@ export interface IUsersController {
   deleteUser(userId: string);
 }
 
-export interface IUsersRepository extends IRepository<IUser> {}
+export interface IUsersRepository extends IRepository<IUser> {
+  isUserAuthConfirmed(userId: string): Promise<boolean>;
+  getUserById(userId: string): Promise<UserDocumentType | null>;
+  isUserExist(userId: string): Promise<boolean>;
+  getUserByLoginOrEmail(login: string, email: string): Promise<UserMongoType | null>;
+}
 
 export interface IUsersQueryRepository {
   getUsers<T>(query: UserPaginationRepositoryDto, mapper: UserListMapperType<T>): Promise<WithPagination<T>>;
   getUserById<T>(userId: string, mapper: UserMapperType<T>): Promise<T | null>;
-  isUserExist(userId: string): Promise<boolean>;
   isUserExistByLoginOrEmail(login: string, email: string): Promise<boolean>;
   getUserByLoginOrEmail<T>(login: string, email: string, mapper: UserMapperType<T>): Promise<T | null>;
   getAuthConfirmationValidation(code: string): Promise<UserConfirmationCodeValidateResult | null>;

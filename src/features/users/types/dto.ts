@@ -3,7 +3,7 @@ import { EnhancedOmit, PaginationQueryModel, WithPagination, WithPaginationQuery
 
 export type UserCreateModel = Pick<IUser, 'login' | 'email'> & { password: string };
 
-export type UserCreateInputDto = Pick<IUser, 'login' | 'email' | 'password' | 'authConfirmation'>;
+export type UserCreateInputModel = Pick<IUser, 'login' | 'email' | 'password' | 'authConfirmation'>;
 
 export type UserViewModel = Pick<IUser, 'login' | 'email'> & { id: string; createdAt: string };
 

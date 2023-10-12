@@ -10,7 +10,7 @@ import { PostsRepository } from '../../posts/dao/posts.repository';
 import { BlogMongoType } from '../types/dao';
 import { BlogServiceError } from '../types/errors';
 
-export class CreatePostCommand {
+export class CreateBlogPostCommand {
   constructor(
     public readonly userId: UserIdReq,
     public readonly blogId: string,
@@ -18,39 +18,36 @@ export class CreatePostCommand {
   ) {}
 }
 
-@CommandHandler(CreatePostCommand)
-export class CreatePostCase implements ICommandHandler<CreatePostCommand, ServiceResult<PostViewModel>> {
+@CommandHandler(CreateBlogPostCommand)
+export class CreateBlogPostCase implements ICommandHandler<CreateBlogPostCommand, ServiceResult<PostViewModel>> {
   constructor(
     private readonly blogsRepo: BlogsRepository,
     private readonly postsRepo: PostsRepository,
   ) {}
 
-  async execute({ dto, blogId, userId }: CreatePostCommand): Promise<ServiceResult<PostViewModel>> {
+  async execute({ dto, blogId, userId }: CreateBlogPostCommand): Promise<ServiceResult<PostViewModel>> {
     await validateOrRejectDto(dto, BlogPostCreateDto);
 
-    const blog: BlogMongoType | null = await this.blogsRepo.getBlogById(blogId);
     const result = new ServiceResult<PostViewModel>();
+
+    const blog: BlogMongoType | null = await this.blogsRepo.getBlogById(blogId);
 
     if (!blog) {
       result.addError({
-        message: 'Blog not found',
         code: BlogServiceError.BLOG_NOT_FOUND,
       });
       return result;
     }
 
-    const post: PostViewModel = await this.postsRepo.createPost(
-      userId,
-      {
-        title: dto.title,
-        shortDescription: dto.shortDescription,
-        content: dto.content,
-        blogId: blog._id.toString(),
-        blogName: blog.name,
-      },
-      PostsDataMapper.toPostView,
-    );
-    result.setData(post);
+    const post = await this.postsRepo.createPost({
+      title: dto.title,
+      shortDescription: dto.shortDescription,
+      content: dto.content,
+      blogId: blog._id.toString(),
+      blogName: blog.name,
+    });
+
+    result.setData(PostsDataMapper.toPostView(post, userId));
 
     return result;
   }

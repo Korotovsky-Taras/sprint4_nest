@@ -1,5 +1,5 @@
 import { BadRequestException, Body, Controller, Get, HttpCode, Injectable, Post, Req, Res, UnauthorizedException, UseGuards } from '@nestjs/common';
-import { UserServiceError, UsersService } from '../../users/domain/users.service';
+import { UsersService } from '../../users/domain/users.service';
 import { UsersQueryRepository } from '../../users/dao/users.query.repository';
 import { IAuthRouterController } from '../types/common';
 import { AuthSessionService } from '../domain/auth.service';
@@ -22,6 +22,17 @@ import { AuthConfirmationCodeDto } from '../dto/AuthConfirmationCodeDto';
 import { AuthResendingEmailDto } from '../dto/AuthResendingEmailDto';
 import { AuthPasswordRecoveryDto } from '../dto/AuthPasswordRecoveryDto';
 import { AuthNewPasswordDto } from '../dto/AuthNewPasswordDto';
+import { CommandBus } from '@nestjs/cqrs';
+import { AuthLoginCommand } from '../use-cases/auth-login.case';
+import { AuthLogoutCommand } from '../use-cases/auth-logout.case';
+import { AuthRefreshTokensCommand } from '../use-cases/auth-refresh-tokens.case';
+import { AuthCreateUserWithConfirmationCommand } from '../use-cases/auth-create-user-with-code.case';
+import { AuthVerifyRegistrationCodeCommand } from '../use-cases/auth-verify-registration-code.case';
+import { AuthServiceError } from '../types/errors';
+import { AuthRecoverPasswordWithCodeCommand } from '../use-cases/auth-recover-password-with-code.case';
+import { UserServiceError } from '../../users/types/errors';
+import { AuthResendConfirmationCodeCommand } from '../use-cases/auth-resend-cofirmation-code';
+import { AuthResendPassConfirmationCodeCommand } from '../use-cases/auth-resend-pass-cofirmation-code';
 
 @Injectable()
 @Controller('auth')
@@ -31,27 +42,32 @@ export class AuthController implements IAuthRouterController {
     private readonly authService: AuthSessionService,
     private readonly userQueryRepo: UsersQueryRepository,
     private readonly authHelper: AuthHelper,
+    private readonly commandBus: CommandBus,
   ) {}
 
   @Post('login')
   @UseGuards(RateLimiterGuard)
   @HttpCode(Status.OK)
   async login(@Body() input: AuthLoginInputDto, @Req() req: Request, @Res() res: Response) {
-    const auth: AuthTokens | null = await this.authService.login({
-      loginOrEmail: input.loginOrEmail,
-      password: input.password,
-      userAgent: this.authHelper.getUserAgent(req),
-      ip: this.authHelper.getIp(req),
-    });
+    const result: ServiceResult<AuthTokens> = await this.commandBus.execute<AuthLoginCommand, ServiceResult<AuthTokens>>(
+      new AuthLoginCommand({
+        loginOrEmail: input.loginOrEmail,
+        password: input.password,
+        userAgent: this.authHelper.getUserAgent(req),
+        ip: this.authHelper.getIp(req),
+      }),
+    );
 
-    if (!auth) {
+    if (result.hasErrors()) {
       throw new UnauthorizedException();
     }
 
-    this.authHelper.applyRefreshToken(res, auth.refreshToken);
+    const { refreshToken, accessToken } = result.getData();
+
+    this.authHelper.applyRefreshToken(res, refreshToken);
 
     res.status(Status.OK).send({
-      accessToken: auth.accessToken,
+      accessToken,
     });
   }
 
@@ -59,10 +75,14 @@ export class AuthController implements IAuthRouterController {
   @UseGuards(AuthSessionGuard)
   @HttpCode(Status.NO_CONTENT)
   async logout(@GetAuthSessionInfo() authSession: AuthSessionInfoModel, @Res() res: Response) {
-    const isLogout: boolean = await this.authService.logout(authSession);
-    if (isLogout) {
-      this.authHelper.clearRefreshToken(res);
+    const result: ServiceResult = await this.commandBus.execute<AuthLogoutCommand, ServiceResult>(new AuthLogoutCommand(authSession));
+
+    if (result.hasErrors()) {
+      throw new UnauthorizedException();
     }
+
+    this.authHelper.clearRefreshToken(res);
+
     res.sendStatus(Status.NO_CONTENT);
   }
 
@@ -70,19 +90,25 @@ export class AuthController implements IAuthRouterController {
   @UseGuards(AuthSessionGuard)
   @HttpCode(Status.OK)
   async refreshToken(@GetAuthSessionInfo() authSession: AuthSessionInfoModel, @Req() req: Request, @Res() res: Response) {
-    const auth: AuthTokens | null = await this.authService.refreshTokens({
-      userId: authSession.userId,
-      deviceId: authSession.deviceId,
-      userAgent: this.authHelper.getUserAgent(req),
-      ip: this.authHelper.getIp(req),
-    });
-    if (!auth) {
+    const result = await this.commandBus.execute<AuthRefreshTokensCommand, ServiceResult<AuthTokens>>(
+      new AuthRefreshTokensCommand({
+        userId: authSession.userId,
+        deviceId: authSession.deviceId,
+        userAgent: this.authHelper.getUserAgent(req),
+        ip: this.authHelper.getIp(req),
+      }),
+    );
+
+    if (result.hasErrors()) {
       throw new UnauthorizedException();
     }
-    this.authHelper.applyRefreshToken(res, auth.refreshToken);
+
+    const { refreshToken, accessToken } = result.getData();
+
+    this.authHelper.applyRefreshToken(res, refreshToken);
 
     res.status(Status.OK).send({
-      accessToken: auth.accessToken,
+      accessToken,
     });
   }
 
@@ -101,8 +127,10 @@ export class AuthController implements IAuthRouterController {
   @Post('registration')
   @UseGuards(RateLimiterGuard)
   @HttpCode(Status.NO_CONTENT)
-  async registration(@Body() input: AuthRegistrationDto) {
-    const result: ServiceResult<UserViewModel> = await this.userService.createUserWithConfirmation(input);
+  async registration(@Body() dto: AuthRegistrationDto) {
+    const result: ServiceResult<UserViewModel> = await this.commandBus.execute<AuthCreateUserWithConfirmationCommand, ServiceResult<UserViewModel>>(
+      new AuthCreateUserWithConfirmationCommand(dto),
+    );
     if (result.hasErrorCode(UserServiceError.USER_ALREADY_REGISTER)) {
       throw new BadRequestException();
     }
@@ -111,9 +139,9 @@ export class AuthController implements IAuthRouterController {
   @Post('registration-confirmation')
   @UseGuards(RateLimiterGuard)
   @HttpCode(Status.NO_CONTENT)
-  async registrationConfirmation(@Body() input: AuthConfirmationCodeDto) {
-    const result: ServiceResult = await this.userService.verifyConfirmationCode(input);
-    if (result.hasErrorCode(UserServiceError.AUTH_CONFIRMATION_INVALID)) {
+  async registrationConfirmation(@Body() dto: AuthConfirmationCodeDto) {
+    const result: ServiceResult = await this.commandBus.execute<AuthVerifyRegistrationCodeCommand, ServiceResult>(new AuthVerifyRegistrationCodeCommand(dto));
+    if (result.hasErrorCode(AuthServiceError.AUTH_REG_CONFIRMATION_INVALID)) {
       throw new BadRequestException();
     }
   }
@@ -121,23 +149,23 @@ export class AuthController implements IAuthRouterController {
   @Post('registration-email-resending')
   @UseGuards(RateLimiterGuard)
   @HttpCode(Status.NO_CONTENT)
-  async registrationEmailResending(@Body() input: AuthResendingEmailDto) {
-    await this.userService.tryResendConfirmationCode(input);
+  async registrationEmailResending(@Body() dto: AuthResendingEmailDto) {
+    await this.commandBus.execute<AuthResendConfirmationCodeCommand, ServiceResult>(new AuthResendConfirmationCodeCommand(dto));
   }
 
   @Post('password-recovery')
   @UseGuards(RateLimiterGuard)
   @HttpCode(Status.NO_CONTENT)
-  async passwordRecovery(@Body() input: AuthPasswordRecoveryDto) {
-    await this.userService.tryResendPasswordRecoverCode(input);
+  async passwordRecovery(@Body() dto: AuthPasswordRecoveryDto) {
+    await this.commandBus.execute<AuthResendPassConfirmationCodeCommand, ServiceResult>(new AuthResendPassConfirmationCodeCommand(dto));
   }
 
   @Post('new-password')
   @UseGuards(RateLimiterGuard)
   @HttpCode(Status.NO_CONTENT)
-  async recoverPasswordWithConfirmationCode(@Body() input: AuthNewPasswordDto) {
-    const result: ServiceResult = await this.userService.recoverPasswordWithConfirmationCode(input);
-    if (result.hasErrorCode(UserServiceError.PASS_CONFIRMATION_INVALID)) {
+  async recoverPasswordWithConfirmationCode(@Body() dto: AuthNewPasswordDto) {
+    const result: ServiceResult = await this.commandBus.execute<AuthRecoverPasswordWithCodeCommand, ServiceResult>(new AuthRecoverPasswordWithCodeCommand(dto));
+    if (result.hasErrorCode(AuthServiceError.AUTH_PASS_CONFIRMATION_INVALID)) {
       throw new BadRequestException();
     }
   }

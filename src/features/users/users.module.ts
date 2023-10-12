@@ -11,9 +11,12 @@ import { IsAuthEmailResendingValidator } from '../../application/decorators/vali
 import { IsUniqueUserLoginValidator } from '../../application/decorators/validation/IsUniqueUserLogin';
 import { SharedModule } from '../../shared.module';
 import { GMailSender } from '../../application/mails/GMailSender';
+import { CqrsModule } from '@nestjs/cqrs';
+import { userCases } from './use-cases';
 
 @Module({
   imports: [
+    CqrsModule,
     MongooseModule.forFeature([
       {
         name: User.name,
@@ -32,6 +35,7 @@ import { GMailSender } from '../../application/mails/GMailSender';
     IsAuthConfirmationCodeValidator,
     IsAuthEmailResendingValidator,
     GMailSender,
+    ...userCases,
   ],
   exports: [UsersService, UsersRepository, UsersQueryRepository],
 })

@@ -22,20 +22,11 @@ export class CommentsQueryRepository implements ICommentsQueryRepository {
       return mapper(items, userId);
     });
   }
-  async isUserCommentOwner(commentId: string, userId: string): Promise<boolean> {
-    const query = this.commentModel.where({ _id: new ObjectId(commentId) }).where({ 'commentatorInfo.userId': userId });
-    const res: CommentMongoType | null = await query.findOne().lean();
-    return !!res;
-  }
   async getCommentById<T>(userId: UserIdReq, id: string, mapper: CommentMapperType<T>): Promise<T | null> {
     const comment: CommentDocumentType | null = await this.commentModel.findOne({ _id: new ObjectId(id) }).exec();
     if (comment) {
       return mapper(comment, userId);
     }
     return null;
-  }
-  async isCommentExist(id: string): Promise<boolean> {
-    const comment: CommentDocumentType | null = await this.commentModel.findOne({ _id: new ObjectId(id) }).exec();
-    return !!comment;
   }
 }

@@ -2,19 +2,20 @@ import { DeleteResult, ObjectId, UpdateResult } from 'mongodb';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Post } from './posts.schema';
-import { IPostModel, PostDocumentType } from '../types/dao';
-import { IPostsRepository, PostMapperType } from '../types/common';
+import { IPostModel, PostDocumentType, PostMongoType } from '../types/dao';
+import { IPostsRepository } from '../types/common';
 import { PostCreateModel } from '../types/dto';
 import { PostUpdateDto } from '../dto/PostUpdateDto';
+import { LikeStatus } from '../../likes/types';
 
 @Injectable()
 export class PostsRepository implements IPostsRepository {
   constructor(@InjectModel(Post.name) private postModel: IPostModel) {}
 
-  async createPost<T>(userId: string | null, input: PostCreateModel, mapper: PostMapperType<T>): Promise<T> {
+  async createPost(input: PostCreateModel): Promise<PostMongoType> {
     const model: PostDocumentType = this.postModel.createPost(input);
     await this.saveDoc(model);
-    return mapper(model, userId);
+    return model;
   }
 
   async updatePostById(id: string, dto: PostUpdateDto): Promise<boolean> {
@@ -32,6 +33,25 @@ export class PostsRepository implements IPostsRepository {
       )
       .exec();
     return res.modifiedCount > 0;
+  }
+
+  async updateLike(postId: string, likeStatus: LikeStatus, userId: string, userLogin: string): Promise<boolean> {
+    const post: PostDocumentType | null = await this.postModel.findOne({ _id: new ObjectId(postId) }).exec();
+    if (!post) {
+      return false;
+    }
+    post.updateLike(userId, userLogin, likeStatus);
+    await this.saveDoc(post);
+    return true;
+  }
+
+  async isPostExist(id: string): Promise<boolean> {
+    const post: PostMongoType | null = await this.postModel.findById(id).lean();
+    return !!post;
+  }
+
+  async getPostById(id: string): Promise<PostMongoType | null> {
+    return this.postModel.findById(id).lean();
   }
 
   async deletePostById(id: string): Promise<boolean> {

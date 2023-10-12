@@ -9,9 +9,12 @@ import { CommentsModule } from '../comments/comments.module';
 import { BlogsModule } from '../blogs/blogs.module';
 import { IsPostIdExistValidator } from '../../application/decorators/validation/IsPostExist';
 import { UsersModule } from '../users/users.module';
+import { CqrsModule } from '@nestjs/cqrs';
+import { postCases } from './use-cases';
 
 @Module({
   imports: [
+    CqrsModule,
     MongooseModule.forFeature([
       {
         name: Post.name,
@@ -23,7 +26,7 @@ import { UsersModule } from '../users/users.module';
     UsersModule,
   ],
   controllers: [PostsController],
-  providers: [PostsService, PostsRepository, PostsQueryRepository, IsPostIdExistValidator],
+  providers: [PostsService, PostsRepository, PostsQueryRepository, IsPostIdExistValidator, ...postCases],
   exports: [PostsRepository, PostsQueryRepository],
 })
 export class PostsModule {}

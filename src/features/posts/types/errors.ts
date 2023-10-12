@@ -1,0 +1,9 @@
+export enum PostServiceError {
+  POST_NOT_FOUND = 1,
+  USER_NOT_FOUND = 2,
+  USER_UNAUTHORIZED = 3,
+  COMMENT_NOT_CREATED = 4,
+  BLOG_NOT_FOUND = 5,
+  POST_NOT_DELETED = 6,
+  POST_NOT_UPDATED = 7,
+}

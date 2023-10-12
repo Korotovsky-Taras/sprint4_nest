@@ -15,14 +15,14 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { IPostsController } from '../types/common';
-import { PostLikeServiceError, PostsService } from '../domain/posts.service';
+import { PostsService } from '../domain/posts.service';
 import { PostsDataMapper } from './posts.dm';
 import { PostsQueryRepository } from '../dao/posts.query.repository';
 import { IPost } from '../types/dao';
 import { PostViewModel } from '../types/dto';
 import { Request } from 'express';
 import { CommentViewModel } from '../../comments/types/dto';
-import { CommentServiceError, CommentsService } from '../../comments/domain/comments.service';
+import { CommentsService } from '../../comments/domain/comments.service';
 import { CommentsQueryRepository } from '../../comments/dao/comments.query.repository';
 import { CommentsDataMapper } from '../../comments/api/comments.dm';
 import { IComment } from '../../comments/types/dao';
@@ -36,6 +36,13 @@ import { PostUpdateDto } from '../dto/PostUpdateDto';
 import { PostCommentCreateDto } from '../dto/PostCommentCreateDto';
 import { LikeStatusUpdateDto } from '../../likes/dto/LikeStatusUpdateDto';
 import { GetUserId } from '../../../application/decorators/params/getUserId';
+import { CommandBus } from '@nestjs/cqrs';
+import { CreatePostCommentByIdCommand } from '../use-cases/create-post-comment-by-id.case';
+import { PostServiceError } from '../types/errors';
+import { CreatePostCommand } from '../use-cases/create-post.case';
+import { DeletePostByIdCommand } from '../use-cases/delete-post-by-id.case';
+import { UpdatePostByIdCommand } from '../use-cases/udpate-post-by-id.case';
+import { UpdatePostLikeStatusCommand } from '../use-cases/update-post-like-status.case';
 
 @Injectable()
 @Controller('posts')
@@ -45,6 +52,7 @@ export class PostsController implements IPostsController {
     private readonly commentsService: CommentsService,
     private readonly commentsQueryRepo: CommentsQueryRepository,
     private readonly postsQueryRepository: PostsQueryRepository,
+    private readonly commandBus: CommandBus,
   ) {}
 
   @Get()
@@ -69,34 +77,34 @@ export class PostsController implements IPostsController {
   @Post()
   @UseGuards(AuthBasicGuard)
   @HttpCode(Status.CREATED)
-  async createPost(@Body() input: PostCreateDto, @Req() req: Request): Promise<PostViewModel> {
-    const post: PostViewModel | null = await this.postsService.createPost(req.userId, input);
-    if (post) {
-      return post;
+  async createPost(@Body() dto: PostCreateDto, @Req() req: Request): Promise<PostViewModel> {
+    const result = await this.commandBus.execute<CreatePostCommand, ServiceResult<PostViewModel>>(new CreatePostCommand(req.userId, dto));
+    if (result.hasErrorCode(PostServiceError.BLOG_NOT_FOUND)) {
+      throw new BadRequestException();
     }
-    throw new BadRequestException();
+    return result.getData();
   }
 
   @Put(':id')
   @UseGuards(AuthBasicGuard)
   @HttpCode(Status.NO_CONTENT)
-  async updatePost(@Param('id') postId: string, @Body() input: PostUpdateDto): Promise<void> {
-    const postExist: boolean = await this.postsQueryRepository.isPostExist(postId);
-    if (!postExist) {
+  async updatePost(@Param('id') postId: string, @Body() dto: PostUpdateDto): Promise<void> {
+    const result = await this.commandBus.execute<UpdatePostByIdCommand, ServiceResult>(new UpdatePostByIdCommand(postId, dto));
+
+    if (result.hasErrorCode(PostServiceError.POST_NOT_FOUND)) {
       throw new NotFoundException();
     }
-    await this.postsService.updatePostById(postId, input);
   }
 
   @Delete(':id')
   @UseGuards(AuthBasicGuard)
   @HttpCode(Status.NO_CONTENT)
   async deletePost(@Param('id') postId: string): Promise<void> {
-    const postExist: boolean = await this.postsQueryRepository.isPostExist(postId);
-    if (!postExist) {
+    const result = await this.commandBus.execute<DeletePostByIdCommand, ServiceResult>(new DeletePostByIdCommand(postId));
+
+    if (result.hasErrorCode(PostServiceError.POST_NOT_FOUND)) {
       throw new NotFoundException();
     }
-    await this.postsService.deletePostById(postId);
   }
 
   @Get('/:id/comments')
@@ -118,10 +126,12 @@ export class PostsController implements IPostsController {
   @Post('/:id/comments')
   @UseGuards(AuthTokenGuard)
   @HttpCode(Status.CREATED)
-  async createComment(@Param('id') postId: string, @Body() input: PostCommentCreateDto, @Req() req: Request): Promise<CommentViewModel> {
-    const result: ServiceResult<CommentViewModel> = await this.commentsService.createComment(postId, req.userId, input, CommentsDataMapper.toCommentView);
+  async createComment(@Param('id') postId: string, @Body() dto: PostCommentCreateDto, @Req() req: Request): Promise<CommentViewModel> {
+    const result: ServiceResult<CommentViewModel> = await this.commandBus.execute<CreatePostCommentByIdCommand, ServiceResult<CommentViewModel>>(
+      new CreatePostCommentByIdCommand(postId, req.userId, dto),
+    );
 
-    if (result.hasErrorCode(CommentServiceError.POST_NOT_FOUND) || result.hasErrorCode(CommentServiceError.USER_NOT_FOUND)) {
+    if (result.hasErrorCode(PostServiceError.POST_NOT_FOUND) || result.hasErrorCode(PostServiceError.USER_NOT_FOUND)) {
       throw new NotFoundException();
     }
 
@@ -131,16 +141,19 @@ export class PostsController implements IPostsController {
   @Put('/:id/like-status')
   @UseGuards(AuthTokenGuard)
   @HttpCode(Status.NO_CONTENT)
-  async updateCommentLikeStatus(@Param('id') postId: string, @Body() input: LikeStatusUpdateDto, @GetUserId() userId: string): Promise<void> {
-    const result: ServiceResult = await this.postsService.updateLikeStatus({
-      postId: postId,
-      userId: userId,
-      status: input.likeStatus,
-    });
-    if (result.hasErrorCode(PostLikeServiceError.POST_NO_FOUND)) {
+  async updateCommentLikeStatus(@Param('id') postId: string, @Body() dto: LikeStatusUpdateDto, @GetUserId() userId: string): Promise<void> {
+    const result = await this.commandBus.execute<UpdatePostLikeStatusCommand, ServiceResult>(
+      new UpdatePostLikeStatusCommand({
+        postId: postId,
+        userId: userId,
+        status: dto.likeStatus,
+      }),
+    );
+
+    if (result.hasErrorCode(PostServiceError.POST_NOT_FOUND)) {
       throw new NotFoundException();
     }
-    if (result.hasErrorCode(PostLikeServiceError.UNAUTHORIZED)) {
+    if (result.hasErrorCode(PostServiceError.USER_UNAUTHORIZED)) {
       throw new NotFoundException();
     }
   }

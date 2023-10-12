@@ -1,6 +1,6 @@
 import { WithId } from 'mongodb';
 import { HydratedDocument, Model } from 'mongoose';
-import { UserCreateInputDto } from './dto';
+import { UserCreateInputModel } from './dto';
 
 export type IUser = {
   login: string;
@@ -40,5 +40,5 @@ export interface IUserMethods {
 }
 
 export interface IUserModel extends Model<UserDocumentType, IUserMethods> {
-  createUser(input: UserCreateInputDto): UserDocumentType;
+  createUser(input: UserCreateInputModel): UserDocumentType;
 }

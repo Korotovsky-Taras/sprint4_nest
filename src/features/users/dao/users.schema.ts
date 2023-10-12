@@ -1,10 +1,10 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { IUser, UserConfirmation, UserEncodedPassword } from '../types/dao';
-import { UserCreateInputDto } from '../types/dto';
+import { UserCreateInputModel } from '../types/dto';
 
 @Schema({ timestamps: true })
 export class User implements IUser {
-  constructor(input: UserCreateInputDto) {
+  constructor(input: UserCreateInputModel) {
     this.login = input.login;
     this.email = input.email;
     this.password = input.password;
@@ -72,7 +72,7 @@ export class User implements IUser {
     };
   }
 
-  static createUser(input: UserCreateInputDto) {
+  static createUser(input: UserCreateInputModel) {
     return new this(input);
   }
 }

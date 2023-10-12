@@ -17,7 +17,7 @@ import { BlogCreateDto } from '../dto/BlogCreateDto';
 import { BlogUpdateDto } from '../dto/BlogUpdateDto';
 import { SetTokenGuardParams } from '../../../application/decorators/skipTokenError';
 import { CommandBus } from '@nestjs/cqrs';
-import { CreatePostCommand } from '../use-cases/create-post.case';
+import { CreateBlogPostCommand } from '../use-cases/create-post.case';
 import { UpdateBlogByIdCommand } from '../use-cases/update-blog-by-id.case';
 import { DeleteBlogByIdCommand } from '../use-cases/delete-blog-by-id.case';
 import { BlogServiceError } from '../types/errors';
@@ -73,8 +73,8 @@ export class BlogsController implements IBlogsController {
   @UseGuards(AuthBasicGuard)
   @HttpCode(Status.CREATED)
   async createBlogPost(@Param('id') blogId: string, @Body() dto: BlogPostCreateDto, @Req() req: Request): Promise<PostViewModel> {
-    const result: ServiceResult<PostViewModel> = await this.commandBus.execute<CreatePostCommand, ServiceResult<PostViewModel>>(
-      new CreatePostCommand(req.userId, blogId, dto),
+    const result: ServiceResult<PostViewModel> = await this.commandBus.execute<CreateBlogPostCommand, ServiceResult<PostViewModel>>(
+      new CreateBlogPostCommand(req.userId, blogId, dto),
     );
 
     if (result.hasErrorCode(BlogServiceError.BLOG_NOT_FOUND)) {

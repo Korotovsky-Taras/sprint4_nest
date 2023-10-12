@@ -7,9 +7,12 @@ import { CommentsQueryRepository } from './dao/comments.query.repository';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Comment, CommentsSchema } from './dao/comments.schema';
 import { UsersModule } from '../users/users.module';
+import { commentsCases } from './use-cases';
+import { CqrsModule } from '@nestjs/cqrs';
 
 @Module({
   imports: [
+    CqrsModule,
     MongooseModule.forFeature([
       {
         name: Comment.name,
@@ -20,7 +23,7 @@ import { UsersModule } from '../users/users.module';
     UsersModule,
   ],
   controllers: [CommentsController],
-  providers: [CommentsService, CommentsRepository, CommentsQueryRepository],
+  providers: [CommentsService, CommentsRepository, CommentsQueryRepository, ...commentsCases],
   exports: [CommentsService, CommentsRepository, CommentsQueryRepository],
 })
 export class CommentsModule {}

@@ -10,9 +10,13 @@ import { AuthTokenCreator } from './utils/tokenCreator';
 import { AuthSecurityController } from './api/auth.security.controller';
 import { AuthTokenGuard } from '../../application/guards/AuthTokenGuard';
 import { SharedModule } from '../../shared.module';
+import { CqrsModule } from '@nestjs/cqrs';
+import { authCases } from './use-cases';
+import { GMailSender } from '../../application/mails/GMailSender';
 
 @Module({
   imports: [
+    CqrsModule,
     MongooseModule.forFeature([
       {
         name: AuthSession.name,
@@ -23,7 +27,7 @@ import { SharedModule } from '../../shared.module';
     SharedModule,
   ],
   controllers: [AuthController, AuthSecurityController],
-  providers: [AuthSessionService, AuthSessionRepository, AuthSessionQueryRepository, AuthTokenCreator, AuthTokenGuard],
+  providers: [AuthSessionService, AuthSessionRepository, AuthSessionQueryRepository, AuthTokenCreator, AuthTokenGuard, GMailSender, ...authCases],
   exports: [AuthSessionRepository, AuthSessionQueryRepository],
 })
 export class AuthModule {}

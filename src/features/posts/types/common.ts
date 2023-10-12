@@ -1,4 +1,4 @@
-import { PostCreateModel, PostLikeStatusInputModel, PostPaginationRepositoryModel, PostViewModel } from './dto';
+import { PostCreateModel, PostPaginationRepositoryModel, PostViewModel } from './dto';
 import { IPost, PostMongoType } from './dao';
 import { IRepository, IService } from '../../types';
 import { Request } from 'express';
@@ -8,17 +8,12 @@ import { PaginationQueryModel, UserIdReq, WithPagination } from '../../../applic
 import { PostCreateDto } from '../dto/PostCreateDto';
 import { PostUpdateDto } from '../dto/PostUpdateDto';
 import { PostCommentCreateDto } from '../dto/PostCommentCreateDto';
-import { ServiceResult } from '../../../application/core/ServiceResult';
+import { LikeStatus } from '../../likes/types';
 
 export type PostMapperType<T> = (post: PostMongoType, userId: UserIdReq) => T;
 export type PostListMapperType<T> = (post: PostMongoType[], userId: UserIdReq) => T[];
 
-export interface IPostsService extends IService {
-  createPost(userId: UserIdReq, model: PostCreateDto): Promise<PostViewModel | null>;
-  updatePostById(blogId: string, model: PostUpdateDto): Promise<boolean>;
-  updateLikeStatus(input: PostLikeStatusInputModel): Promise<ServiceResult>;
-  deletePostById(blogId: string): Promise<boolean>;
-}
+export interface IPostsService extends IService {}
 
 export interface IPostsController {
   getAll(query: PaginationQueryModel<IPost>, req: Request): Promise<WithPagination<PostViewModel>>;
@@ -31,8 +26,11 @@ export interface IPostsController {
 }
 
 export interface IPostsRepository extends IRepository<IPost> {
-  createPost<T>(userId: string | null, input: PostCreateModel, mapper: PostMapperType<T>): Promise<T>;
+  createPost(input: PostCreateModel): Promise<PostMongoType>;
   updatePostById(id: string, input: PostUpdateDto): Promise<boolean>;
+  getPostById(id: string): Promise<PostMongoType | null>;
+  isPostExist(id: string): Promise<boolean>;
+  updateLike(postId: string, likeStatus: LikeStatus, userId: string, userLogin: string): Promise<boolean>;
   deletePostById(id: string): Promise<boolean>;
 }
 
