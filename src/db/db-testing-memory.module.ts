@@ -19,7 +19,7 @@ let mongod: MongoMemoryServer;
     } as MongooseModuleAsyncOptions),
   ],
 })
-export class DbTestModule {}
+export class DbTestingMemoryModule {}
 
 export const closeTestConnection = async () => {
   if (mongod) await mongod.stop();

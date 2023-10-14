@@ -16,6 +16,8 @@ import { IBlogModel } from '../../src/features/blogs/types/dao';
 import { TestingModels } from './testing.models';
 import { IPostModel } from '../../src/features/posts/types/dao';
 import { AuthTokenCreator } from '../../src/features/auth/utils/tokenCreator';
+import { DbModule } from '../../src/db/db.module';
+import { DbTestingModule } from '../../src/db/db-testing.module';
 
 export type AppTestProvider = {
   getApp(): INestApplication;
@@ -55,7 +57,10 @@ export function useTestDescribeConfig(): AppTestProvider {
           useValue: AuthSession,
         },
       ],
-    }).compile();
+    })
+      .overrideModule(DbModule)
+      .useModule(DbTestingModule)
+      .compile();
 
     app = moduleRef.createNestApplication();
 

@@ -8,6 +8,7 @@ export type AppConfigurationAuth = {
 
 export type AppConfigurationMongo = {
   URI: string;
+  TEST_URI: string;
   DB_NAME: string;
   DB_VER: ServerApiVersion;
 };
@@ -19,7 +20,6 @@ export type AppConfigurationGmail = {
 };
 
 export type AppConfiguration = {
-  IS_DEV_MODE: boolean;
   PORT: number;
   auth: AppConfigurationAuth;
   mongo: AppConfigurationMongo;
@@ -35,7 +35,6 @@ export function getEnvFilePath() {
 
 export const getConfiguration = (): AppConfiguration => {
   return {
-    IS_DEV_MODE: process.env.DEV_MODE === 'true' || process.env.NODE_ENV !== 'production',
     PORT: Number(process.env.PORT) || 80,
     auth: {
       AUTH_LOGIN: process.env.AUTH_LOGIN || '',
@@ -44,6 +43,7 @@ export const getConfiguration = (): AppConfiguration => {
     },
     mongo: {
       URI: process.env.MONGO_URL || 'mongodb://0.0.0.0:27017',
+      TEST_URI: process.env.MONGO_TEST_URL || 'mongodb://0.0.0.0:27017',
       DB_NAME: process.env.NODE_ENV || 'development',
       DB_VER: ServerApiVersion.v1,
     },
