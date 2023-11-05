@@ -42,7 +42,7 @@ export class TestCreateUtils extends TestCommonUtils {
   async createUser(model: UserCreateModel): Promise<UserViewModel> {
     const result = await this.config
       .getHttp()
-      .post('/users')
+      .post('sa/users')
       .set('Authorization', 'Basic ' + authBasic64)
       .set('Content-Type', 'application/json')
       .send({
