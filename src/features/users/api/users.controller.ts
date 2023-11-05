@@ -28,7 +28,7 @@ import { CreateConfirmedUserCommand } from '../use-cases/create-confirmed-user.c
 import { UserPaginationQueryDto } from '../dto/UserPaginationQueryDto';
 
 @Injectable()
-@Controller('users')
+@Controller('sa/users')
 export class UsersController implements IUsersController {
   constructor(
     private readonly commandBus: CommandBus,
