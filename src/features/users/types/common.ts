@@ -10,7 +10,7 @@ export type UserListMapperType<T> = (post: UserMongoType[]) => T[];
 
 export interface IUsersService extends IService {}
 
-export interface IUsersController {
+export interface IUsersAdminController {
   getAll(query: UserPaginationQueryDto): Promise<UserListViewModel>;
   createUser(input: UserCreateModel): Promise<UserViewModel>;
   deleteUser(userId: string);

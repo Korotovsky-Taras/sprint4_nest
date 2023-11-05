@@ -13,8 +13,7 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { IUsersController, IUsersQueryRepository, UserQueryRepoKey } from '../types/common';
-import { UsersService } from '../domain/users.service';
+import { IUsersAdminController, IUsersQueryRepository, UserQueryRepoKey } from '../types/common';
 import { UsersDataMapper } from './users.dm';
 import { UserListViewModel, UserViewModel } from '../types/dto';
 import { Status } from '../../../application/utils/types';
@@ -28,21 +27,20 @@ import { CreateConfirmedUserCommand } from '../use-cases/create-confirmed-user.c
 import { UserPaginationQueryDto } from '../dto/UserPaginationQueryDto';
 
 @Injectable()
-@Controller('sa/users')
-export class UsersController implements IUsersController {
+@Controller('sa')
+export class UsersAdminController implements IUsersAdminController {
   constructor(
     private readonly commandBus: CommandBus,
-    private readonly usersService: UsersService,
     @Inject(UserQueryRepoKey) private readonly usersQueryRepo: IUsersQueryRepository,
   ) {}
 
-  @Get()
+  @Get('/users')
   @HttpCode(Status.OK)
   async getAll(@Query() query: UserPaginationQueryDto): Promise<UserListViewModel> {
     return await this.usersQueryRepo.getUsers(query, UsersDataMapper.toUsersView);
   }
 
-  @Post()
+  @Post('/users')
   @UseGuards(AuthBasicGuard)
   @HttpCode(Status.CREATED)
   async createUser(@Body() dto: AuthUserCreateDto): Promise<UserViewModel> {
@@ -55,7 +53,7 @@ export class UsersController implements IUsersController {
     return result.getData();
   }
 
-  @Delete(':id')
+  @Delete('/users/:id')
   @UseGuards(AuthBasicGuard)
   @HttpCode(Status.NO_CONTENT)
   async deleteUser(@Param('id') userId: string) {

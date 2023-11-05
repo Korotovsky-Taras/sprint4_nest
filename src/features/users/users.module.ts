@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { UsersController } from './api/users.controller';
+import { UsersAdminController } from './api/users.admin.controller';
 import { UsersService } from './domain/users.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { User, UserSchema } from './dao/mongo/users.schema';
@@ -32,7 +32,7 @@ const UserRepoTyped = withDbTypedClass(UserRepoKey, { Mongo: UsersMongoRepositor
     ]),
     SharedModule,
   ],
-  controllers: [UsersController],
+  controllers: [UsersAdminController],
   providers: [
     UsersService,
     UserRepoTyped,

@@ -13,7 +13,7 @@ describe('auth testing', () => {
   it('POST -> should create user', async () => {
     await config
       .getHttp()
-      .post('sa/users')
+      .post('/sa/users')
       .set('Authorization', 'Basic ' + authBasic64)
       .set('Content-Type', 'application/json')
       .send({
@@ -26,7 +26,7 @@ describe('auth testing', () => {
     const userModel = utils.createNewUserModel();
     const res1 = await config
       .getHttp()
-      .post('sa/users')
+      .post('/sa/users')
       .set('Authorization', 'Basic ' + authBasic64)
       .set('Content-Type', 'application/json')
       .send({
@@ -47,7 +47,7 @@ describe('auth testing', () => {
 
     const res2 = await config
       .getHttp()
-      .post('sa/users')
+      .post('/sa/users')
       .set('Authorization', 'Basic ' + authBasic64)
       .set('Content-Type', 'application/json')
       .send({
@@ -68,7 +68,7 @@ describe('auth testing', () => {
 
     const res3 = await config
       .getHttp()
-      .post('sa/users')
+      .post('/sa/users')
       .set('Authorization', 'Basic ' + authBasic64)
       .set('Content-Type', 'application/json')
       .send({
@@ -89,7 +89,7 @@ describe('auth testing', () => {
 
     const res4 = await config
       .getHttp()
-      .post('sa/users')
+      .post('/sa/users')
       .set('Authorization', 'Basic ' + authBasic64)
       .set('Content-Type', 'application/json')
       .send({
@@ -118,7 +118,7 @@ describe('auth testing', () => {
 
     const res5 = await config
       .getHttp()
-      .post('sa/users')
+      .post('/sa/users')
       .set('Authorization', 'Basic ' + authBasic64)
       .set('Content-Type', 'application/json')
       .expect(Status.BAD_REQUEST);
@@ -145,7 +145,7 @@ describe('auth testing', () => {
     const user = await utils.createUser(utils.createNewUserModel());
     await config
       .getHttp()
-      .delete(`sa/users/${user.id}`)
+      .delete(`/sa/users/${user.id}`)
       .set('Content-Type', 'application/json')
       .set('Authorization', 'Basic ' + authBasic64)
       .expect(Status.NO_CONTENT);
@@ -154,7 +154,7 @@ describe('auth testing', () => {
   it('POST, DELETE/:id -> should return error if auth credentials is incorrect', async () => {
     await config
       .getHttp()
-      .post('sa/users')
+      .post('/sa/users')
       .set('Content-Type', 'application/json')
       .send({
         ...utils.createNewUserModel(),
@@ -163,7 +163,7 @@ describe('auth testing', () => {
 
     await config
       .getHttp()
-      .post('/users')
+      .post('/sa/users')
       .set('Content-Type', 'application/json')
       .set('Authorization', 'Basic 123:123')
       .send({
@@ -173,11 +173,11 @@ describe('auth testing', () => {
 
     const user = await utils.createUser(utils.createNewUserModel());
 
-    await config.getHttp().delete(`sa/users/${user.id}`).set('Content-Type', 'application/json').expect(Status.UNATHORIZED);
+    await config.getHttp().delete(`/sa/users/${user.id}`).set('Content-Type', 'application/json').expect(Status.UNATHORIZED);
 
     await config
       .getHttp()
-      .delete(`sa/users/${user.id}`)
+      .delete(`/sa/users/${user.id}`)
       .set('Content-Type', 'application/json')
       .set('Authorization', 'Basic 123:123')
       .expect(Status.UNATHORIZED);
@@ -188,14 +188,14 @@ describe('auth testing', () => {
 
     await config
       .getHttp()
-      .delete(`sa/users/${user.id}`)
+      .delete(`/sa/users/${user.id}`)
       .set('Content-Type', 'application/json')
       .set('Authorization', 'Basic ' + authBasic64)
       .expect(Status.NO_CONTENT);
 
     await config
       .getHttp()
-      .delete(`sa/users/${user.id}`)
+      .delete(`/sa/users/${user.id}`)
       .set('Authorization', 'Basic ' + authBasic64)
       .set('Content-Type', 'application/json')
       .expect(Status.NOT_FOUND);
