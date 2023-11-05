@@ -175,7 +175,12 @@ describe('auth testing', () => {
 
     await config.getHttp().delete(`sa/users/${user.id}`).set('Content-Type', 'application/json').expect(Status.UNATHORIZED);
 
-    await config.getHttp().delete(`sa/users/${user.id}`).set('Content-Type', 'application/json').set('Authorization', 'Basic 123:123').expect(Status.UNATHORIZED);
+    await config
+      .getHttp()
+      .delete(`sa/users/${user.id}`)
+      .set('Content-Type', 'application/json')
+      .set('Authorization', 'Basic 123:123')
+      .expect(Status.UNATHORIZED);
   });
 
   it('DELETE/:id -> should return error id param not found', async () => {
