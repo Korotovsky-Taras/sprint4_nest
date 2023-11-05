@@ -54,7 +54,7 @@ export class UserSqlRawResult extends EntityRepoResult implements IUser, IUserMe
     this.addCommand(async () => {
       await this.dataSource.query(
         `INSERT INTO public."UsersRegistrationConfirmation" ("userId", "code", "confirmed", "expiredIn")
-                                   VALUES ($1, $2, $3, $4) ON CONFLICT ("userId") DO UPDATE SET "confirmed" = $3, "expiredIn" = $4 `,
+                                   VALUES ($1, $2, $3, $4) ON CONFLICT ("userId") DO UPDATE SET "code"= $2, "confirmed" = $3, "expiredIn" = $4 `,
         [this._id, conf.code, conf.confirmed, conf.expiredIn],
       );
       this.authConfirmation.confirmed = conf.confirmed;
