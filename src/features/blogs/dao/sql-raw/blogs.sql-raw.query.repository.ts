@@ -16,7 +16,7 @@ export class BlogsSqlRawQueryRepository implements IBlogsQueryRepository {
     const searchByTerm = query.searchNameTerm ? query.searchNameTerm : '';
     return withSqlPagination(
       this.dataSource,
-      `SELECT * FROM public."Blogs" as t WHERE t."name" ILIKE $3 ORDER BY "${query.sortBy}" ${query.sortDirection} LIMIT $1 OFFSET $2`,
+      `SELECT *, CAST(count(*) OVER() as INTEGER) as "totalCount" FROM public."Blogs" as t WHERE t."name" ILIKE $3 ORDER BY "${query.sortBy}" ${query.sortDirection} LIMIT $1 OFFSET $2`,
       [`%${searchByTerm}%`],
       query,
       mapper,

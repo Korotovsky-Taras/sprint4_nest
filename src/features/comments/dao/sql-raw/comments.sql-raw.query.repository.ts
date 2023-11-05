@@ -14,7 +14,7 @@ export class CommentsSqlRawQueryRepository implements ICommentsQueryRepository {
   constructor(@InjectDataSource() private readonly dataSource: DataSource) {}
 
   async getComments(userId: UserIdReq, postId: string, query: CommentsPaginationQueryDto): Promise<WithPagination<CommentViewModel>> {
-    const sql = `SELECT pc.*,
+    const sql = `SELECT pc.*, CAST(count(*) OVER() as INTEGER) as "totalCount",
                         (SELECT row_to_json(row) as "likesInfo"
                          FROM (SELECT (SELECT count(*) FROM public."PostsCommentsLikes" WHERE "postId" = pc._id AND "likeStatus" = 1) as "likesCount",
                                       (SELECT count(*) FROM public."PostsCommentsLikes" WHERE "postId" = pc._id AND "likeStatus" = 0) as "dislikesCount",
