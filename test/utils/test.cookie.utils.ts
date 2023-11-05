@@ -2,7 +2,7 @@ import setCookie from 'set-cookie-parser';
 import { UUID } from 'crypto';
 import { Response } from 'supertest';
 import { AuthRefreshTokenPayload } from '../../src/features/auth/utils/tokenCreator.types';
-import { AppTestProvider } from './useTestDescribeConfig';
+import { AppTestProvider } from './test.init';
 
 export type Cookie = {
   value: string;

@@ -1,8 +1,9 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { UserIdReq } from '../../../application/utils/types';
 import { ServiceResult } from '../../../application/core/ServiceResult';
-import { CommentsRepository } from '../dao/comments.repository';
 import { CommentServiceError } from '../types/errors';
+import { CommentsRepoKey, ICommentsRepository } from '../types/common';
+import { Inject } from '@nestjs/common';
 
 export class DeleteCommentByIdCommand {
   constructor(
@@ -13,7 +14,7 @@ export class DeleteCommentByIdCommand {
 
 @CommandHandler(DeleteCommentByIdCommand)
 export class DeleteCommentByIdCase implements ICommandHandler<DeleteCommentByIdCommand> {
-  constructor(private readonly commentsRepo: CommentsRepository) {}
+  constructor(@Inject(CommentsRepoKey) private readonly commentsRepo: ICommentsRepository) {}
 
   async execute({ commentId, userId }: DeleteCommentByIdCommand): Promise<ServiceResult> {
     const result = new ServiceResult();

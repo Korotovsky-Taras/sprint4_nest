@@ -1,11 +1,11 @@
 import { registerDecorator, ValidationOptions, ValidatorConstraint, ValidatorConstraintInterface } from 'class-validator';
-import { Injectable } from '@nestjs/common';
-import { PostsQueryRepository } from '../../../features/posts/dao/posts.query.repository';
+import { Inject, Injectable } from '@nestjs/common';
+import { IPostsQueryRepository, PostQueryRepoKey } from '../../../features/posts/types/common';
 
 @Injectable()
 @ValidatorConstraint({ async: true })
 export class IsPostIdExistValidator implements ValidatorConstraintInterface {
-  constructor(private postsQueryRepo: PostsQueryRepository) {}
+  constructor(@Inject(PostQueryRepoKey) private postsQueryRepo: IPostsQueryRepository) {}
   async validate(postId: string) {
     return await this.postsQueryRepo.isPostExist(postId);
   }

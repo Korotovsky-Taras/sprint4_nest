@@ -1,6 +1,7 @@
 import { WithId } from 'mongodb';
 import { HydratedDocument, Model } from 'mongoose';
 import { AuthSessionCreateModel, AuthSessionUpdateModel } from './dto';
+import { RepoEntityMethods } from '../../entity.repo';
 
 export type IAuthSession = {
   deviceId: string;
@@ -14,6 +15,8 @@ export type IAuthSession = {
 export type AuthSessionMongoType = WithId<IAuthSession>;
 
 export type AuthSessionDocumentType = HydratedDocument<IAuthSession, IAuthSessionMethods>;
+
+export type AuthRepoType = IAuthSession & { _id: string } & IAuthSessionMethods & RepoEntityMethods;
 
 export interface IAuthSessionMethods {
   updateSession(input: AuthSessionUpdateModel);

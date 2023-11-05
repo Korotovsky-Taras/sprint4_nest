@@ -1,11 +1,12 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { ServiceResult } from '../../../application/core/ServiceResult';
 import { validateOrRejectDto } from '../../../application/utils/validateOrRejectDto';
-import { UserDocumentType } from '../../users/types/dao';
-import { UsersRepository } from '../../users/dao/users.repository';
 import { AuthServiceError } from '../types/errors';
 import { AuthNewPasswordDto } from '../dto/AuthNewPasswordDto';
 import { UsersService } from '../../users/domain/users.service';
+import { Inject } from '@nestjs/common';
+import { IUsersRepository, UserRepoKey } from '../../users/types/common';
+import { UserEntityRepo } from '../../users/dao/user-entity.repo';
 
 export class AuthRecoverPasswordWithCodeCommand {
   constructor(public readonly dto: AuthNewPasswordDto) {}
@@ -14,7 +15,7 @@ export class AuthRecoverPasswordWithCodeCommand {
 @CommandHandler(AuthRecoverPasswordWithCodeCommand)
 export class AuthRecoverPasswordWithCodeCase implements ICommandHandler<AuthRecoverPasswordWithCodeCommand> {
   constructor(
-    private readonly usersRepo: UsersRepository,
+    @Inject(UserRepoKey) private readonly usersRepo: IUsersRepository,
     private readonly userService: UsersService,
   ) {}
 
@@ -22,7 +23,7 @@ export class AuthRecoverPasswordWithCodeCase implements ICommandHandler<AuthReco
     await validateOrRejectDto(dto, AuthNewPasswordDto);
 
     const result = new ServiceResult();
-    const user: UserDocumentType | null = await this.usersRepo.getUserByPassConfirmationCode(dto.recoveryCode);
+    const user: UserEntityRepo | null = await this.usersRepo.getUserByPassConfirmationCode(dto.recoveryCode);
 
     if (user === null || user.isPassExpired() || user.isPassConfirmed()) {
       result.addError({
@@ -31,10 +32,10 @@ export class AuthRecoverPasswordWithCodeCase implements ICommandHandler<AuthReco
       return result;
     }
 
-    user.password = this.userService.hashPassword(dto.newPassword);
+    user.setPassword(this.userService.hashPassword(dto.newPassword));
     user.setPassConfirmed(true);
 
-    await this.usersRepo.saveDoc(user);
+    await user.save();
 
     return result;
   }

@@ -5,6 +5,7 @@ import {
   ForbiddenException,
   Get,
   HttpCode,
+  Inject,
   Injectable,
   NotFoundException,
   Param,
@@ -13,12 +14,10 @@ import {
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
-import { ICommentsController } from '../types/common';
+import { CommentsQueryRepoKey, ICommentsController, ICommentsQueryRepository } from '../types/common';
 import { CommentsService } from '../domain/comments.service';
-import { CommentsQueryRepository } from '../dao/comments.query.repository';
 import { CommentViewModel } from '../types/dto';
 import { Request } from 'express';
-import { CommentsDataMapper } from './comments.dm';
 import { Status } from '../../../application/utils/types';
 import { ServiceResult } from '../../../application/core/ServiceResult';
 import { AuthTokenGuard } from '../../../application/guards/AuthTokenGuard';
@@ -37,7 +36,7 @@ export class CommentsController implements ICommentsController {
   constructor(
     private readonly commandBus: CommandBus,
     private readonly commentsService: CommentsService,
-    private readonly commentsQueryRepo: CommentsQueryRepository,
+    @Inject(CommentsQueryRepoKey) private readonly commentsQueryRepo: ICommentsQueryRepository,
   ) {}
 
   @Get('/:id')
@@ -45,7 +44,7 @@ export class CommentsController implements ICommentsController {
   @UseGuards(AuthTokenGuard)
   @HttpCode(Status.OK)
   async getComment(@Param('id') commentId: string, @Req() req: Request): Promise<CommentViewModel> {
-    const comment: CommentViewModel | null = await this.commentsQueryRepo.getCommentById(req.userId, commentId, CommentsDataMapper.toCommentView);
+    const comment: CommentViewModel | null = await this.commentsQueryRepo.getCommentById(req.userId, commentId);
     if (comment) {
       return comment;
     }

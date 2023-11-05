@@ -7,13 +7,13 @@ export type UserCreateInputModel = Pick<IUser, 'login' | 'email' | 'password' | 
 
 export type UserViewModel = Pick<IUser, 'login' | 'email'> & { id: string; createdAt: string };
 
-export type UserAuthDto = Pick<IUser, 'login' | 'email' | 'password'> & { id: string };
+export type UserAuthModel = Pick<IUser, 'login' | 'email' | 'password'> & { id: string };
 
-export type UserMeViewDto = Pick<IUser, 'login' | 'email'> & { userId: string };
+export type UserMeViewModel = Pick<IUser, 'login' | 'email'> & { userId: string };
 
-export type UserWithConfirmedViewDto = Pick<IUser, 'login' | 'email'> & { id: string; confirmationCode: string; confirmed: boolean; createdAt: string };
+export type UserWithConfirmedViewModel = Pick<IUser, 'login' | 'email'> & { id: string; confirmationCode: string; confirmed: boolean; createdAt: string };
 
-export type UserAuthWithConfirmationDto = UserAuthDto & { confirmationCode: string; confirmed: boolean };
+export type UserAuthWithConfirmationModel = UserAuthModel & { confirmationCode: string; confirmed: boolean };
 
 export type UserListViewModel = WithPagination<UserViewModel>;
 
@@ -22,7 +22,7 @@ export type UserPaginationQueryModel = PaginationQueryModel<IUser> & {
   searchEmailTerm?: string;
 };
 
-export type UserPaginationRepositoryDto = EnhancedOmit<WithPaginationQuery<IUser>, 'searchLoginTerm' | 'searchEmailTerm'> & {
+export type UserPaginationRepositoryModel = EnhancedOmit<WithPaginationQuery, 'searchLoginTerm' | 'searchEmailTerm'> & {
   searchLoginTerm: string | null;
   searchEmailTerm: string | null;
 };

@@ -1,9 +1,10 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { ServiceResult } from '../../../application/core/ServiceResult';
-import { PostsRepository } from '../dao/posts.repository';
 import { PostServiceError } from '../types/errors';
 import { PostLikeStatusInputModel } from '../types/dto';
-import { UsersRepository } from '../../users/dao/users.repository';
+import { Inject } from '@nestjs/common';
+import { IPostsRepository, PostRepoKey } from '../types/common';
+import { IUsersRepository, UserRepoKey } from '../../users/types/common';
 
 export class UpdatePostLikeStatusCommand {
   constructor(public readonly model: PostLikeStatusInputModel) {}
@@ -12,8 +13,8 @@ export class UpdatePostLikeStatusCommand {
 @CommandHandler(UpdatePostLikeStatusCommand)
 export class UpdatePostLikeStatusCase implements ICommandHandler<UpdatePostLikeStatusCommand> {
   constructor(
-    private readonly postsRepo: PostsRepository,
-    private readonly usersRepo: UsersRepository,
+    @Inject(PostRepoKey) private readonly postsRepo: IPostsRepository,
+    @Inject(UserRepoKey) private readonly usersRepo: IUsersRepository,
   ) {}
 
   async execute({ model }: UpdatePostLikeStatusCommand): Promise<ServiceResult> {

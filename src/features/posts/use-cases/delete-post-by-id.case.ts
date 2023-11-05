@@ -1,7 +1,8 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { ServiceResult } from '../../../application/core/ServiceResult';
-import { PostsRepository } from '../dao/posts.repository';
 import { PostServiceError } from '../types/errors';
+import { Inject } from '@nestjs/common';
+import { IPostsRepository, PostRepoKey } from '../types/common';
 
 export class DeletePostByIdCommand {
   constructor(public readonly postId: string) {}
@@ -9,7 +10,7 @@ export class DeletePostByIdCommand {
 
 @CommandHandler(DeletePostByIdCommand)
 export class DeletePostByIdCase implements ICommandHandler<DeletePostByIdCommand> {
-  constructor(private readonly postsRepo: PostsRepository) {}
+  constructor(@Inject(PostRepoKey) private readonly postsRepo: IPostsRepository) {}
 
   async execute({ postId }: DeletePostByIdCommand): Promise<ServiceResult> {
     const result = new ServiceResult();

@@ -1,9 +1,10 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { AuthSessionInfoModel } from '../types/dto';
 import { ServiceResult } from '../../../application/core/ServiceResult';
-import { UsersRepository } from '../../users/dao/users.repository';
-import { AuthSessionRepository } from '../dao/auth.repository';
 import { AuthServiceError } from '../types/errors';
+import { Inject } from '@nestjs/common';
+import { IUsersRepository, UserRepoKey } from '../../users/types/common';
+import { AuthRepoKey, IAuthSessionRepository } from '../types/common';
 
 export class AuthLogoutCommand {
   constructor(public readonly input: AuthSessionInfoModel) {}
@@ -12,8 +13,8 @@ export class AuthLogoutCommand {
 @CommandHandler(AuthLogoutCommand)
 export class AuthLogoutCase implements ICommandHandler<AuthLogoutCommand, ServiceResult> {
   constructor(
-    private readonly usersRepo: UsersRepository,
-    private readonly sessionRepo: AuthSessionRepository,
+    @Inject(UserRepoKey) private readonly usersRepo: IUsersRepository,
+    @Inject(AuthRepoKey) private readonly authRepo: IAuthSessionRepository,
   ) {}
 
   async execute({ input }: AuthLogoutCommand): Promise<ServiceResult> {
@@ -37,7 +38,7 @@ export class AuthLogoutCase implements ICommandHandler<AuthLogoutCommand, Servic
       return result;
     }
 
-    await this.sessionRepo.deleteSession({ userId, deviceId });
+    await this.authRepo.deleteSession({ userId, deviceId });
 
     return result;
   }

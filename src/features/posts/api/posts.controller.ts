@@ -5,6 +5,7 @@ import {
   Delete,
   Get,
   HttpCode,
+  Inject,
   Injectable,
   NotFoundException,
   Param,
@@ -14,20 +15,14 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { IPostsController } from '../types/common';
+import { IPostsController, IPostsQueryRepository, PostQueryRepoKey } from '../types/common';
 import { PostsService } from '../domain/posts.service';
-import { PostsDataMapper } from './posts.dm';
-import { PostsQueryRepository } from '../dao/posts.query.repository';
-import { IPost } from '../types/dao';
 import { PostViewModel } from '../types/dto';
 import { Request } from 'express';
 import { CommentViewModel } from '../../comments/types/dto';
 import { CommentsService } from '../../comments/domain/comments.service';
-import { CommentsQueryRepository } from '../../comments/dao/comments.query.repository';
-import { CommentsDataMapper } from '../../comments/api/comments.dm';
-import { IComment } from '../../comments/types/dao';
 import { ServiceResult } from '../../../application/core/ServiceResult';
-import { PaginationQueryModel, Status, WithPagination } from '../../../application/utils/types';
+import { Status, WithPagination } from '../../../application/utils/types';
 import { AuthTokenGuard } from '../../../application/guards/AuthTokenGuard';
 import { SetTokenGuardParams } from '../../../application/decorators/skipTokenError';
 import { PostCreateDto } from '../dto/PostCreateDto';
@@ -43,23 +38,26 @@ import { CreatePostCommand } from '../use-cases/create-post.case';
 import { DeletePostByIdCommand } from '../use-cases/delete-post-by-id.case';
 import { UpdatePostByIdCommand } from '../use-cases/udpate-post-by-id.case';
 import { UpdatePostLikeStatusCommand } from '../use-cases/update-post-like-status.case';
+import { PostPaginationQueryDto } from '../dto/PostPaginationQueryDto';
+import { CommentsPaginationQueryDto } from '../../comments/dto/CommentsPaginationQueryDto';
+import { CommentsQueryRepoKey, ICommentsQueryRepository } from '../../comments/types/common';
 
 @Injectable()
 @Controller('posts')
 export class PostsController implements IPostsController {
   constructor(
+    private readonly commandBus: CommandBus,
     private readonly postsService: PostsService,
     private readonly commentsService: CommentsService,
-    private readonly commentsQueryRepo: CommentsQueryRepository,
-    private readonly postsQueryRepository: PostsQueryRepository,
-    private readonly commandBus: CommandBus,
+    @Inject(CommentsQueryRepoKey) private readonly commentsQueryRepo: ICommentsQueryRepository,
+    @Inject(PostQueryRepoKey) private postsQueryRepo: IPostsQueryRepository,
   ) {}
 
   @Get()
   @SetTokenGuardParams({ throwError: false })
   @UseGuards(AuthTokenGuard)
-  async getAll(@Query() query: PaginationQueryModel<IPost>, @Req() req: Request): Promise<WithPagination<PostViewModel>> {
-    return await this.postsQueryRepository.getPosts(req.userId, {}, PostsDataMapper.toRepoQuery(query), PostsDataMapper.toPostsView);
+  async getAll(@Query() query: PostPaginationQueryDto, @Req() req: Request): Promise<WithPagination<PostViewModel>> {
+    return await this.postsQueryRepo.getAllPosts(req.userId, query);
   }
 
   @Get(':id')
@@ -67,7 +65,7 @@ export class PostsController implements IPostsController {
   @UseGuards(AuthTokenGuard)
   @HttpCode(Status.OK)
   async getPost(@Param('id') postId: string, @Req() req: Request): Promise<PostViewModel> {
-    const post: PostViewModel | null = await this.postsQueryRepository.getPostById(req.userId, postId, PostsDataMapper.toPostView);
+    const post: PostViewModel | null = await this.postsQueryRepo.getPostById(req.userId, postId);
     if (post) {
       return post;
     }
@@ -111,16 +109,12 @@ export class PostsController implements IPostsController {
   @SetTokenGuardParams({ throwError: false })
   @UseGuards(AuthTokenGuard)
   @HttpCode(Status.OK)
-  async getComments(
-    @Param('id') postId: string,
-    @Query() query: PaginationQueryModel<IComment>,
-    @Req() req: Request,
-  ): Promise<WithPagination<CommentViewModel>> {
-    const postExist: boolean = await this.postsQueryRepository.isPostExist(postId);
+  async getComments(@Param('id') postId: string, @Query() query: CommentsPaginationQueryDto, @Req() req: Request): Promise<WithPagination<CommentViewModel>> {
+    const postExist: boolean = await this.postsQueryRepo.isPostExist(postId);
     if (!postExist) {
       throw new NotFoundException();
     }
-    return await this.commentsQueryRepo.getComments(req.userId, { postId }, CommentsDataMapper.toRepoQuery(query), CommentsDataMapper.toCommentsView);
+    return await this.commentsQueryRepo.getComments(req.userId, postId, query);
   }
 
   @Post('/:id/comments')

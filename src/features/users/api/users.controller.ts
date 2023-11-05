@@ -1,9 +1,22 @@
-import { BadRequestException, Body, Controller, Delete, Get, HttpCode, Injectable, NotFoundException, Param, Post, Query, UseGuards } from '@nestjs/common';
-import { IUsersController } from '../types/common';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  Inject,
+  Injectable,
+  NotFoundException,
+  Param,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
+import { IUsersController, IUsersQueryRepository, UserQueryRepoKey } from '../types/common';
 import { UsersService } from '../domain/users.service';
-import { UsersQueryRepository } from '../dao/users.query.repository';
 import { UsersDataMapper } from './users.dm';
-import { UserListViewModel, UserPaginationQueryModel, UserViewModel } from '../types/dto';
+import { UserListViewModel, UserViewModel } from '../types/dto';
 import { Status } from '../../../application/utils/types';
 import { ServiceResult } from '../../../application/core/ServiceResult';
 import { AuthBasicGuard } from '../../../application/guards/AuthBasicGuard';
@@ -12,6 +25,7 @@ import { CommandBus } from '@nestjs/cqrs';
 import { DeleteUserCommand } from '../use-cases/delete-user.case';
 import { UserServiceError } from '../types/errors';
 import { CreateConfirmedUserCommand } from '../use-cases/create-confirmed-user.case';
+import { UserPaginationQueryDto } from '../dto/UserPaginationQueryDto';
 
 @Injectable()
 @Controller('users')
@@ -19,13 +33,13 @@ export class UsersController implements IUsersController {
   constructor(
     private readonly commandBus: CommandBus,
     private readonly usersService: UsersService,
-    private readonly usersQueryRepo: UsersQueryRepository,
+    @Inject(UserQueryRepoKey) private readonly usersQueryRepo: IUsersQueryRepository,
   ) {}
 
   @Get()
   @HttpCode(Status.OK)
-  async getAll(@Query() query: UserPaginationQueryModel): Promise<UserListViewModel> {
-    return await this.usersQueryRepo.getUsers(UsersDataMapper.toRepoQuery(query), UsersDataMapper.toUsersView);
+  async getAll(@Query() query: UserPaginationQueryDto): Promise<UserListViewModel> {
+    return await this.usersQueryRepo.getUsers(query, UsersDataMapper.toUsersView);
   }
 
   @Post()

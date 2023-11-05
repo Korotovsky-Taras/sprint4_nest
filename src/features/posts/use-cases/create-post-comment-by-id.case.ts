@@ -1,14 +1,14 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { UserIdReq } from '../../../application/utils/types';
 import { ServiceResult } from '../../../application/core/ServiceResult';
-import { CommentsRepository } from '../../comments/dao/comments.repository';
 import { PostCommentCreateDto } from '../dto/PostCommentCreateDto';
 import { validateOrRejectDto } from '../../../application/utils/validateOrRejectDto';
-import { PostsRepository } from '../dao/posts.repository';
-import { UsersRepository } from '../../users/dao/users.repository';
-import { CommentsDataMapper } from '../../comments/api/comments.dm';
 import { CommentViewModel } from '../../comments/types/dto';
 import { PostServiceError } from '../types/errors';
+import { Inject } from '@nestjs/common';
+import { IPostsRepository, PostRepoKey } from '../types/common';
+import { IUsersRepository, UserRepoKey } from '../../users/types/common';
+import { CommentsQueryRepoKey, CommentsRepoKey, ICommentsQueryRepository, ICommentsRepository } from '../../comments/types/common';
 
 export class CreatePostCommentByIdCommand {
   constructor(
@@ -21,9 +21,10 @@ export class CreatePostCommentByIdCommand {
 @CommandHandler(CreatePostCommentByIdCommand)
 export class CreatePostCommentByIdCase implements ICommandHandler<CreatePostCommentByIdCommand> {
   constructor(
-    private readonly commentsRepo: CommentsRepository,
-    private readonly postsRepo: PostsRepository,
-    private readonly usersRepo: UsersRepository,
+    @Inject(CommentsRepoKey) private readonly commentsRepo: ICommentsRepository,
+    @Inject(CommentsQueryRepoKey) private readonly commentsQueryRepo: ICommentsQueryRepository,
+    @Inject(PostRepoKey) private readonly postsRepo: IPostsRepository,
+    @Inject(UserRepoKey) private readonly usersRepo: IUsersRepository,
   ) {}
 
   async execute({ postId, userId, dto }: CreatePostCommentByIdCommand): Promise<ServiceResult<CommentViewModel>> {
@@ -69,12 +70,12 @@ export class CreatePostCommentByIdCase implements ICommandHandler<CreatePostComm
       postId: post._id.toString(),
       content: dto.content,
       commentatorInfo: {
-        userId: user.id,
+        userId: user._id,
         userLogin: user.login,
       },
     });
 
-    const comment = await this.commentsRepo.getCommentById(commentId);
+    const comment: CommentViewModel | null = await this.commentsQueryRepo.getCommentById(userId, commentId);
 
     if (!comment) {
       result.addError({
@@ -83,7 +84,7 @@ export class CreatePostCommentByIdCase implements ICommandHandler<CreatePostComm
       return result;
     }
 
-    result.setData(CommentsDataMapper.toCommentView(comment, userId));
+    result.setData(comment);
 
     return result;
   }

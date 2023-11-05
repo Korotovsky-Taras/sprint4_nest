@@ -24,8 +24,8 @@ export type ParamIdModel = {
   id: string;
 };
 
-export type WithPaginationQuery<T> = {
-  sortBy: Extract<keyof T, string>;
+export type WithPaginationQuery = {
+  sortBy: string;
   sortDirection: SortingDirection;
   pageNumber: number;
   pageSize: number;
@@ -103,3 +103,5 @@ export type WithUserId = {
 export type WithExpiredIn = {
   expiredIn: string;
 };
+
+export type WithDbId<T> = T & { _id: string };

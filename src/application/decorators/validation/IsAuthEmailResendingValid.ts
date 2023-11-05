@@ -1,17 +1,17 @@
 import { registerDecorator, ValidationOptions, ValidatorConstraint, ValidatorConstraintInterface } from 'class-validator';
-import { Injectable } from '@nestjs/common';
-import { UsersQueryRepository } from '../../../features/users/dao/users.query.repository';
-import { UsersDataMapper } from '../../../features/users/api/users.dm';
+import { Inject, Injectable } from '@nestjs/common';
+import { IUsersQueryRepository, UserQueryRepoKey } from '../../../features/users/types/common';
+import { UserConfirmation } from '../../../features/users/types/dao';
 
 @Injectable()
 @ValidatorConstraint({ async: true })
 export class IsAuthEmailResendingValidator implements ValidatorConstraintInterface {
-  constructor(private usersQueryRepo: UsersQueryRepository) {}
+  constructor(@Inject(UserQueryRepoKey) private usersQueryRepo: IUsersQueryRepository) {}
   async validate(email: string) {
-    const user = await this.usersQueryRepo.getUserByFilter({ email }, UsersDataMapper.toUserWithAuthConfirmation);
-    if (!user) {
+    const userConfirmation: UserConfirmation | null = await this.usersQueryRepo.getUserRegistrationConfirmationByEmail(email);
+    if (userConfirmation === null) {
       return false; //email doesnt exist
-    } else if (user.confirmed) {
+    } else if (userConfirmation.confirmed) {
       return false; //email already confirmed
     }
     return true;

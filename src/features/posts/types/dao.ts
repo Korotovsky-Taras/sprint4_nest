@@ -1,6 +1,6 @@
 import { HydratedDocument, Model } from 'mongoose';
 import { WithId } from 'mongodb';
-import { IWithLikes, LikeStatus } from '../../likes/types';
+import { IWithLikes, LastLike, LikesInfo, LikeStatus } from '../../likes/types';
 import { PostCreateModel } from './dto';
 
 export interface IPost extends IWithLikes {
@@ -12,7 +12,19 @@ export interface IPost extends IWithLikes {
   createdAt: Date;
 }
 
-export type PostMongoType = WithId<IPost>;
+export interface IPostSqlRaw {
+  _id: number;
+  title: string;
+  shortDescription: string;
+  content: string;
+  blogId: number;
+  blogName: string;
+  likesInfo: LikesInfo & { myStatus: number | null };
+  lastLikes: LastLike[];
+  createdAt: Date;
+}
+
+export type PostDBType = WithId<IPost>;
 
 export type PostDocumentType = HydratedDocument<IPost, IPostMethods>;
 

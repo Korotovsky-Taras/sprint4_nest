@@ -9,7 +9,18 @@ export interface IWithLikes {
 export type Like = {
   userId: string;
   status: LikeStatus;
-  createdAt: string;
+  createdAt: Date;
+};
+
+export type LikesInfo = {
+  likesCount: number;
+  dislikesCount: number;
+};
+
+export type LastLike = {
+  userId: string;
+  userLogin: string;
+  createdAt: Date;
 };
 
 export enum LikeStatus {
@@ -18,20 +29,9 @@ export enum LikeStatus {
   DISLIKE = 'Dislike',
 }
 
-export type LikesInfo = {
-  likesCount: number;
-  dislikesCount: number;
-};
-
 export type LikeUserInfo = {
   userId: string;
   userLogin: string;
-};
-
-export type LastLike = {
-  userId: string;
-  userLogin: string;
-  createdAt: string;
 };
 
 export type LikesExtendedInfo = {

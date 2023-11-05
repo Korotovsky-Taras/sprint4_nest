@@ -1,23 +1,24 @@
-import { AuthSessionMongoType } from '../types/dao';
+import { IAuthSession } from '../types/dao';
 import { AuthSessionDataModel, AuthSessionValidationModel, AuthSessionViewModel } from '../types/dto';
 import { toIsoString } from '../../../application/utils/date';
+import { WithDbId } from '../../../application/utils/types';
 
 export class AuthDataMapper {
   constructor() {}
-  static toSessionValidate({ deviceId, uuid }: AuthSessionMongoType): AuthSessionValidationModel {
+  static toSessionValidate({ deviceId, uuid }: WithDbId<IAuthSession>): AuthSessionValidationModel {
     return {
       uuid,
       deviceId,
     };
   }
-  static toUserSessionValidate({ deviceId, userId, uuid }: AuthSessionMongoType): AuthSessionDataModel {
+  static toUserSessionValidate({ deviceId, userId, uuid }: WithDbId<IAuthSession>): AuthSessionDataModel {
     return {
       uuid,
       userId,
       deviceId,
     };
   }
-  static toSessionView({ deviceId, lastActiveDate, ip, userAgent }: AuthSessionMongoType): AuthSessionViewModel {
+  static toSessionView({ deviceId, lastActiveDate, ip, userAgent }: WithDbId<IAuthSession>): AuthSessionViewModel {
     return {
       ip,
       lastActiveDate: toIsoString(lastActiveDate),
@@ -25,7 +26,7 @@ export class AuthDataMapper {
       deviceId,
     };
   }
-  static toSessionsView(sessions: AuthSessionMongoType[]): AuthSessionViewModel[] {
+  static toSessionsView(sessions: WithDbId<IAuthSession>[]): AuthSessionViewModel[] {
     return sessions.map((session) => {
       return AuthDataMapper.toSessionView(session);
     });

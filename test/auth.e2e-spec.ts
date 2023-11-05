@@ -1,4 +1,4 @@
-import { useTestDescribeConfig } from './utils/useTestDescribeConfig';
+import { testInit } from './utils/test.init';
 import { TestCreateUtils, UserCreationTestModel } from './utils/test.create.utils';
 import { Status } from '../src/application/utils/types';
 import { TestCookieUtils } from './utils/test.cookie.utils';
@@ -7,12 +7,12 @@ let userModel: UserCreationTestModel | null = null;
 let refreshToken: string | null = null;
 
 describe('auth testing', () => {
-  const config = useTestDescribeConfig();
+  const config = testInit();
   const utils = new TestCreateUtils(config);
   const cookieUtils = new TestCookieUtils(config);
 
   beforeAll(async () => {
-    await config.getModels().clearAll();
+    await config.getDaoUtils().clearAll();
 
     userModel = await utils.createNewUserModel();
     await utils.createUser(userModel);
@@ -84,19 +84,15 @@ describe('auth testing', () => {
       })
       .expect(Status.NO_CONTENT);
 
-    const result = await config
-      .getModels()
-      .getUserModel()
-      .findOne({ login: usrModel?.login })
-      .exec();
+    const result = await config.getDaoUtils().getUserAuthConfirmationByLogin(usrModel.login);
 
-    expect(result).not.toBeUndefined();
-    expect(result?.authConfirmation.confirmed).toBeFalsy();
-    expect(result?.authConfirmation.code).not.toBeUndefined();
+    expect(result).not.toBeNull();
+    expect(result?.confirmed).toBeFalsy();
+    expect(result?.code).not.toBeUndefined();
   });
 
   it('POST - auth/registration -> confirmation -> should confirm code', async () => {
-    const usrModel = utils.createNewUserModel();
+    const usrModel: UserCreationTestModel = utils.createNewUserModel();
 
     await config
       .getHttp()
@@ -109,32 +105,25 @@ describe('auth testing', () => {
       })
       .expect(Status.NO_CONTENT);
 
-    const result = await config
-      .getModels()
-      .getUserModel()
-      .findOne({ login: usrModel?.login })
-      .exec();
+    const result = await config.getDaoUtils().getUserAuthConfirmationByLogin(usrModel.login);
 
-    expect(result).not.toBeUndefined();
-    expect(result?.authConfirmation.confirmed).toBeFalsy();
-    expect(result?.authConfirmation.code).not.toBeUndefined();
+    expect(result).not.toBeNull();
+    expect(result?.confirmed).toBeFalsy();
+    expect(result?.code).not.toBeUndefined();
 
     await config
       .getHttp()
       .post(`/auth/registration-confirmation`)
       .set('Content-Type', 'application/json')
       .send({
-        code: result?.authConfirmation.code,
+        code: result?.code,
       })
       .expect(Status.NO_CONTENT);
 
-    const result2 = await config
-      .getModels()
-      .getUserModel()
-      .findOne({ login: usrModel?.login })
-      .exec();
+    const result2 = await config.getDaoUtils().getUserAuthConfirmationByLogin(usrModel.login);
 
-    expect(result2?.authConfirmation.confirmed).toBeTruthy();
+    expect(result2).not.toBeNull();
+    expect(result2?.confirmed).toBeTruthy();
   });
 
   it('should return 401 if wrong password or email', async () => {
@@ -201,7 +190,7 @@ describe('auth testing', () => {
     refreshToken = cookie!.value;
   });
 
-  it('should logout 204', async () => {
+  it('should logout 204 with new refreshToken', async () => {
     expect(refreshToken).not.toBeNull();
 
     const res = await config

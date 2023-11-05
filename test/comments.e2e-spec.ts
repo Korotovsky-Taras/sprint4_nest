@@ -1,4 +1,4 @@
-import { useTestDescribeConfig } from './utils/useTestDescribeConfig';
+import { testInit } from './utils/test.init';
 import { TestCreateUtils, validCommentData } from './utils/test.create.utils';
 import { UserViewModel } from '../src/features/users/types/dto';
 import { BlogViewModel } from '../src/features/blogs/types/dto';
@@ -13,11 +13,11 @@ let user: UserViewModel | null = null;
 let comment: CommentViewModel | null = null;
 
 describe('comments testing', () => {
-  const config = useTestDescribeConfig();
+  const config = testInit();
   const utils = new TestCreateUtils(config);
 
   beforeAll(async () => {
-    await config.getModels().clearAll();
+    await config.getDaoUtils().clearAll();
 
     user = await utils.createUser(utils.createNewUserModel());
     blog = await utils.createBlog(user.id);
@@ -100,6 +100,7 @@ describe('comments testing', () => {
         .set('Content-Type', 'application/json')
         .set('Authorization', 'Bearer ' + utils.createAccessToken(user.id))
         .expect(Status.OK);
+      console.log({ res: res2.body });
 
       expect(res2.body).toEqual({
         id: expect.any(String),

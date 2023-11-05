@@ -1,5 +1,8 @@
 export function toIsoString(date: Date): string {
-  return date.toISOString();
+  if (date instanceof Date) {
+    return date.toISOString();
+  }
+  return date;
   // const tzOffset = -date.getTimezoneOffset();
   // const diff = tzOffset >= 0 ? '+' : '-';
   // const pad = (n : number) => `${Math.floor(Math.abs(n))}`.padStart(2, '0');

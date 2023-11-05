@@ -18,4 +18,4 @@ export type PostLikeStatusInputModel = {
 
 export type PostPaginationQueryModel = PaginationQueryModel<IPost>;
 
-export type PostPaginationRepositoryModel = WithPaginationQuery<IPost>;
+export type PostPaginationRepositoryModel = WithPaginationQuery;

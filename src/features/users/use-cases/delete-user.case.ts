@@ -1,7 +1,8 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { ServiceResult } from '../../../application/core/ServiceResult';
-import { UsersRepository } from '../dao/users.repository';
 import { UserServiceError } from '../types/errors';
+import { Inject } from '@nestjs/common';
+import { IUsersRepository, UserRepoKey } from '../types/common';
 
 export class DeleteUserCommand {
   constructor(public readonly userId: string) {}
@@ -9,12 +10,12 @@ export class DeleteUserCommand {
 
 @CommandHandler(DeleteUserCommand)
 export class DeleteUserCase implements ICommandHandler<DeleteUserCommand> {
-  constructor(private readonly userModel: UsersRepository) {}
+  constructor(@Inject(UserRepoKey) private readonly usersRepo: IUsersRepository) {}
 
   async execute({ userId }: DeleteUserCommand): Promise<ServiceResult> {
     const result = new ServiceResult();
 
-    const userExist: boolean = await this.userModel.isUserExist(userId);
+    const userExist: boolean = await this.usersRepo.isUserExist(userId);
 
     if (!userExist) {
       result.addError({
@@ -23,7 +24,7 @@ export class DeleteUserCase implements ICommandHandler<DeleteUserCommand> {
       return result;
     }
 
-    const isDeleted = await this.userModel.deleteUserById(userId);
+    const isDeleted = await this.usersRepo.deleteUserById(userId);
 
     if (!isDeleted) {
       result.addError({

@@ -1,4 +1,4 @@
-import { useTestDescribeConfig } from './utils/useTestDescribeConfig';
+import { testInit } from './utils/test.init';
 import { TestCreateUtils } from './utils/test.create.utils';
 import { BlogViewModel } from '../src/features/blogs/types/dto';
 import { PostViewModel } from '../src/features/posts/types/dto';
@@ -12,11 +12,11 @@ let post: PostViewModel | null = null;
 let user: UserViewModel | null = null;
 
 describe('posts testing', () => {
-  const config = useTestDescribeConfig();
+  const config = testInit();
   const utils = new TestCreateUtils(config);
 
   beforeAll(async () => {
-    await config.getModels().clearAll();
+    await config.getDaoUtils().clearAll();
 
     user = await utils.createUser(utils.createNewUserModel());
     blog = await utils.createBlog(user.id);

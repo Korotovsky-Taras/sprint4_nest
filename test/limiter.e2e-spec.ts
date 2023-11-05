@@ -1,22 +1,19 @@
-import { useTestDescribeConfig } from './utils/useTestDescribeConfig';
+import { testInit } from './utils/test.init';
 import { TestCreateUtils, UserCreationTestModel } from './utils/test.create.utils';
 import { Status } from '../src/application/utils/types';
-import { UserViewModel } from '../src/features/users/types/dto';
 
 let userModel: UserCreationTestModel | null = null;
-let user: UserViewModel | null = null;
 
 const userAgents = ['app1', 'app2', 'app3', 'app4', 'app5'];
 
 describe('security testing', () => {
-  const config = useTestDescribeConfig();
+  const config = testInit();
   const utils = new TestCreateUtils(config);
 
   beforeAll(async () => {
-    await config.getModels().clearAll();
+    await config.getDaoUtils().clearAll();
 
     userModel = utils.createNewUserModel();
-    user = await utils.createUser(userModel);
   });
 
   it('should not login by limiter', async () => {

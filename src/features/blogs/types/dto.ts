@@ -7,8 +7,8 @@ export type BlogPaginationQueryModel = PaginationQueryModel<IBlog> & {
   searchNameTerm?: string;
 };
 
-export type BlogPaginationRepositoryModel = EnhancedOmit<WithPaginationQuery<IBlog>, 'searchNameTerm'> & {
+export type BlogPaginationRepositoryModel = EnhancedOmit<WithPaginationQuery, 'searchNameTerm'> & {
   searchNameTerm: string | null;
 };
 
-export type BlogQueryModel = WithPaginationQuery<IBlog> & { searchNameTerm: string | null };
+export type BlogQueryModel = WithPaginationQuery & { searchNameTerm: string | null };

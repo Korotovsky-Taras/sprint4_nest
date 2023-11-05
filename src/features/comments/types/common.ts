@@ -1,13 +1,11 @@
 import { UserIdReq, WithPagination } from '../../../application/utils/types';
-import { CommentMongoType, IComment } from './dao';
+import { IComment } from './dao';
 import { IRepository, IService } from '../../types';
-import { CommentCreateDto, CommentPaginationRepositoryDto, CommentViewModel } from './dto';
+import { CommentCreateModel, CommentViewModel } from './dto';
 import { Request } from 'express';
-import { LikeStatusUpdateDto } from '../../likes/types';
+import { LikeStatus, LikeStatusUpdateDto } from '../../likes/types';
 import { CommentUpdateDto } from '../dto/CommentUpdateDto';
-
-export type CommentMapperType<T> = (comment: CommentMongoType, userId: UserIdReq) => T;
-export type CommentListMapperType<T> = (comment: CommentMongoType[], userId: UserIdReq) => T[];
+import { CommentsPaginationQueryDto } from '../dto/CommentsPaginationQueryDto';
 
 export interface ICommentsService extends IService {}
 
@@ -17,20 +15,20 @@ export interface ICommentsController {
   updateCommentLikeStatus(commentId: string, input: LikeStatusUpdateDto, req: Request): Promise<void>;
 }
 
+export const CommentsRepoKey = Symbol('COMMENTS_REPO');
+
 export interface ICommentsRepository extends IRepository<IComment> {
-  createComment(dto: CommentCreateDto): Promise<string>;
-  updateCommentById(id: string, input: CommentUpdateDto): Promise<boolean>;
-  deleteCommentById(id: string): Promise<boolean>;
-  isCommentExist(id: string): Promise<boolean>;
-  isUserCommentOwner(id: string, userId: string): Promise<boolean>;
+  createComment(dto: CommentCreateModel): Promise<string>;
+  updateCommentById(commentId: string, input: CommentUpdateDto): Promise<boolean>;
+  updateLike(commentId: string, userId: string, status: LikeStatus): Promise<boolean>;
+  deleteCommentById(commentId: string): Promise<boolean>;
+  isCommentExist(commentId: string): Promise<boolean>;
+  isUserCommentOwner(commentId: string, userId: string): Promise<boolean>;
 }
 
+export const CommentsQueryRepoKey = Symbol('COMMENTS_QUERY_REPO');
+
 export interface ICommentsQueryRepository {
-  getComments<T>(
-    userId: UserIdReq,
-    filter: Partial<CommentMongoType>,
-    query: CommentPaginationRepositoryDto,
-    mapper: CommentListMapperType<T>,
-  ): Promise<WithPagination<T>>;
-  getCommentById<T>(userId: UserIdReq, id: string, mapper: CommentMapperType<T>): Promise<T | null>;
+  getComments(userId: UserIdReq, postId: string, query: CommentsPaginationQueryDto): Promise<WithPagination<CommentViewModel>>;
+  getCommentById(userId: UserIdReq, commentId: string): Promise<CommentViewModel | null>;
 }

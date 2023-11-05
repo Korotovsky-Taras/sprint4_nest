@@ -10,7 +10,7 @@ export interface IBlog {
   isMembership: boolean;
 }
 
-export type BlogMongoType = WithId<IBlog>;
+export type BlogDBType = WithId<IBlog>;
 
 export type BlogDocumentType = HydratedDocument<IBlog, IBlogMethods>;
 

@@ -3,10 +3,11 @@ import { ServiceResult } from '../../../application/core/ServiceResult';
 import { UsersService } from '../../users/domain/users.service';
 import { validateOrRejectDto } from '../../../application/utils/validateOrRejectDto';
 import { AuthResendingEmailDto } from '../dto/AuthResendingEmailDto';
-import { UserDocumentType } from '../../users/types/dao';
-import { UsersRepository } from '../../users/dao/users.repository';
 import { GMailSender } from '../../../application/mails/GMailSender';
 import { AuthServiceError } from '../types/errors';
+import { Inject } from '@nestjs/common';
+import { IUsersRepository, UserRepoKey } from '../../users/types/common';
+import { UserEntityRepo } from '../../users/dao/user-entity.repo';
 
 export class AuthResendConfirmationCodeCommand {
   constructor(public readonly dto: AuthResendingEmailDto) {}
@@ -15,7 +16,7 @@ export class AuthResendConfirmationCodeCommand {
 @CommandHandler(AuthResendConfirmationCodeCommand)
 export class AuthResendConfirmationCodeCase implements ICommandHandler<AuthResendConfirmationCodeCommand> {
   constructor(
-    private readonly usersRepo: UsersRepository,
+    @Inject(UserRepoKey) private readonly usersRepo: IUsersRepository,
     private readonly usersService: UsersService,
     private readonly mailSender: GMailSender,
   ) {}
@@ -25,7 +26,7 @@ export class AuthResendConfirmationCodeCase implements ICommandHandler<AuthResen
 
     const result = new ServiceResult();
 
-    const user: UserDocumentType | null = await this.usersRepo.getUserByEmail(dto.email);
+    const user: UserEntityRepo | null = await this.usersRepo.getUserByEmail(dto.email);
 
     if (!user) {
       result.addError({
@@ -42,7 +43,7 @@ export class AuthResendConfirmationCodeCase implements ICommandHandler<AuthResen
 
     user.setAuthConfirmation(this.usersService.createUserConfirmation());
 
-    await this.usersRepo.saveDoc(user);
+    await user.save();
 
     await this.mailSender.sendRegistrationMail(user.email, user.authConfirmation.code).catch((e) => console.log(e));
 

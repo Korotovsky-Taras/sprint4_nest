@@ -2,9 +2,9 @@ import { Module } from '@nestjs/common';
 import { UsersController } from './api/users.controller';
 import { UsersService } from './domain/users.service';
 import { MongooseModule } from '@nestjs/mongoose';
-import { User, UserSchema } from './dao/users.schema';
-import { UsersRepository } from './dao/users.repository';
-import { UsersQueryRepository } from './dao/users.query.repository';
+import { User, UserSchema } from './dao/mongo/users.schema';
+import { UsersMongoRepository } from './dao/mongo/users.mongo.repository';
+import { UsersMongoQueryRepository } from './dao/mongo/users.mongo.query.repository';
 import { IsUniqueUserEmailValidator } from '../../application/decorators/validation/IsUniqueUserEmail';
 import { IsAuthConfirmationCodeValidator } from '../../application/decorators/validation/IsAuthConfirmationCodeValid';
 import { IsAuthEmailResendingValidator } from '../../application/decorators/validation/IsAuthEmailResendingValid';
@@ -13,6 +13,13 @@ import { SharedModule } from '../../shared.module';
 import { GMailSender } from '../../application/mails/GMailSender';
 import { CqrsModule } from '@nestjs/cqrs';
 import { userCases } from './use-cases';
+import { withDbTypedClass } from '../../application/utils/withTypedClass';
+import { UserQueryRepoKey, UserRepoKey } from './types/common';
+import { UsersSqlRawRepository } from './dao/sql-raw/users.sql-raw.repository';
+import { UsersSqlRawQueryRepository } from './dao/sql-raw/users.sql-raw.query.repository';
+
+const UserQueryRepoTyped = withDbTypedClass(UserQueryRepoKey, { Mongo: UsersMongoQueryRepository, SQLRaw: UsersSqlRawQueryRepository });
+const UserRepoTyped = withDbTypedClass(UserRepoKey, { Mongo: UsersMongoRepository, SQLRaw: UsersSqlRawRepository });
 
 @Module({
   imports: [
@@ -28,8 +35,8 @@ import { userCases } from './use-cases';
   controllers: [UsersController],
   providers: [
     UsersService,
-    UsersRepository,
-    UsersQueryRepository,
+    UserRepoTyped,
+    UserQueryRepoTyped,
     IsUniqueUserEmailValidator,
     IsUniqueUserLoginValidator,
     IsAuthConfirmationCodeValidator,
@@ -37,6 +44,6 @@ import { userCases } from './use-cases';
     GMailSender,
     ...userCases,
   ],
-  exports: [UsersService, UsersRepository, UsersQueryRepository],
+  exports: [UsersService, UserRepoTyped, UserQueryRepoTyped],
 })
 export class UsersModule {}

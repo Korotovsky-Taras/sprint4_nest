@@ -2,11 +2,12 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { ServiceResult } from '../../../application/core/ServiceResult';
 import { UsersService } from '../../users/domain/users.service';
 import { validateOrRejectDto } from '../../../application/utils/validateOrRejectDto';
-import { UserDocumentType } from '../../users/types/dao';
-import { UsersRepository } from '../../users/dao/users.repository';
 import { GMailSender } from '../../../application/mails/GMailSender';
 import { AuthServiceError } from '../types/errors';
 import { AuthPasswordRecoveryDto } from '../dto/AuthPasswordRecoveryDto';
+import { Inject } from '@nestjs/common';
+import { IUsersRepository, UserRepoKey } from '../../users/types/common';
+import { UserEntityRepo } from '../../users/dao/user-entity.repo';
 
 export class AuthResendPassConfirmationCodeCommand {
   constructor(public readonly dto: AuthPasswordRecoveryDto) {}
@@ -15,7 +16,7 @@ export class AuthResendPassConfirmationCodeCommand {
 @CommandHandler(AuthResendPassConfirmationCodeCommand)
 export class AuthResendPassConfirmationCodeCase implements ICommandHandler<AuthResendPassConfirmationCodeCommand> {
   constructor(
-    private readonly usersRepo: UsersRepository,
+    @Inject(UserRepoKey) private readonly usersRepo: IUsersRepository,
     private readonly usersService: UsersService,
     private readonly mailSender: GMailSender,
   ) {}
@@ -25,7 +26,7 @@ export class AuthResendPassConfirmationCodeCase implements ICommandHandler<AuthR
 
     const result = new ServiceResult();
 
-    const user: UserDocumentType | null = await this.usersRepo.getUserByEmail(dto.email);
+    const user: UserEntityRepo | null = await this.usersRepo.getUserByEmail(dto.email);
 
     if (!user) {
       result.addError({
@@ -42,7 +43,7 @@ export class AuthResendPassConfirmationCodeCase implements ICommandHandler<AuthR
 
     user.setPassConfirmation(this.usersService.createUserConfirmation());
 
-    await this.usersRepo.saveDoc(user);
+    await user.save();
 
     await this.mailSender.sendPasswordRecoveryMail(user.email, user.passConfirmation.code).catch((e) => console.log(e));
 

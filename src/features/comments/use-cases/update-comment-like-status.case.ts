@@ -1,11 +1,11 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { UserIdReq } from '../../../application/utils/types';
 import { ServiceResult } from '../../../application/core/ServiceResult';
-import { CommentsRepository } from '../dao/comments.repository';
 import { CommentServiceError } from '../types/errors';
 import { CommentLikeStatusInputModel } from '../types/dto';
-import { CommentMongoType } from '../types/dao';
-import { UsersRepository } from '../../users/dao/users.repository';
+import { Inject } from '@nestjs/common';
+import { IUsersRepository, UserRepoKey } from '../../users/types/common';
+import { CommentsQueryRepoKey, CommentsRepoKey, ICommentsQueryRepository, ICommentsRepository } from '../types/common';
 
 export class UpdateCommentLikeStatusCommand {
   constructor(
@@ -17,8 +17,9 @@ export class UpdateCommentLikeStatusCommand {
 @CommandHandler(UpdateCommentLikeStatusCommand)
 export class UpdateCommentLikeStatusCase implements ICommandHandler<UpdateCommentLikeStatusCommand> {
   constructor(
-    private readonly commentsRepo: CommentsRepository,
-    private readonly usersRepo: UsersRepository,
+    @Inject(CommentsQueryRepoKey) private readonly commentsQueryRepo: ICommentsQueryRepository,
+    @Inject(CommentsRepoKey) private readonly commentsRepo: ICommentsRepository,
+    @Inject(UserRepoKey) private readonly usersRepo: IUsersRepository,
   ) {}
 
   async execute({ userId, model }: UpdateCommentLikeStatusCommand): Promise<ServiceResult> {
@@ -40,7 +41,7 @@ export class UpdateCommentLikeStatusCase implements ICommandHandler<UpdateCommen
       return result;
     }
 
-    const comment: CommentMongoType | null = await this.commentsRepo.getCommentById(model.commentId);
+    const comment = await this.commentsQueryRepo.getCommentById(userId, model.commentId);
 
     if (comment === null) {
       result.addError({
@@ -49,14 +50,7 @@ export class UpdateCommentLikeStatusCase implements ICommandHandler<UpdateCommen
       return result;
     }
 
-    const isUpdated = await this.commentsRepo.updateLike(comment._id.toString(), userModel.id, userModel.login, model.status);
-
-    if (!isUpdated) {
-      result.addError({
-        code: CommentServiceError.COMMENT_NOT_UPDATED,
-      });
-      return result;
-    }
+    await this.commentsRepo.updateLike(userModel._id, model.commentId, model.status);
 
     return result;
   }

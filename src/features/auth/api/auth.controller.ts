@@ -1,6 +1,5 @@
-import { BadRequestException, Body, Controller, Get, HttpCode, Injectable, Post, Req, Res, UnauthorizedException, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, HttpCode, Inject, Injectable, Post, Req, Res, UnauthorizedException, UseGuards } from '@nestjs/common';
 import { UsersService } from '../../users/domain/users.service';
-import { UsersQueryRepository } from '../../users/dao/users.query.repository';
 import { IAuthRouterController } from '../types/common';
 import { AuthSessionService } from '../domain/auth.service';
 import { AuthTokens } from '../utils/tokenCreator.types';
@@ -8,7 +7,7 @@ import { AuthSessionInfoModel } from '../types/dto';
 import { Request, Response } from 'express';
 import { Status } from '../../../application/utils/types';
 import { UsersDataMapper } from '../../users/api/users.dm';
-import { UserMeViewDto, UserViewModel } from '../../users/types/dto';
+import { UserMeViewModel, UserViewModel } from '../../users/types/dto';
 import { ServiceResult } from '../../../application/core/ServiceResult';
 import { AuthHelper } from '../../../application/authHelper';
 import { AuthSessionGuard } from '../../../application/guards/AuthSessionGuard';
@@ -33,6 +32,7 @@ import { AuthRecoverPasswordWithCodeCommand } from '../use-cases/auth-recover-pa
 import { UserServiceError } from '../../users/types/errors';
 import { AuthResendConfirmationCodeCommand } from '../use-cases/auth-resend-cofirmation-code';
 import { AuthResendPassConfirmationCodeCommand } from '../use-cases/auth-resend-pass-cofirmation-code';
+import { IUsersQueryRepository, UserQueryRepoKey } from '../../users/types/common';
 
 @Injectable()
 @Controller('auth')
@@ -40,7 +40,7 @@ export class AuthController implements IAuthRouterController {
   constructor(
     private readonly userService: UsersService,
     private readonly authService: AuthSessionService,
-    private readonly userQueryRepo: UsersQueryRepository,
+    @Inject(UserQueryRepoKey) private usersQueryRepo: IUsersQueryRepository,
     private readonly authHelper: AuthHelper,
     private readonly commandBus: CommandBus,
   ) {}
@@ -116,7 +116,7 @@ export class AuthController implements IAuthRouterController {
   @UseGuards(AuthTokenGuard)
   @HttpCode(Status.OK)
   async me(@GetUserId() userId: string) {
-    const user: UserMeViewDto | null = await this.userQueryRepo.getUserById(userId, UsersDataMapper.toMeView);
+    const user: UserMeViewModel | null = await this.usersQueryRepo.getUserById(userId, UsersDataMapper.toMeView);
 
     if (!user) {
       throw new UnauthorizedException();

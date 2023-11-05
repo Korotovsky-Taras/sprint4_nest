@@ -5,9 +5,11 @@ import { PostsModule } from '../posts/posts.module';
 import { UsersModule } from '../users/users.module';
 import { CommentsModule } from '../comments/comments.module';
 import { AuthModule } from '../auth/auth.module';
+import { TestsService } from './domain/tests.service';
 
 @Module({
   imports: [BlogsModule, PostsModule, UsersModule, CommentsModule, AuthModule],
   controllers: [TestsController],
+  providers: [TestsService],
 })
 export class TestsModule {}

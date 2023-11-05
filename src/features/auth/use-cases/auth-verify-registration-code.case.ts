@@ -2,9 +2,10 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { ServiceResult } from '../../../application/core/ServiceResult';
 import { validateOrRejectDto } from '../../../application/utils/validateOrRejectDto';
 import { AuthConfirmationCodeDto } from '../dto/AuthConfirmationCodeDto';
-import { UserDocumentType } from '../../users/types/dao';
-import { UsersRepository } from '../../users/dao/users.repository';
 import { AuthServiceError } from '../types/errors';
+import { Inject } from '@nestjs/common';
+import { IUsersRepository, UserRepoKey } from '../../users/types/common';
+import { UserEntityRepo } from '../../users/dao/user-entity.repo';
 
 export class AuthVerifyRegistrationCodeCommand {
   constructor(public readonly dto: AuthConfirmationCodeDto) {}
@@ -12,13 +13,13 @@ export class AuthVerifyRegistrationCodeCommand {
 
 @CommandHandler(AuthVerifyRegistrationCodeCommand)
 export class AuthVerifyRegistrationCodeCase implements ICommandHandler<AuthVerifyRegistrationCodeCommand> {
-  constructor(private readonly usersRepo: UsersRepository) {}
+  constructor(@Inject(UserRepoKey) private readonly usersRepo: IUsersRepository) {}
 
   async execute({ dto }: AuthVerifyRegistrationCodeCommand): Promise<ServiceResult> {
     await validateOrRejectDto(dto, AuthConfirmationCodeDto);
 
     const result = new ServiceResult();
-    const user: UserDocumentType | null = await this.usersRepo.getUserByAuthConfirmationCode(dto.code);
+    const user: UserEntityRepo | null = await this.usersRepo.getUserByAuthConfirmationCode(dto.code);
 
     if (user === null || user.isAuthConfirmed() || user.isAuthExpired()) {
       result.addError({
@@ -28,7 +29,7 @@ export class AuthVerifyRegistrationCodeCase implements ICommandHandler<AuthVerif
     }
 
     user.setAuthConfirmed(true);
-    await this.usersRepo.saveDoc(user);
+    await user.save();
 
     return result;
   }

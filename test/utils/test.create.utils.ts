@@ -1,6 +1,6 @@
-import { AppTestProvider } from './useTestDescribeConfig';
+import { AppTestProvider } from './test.init';
 import { UserCreateModel, UserViewModel } from '../../src/features/users/types/dto';
-import { CommentCreateRequestDto, CommentViewModel } from '../../src/features/comments/types/dto';
+import { CommentCreateRequestModel, CommentViewModel } from '../../src/features/comments/types/dto';
 import { BlogViewModel } from '../../src/features/blogs/types/dto';
 import { PostViewModel } from '../../src/features/posts/types/dto';
 import { TestCommonUtils } from './test.common.utils';
@@ -59,7 +59,7 @@ export class TestCreateUtils extends TestCommonUtils {
       .set('Content-Type', 'application/json')
       .send({
         ...model,
-      } as CommentCreateRequestDto);
+      } as CommentCreateRequestModel);
     return result.body;
   }
 

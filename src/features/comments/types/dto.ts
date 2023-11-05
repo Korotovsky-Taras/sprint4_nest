@@ -1,12 +1,11 @@
 import { CommentCommentatorInfo, IComment } from './dao';
-import { PaginationQueryModel, WithPaginationQuery } from '../../../application/utils/types';
 import { LikeStatus, WithLikes } from '../../likes/types';
 
-export type CommentCreateRequestDto = Pick<IComment, 'postId' | 'content'> & Pick<CommentCommentatorInfo, 'userId' | 'userLogin'>;
+export type CommentCreateRequestModel = Pick<IComment, 'postId' | 'content'> & Pick<CommentCommentatorInfo, 'userId' | 'userLogin'>;
 
-export type CommentCreateInputDto = Pick<IComment, 'postId' | 'content' | 'commentatorInfo'>;
+export type CommentCreateInputModel = Pick<IComment, 'postId' | 'content' | 'commentatorInfo'>;
 
-export type CommentCreateDto = Pick<IComment, 'postId' | 'content' | 'commentatorInfo'>;
+export type CommentCreateModel = Pick<IComment, 'postId' | 'content' | 'commentatorInfo'>;
 
 export type CommentLikeStatusInputModel = {
   commentId: string;
@@ -14,7 +13,3 @@ export type CommentLikeStatusInputModel = {
 };
 
 export type CommentViewModel = WithLikes<Pick<IComment, 'content' | 'commentatorInfo'> & { id: string; createdAt: string }>;
-
-export type CommentPaginationQueryDto = PaginationQueryModel<IComment>;
-
-export type CommentPaginationRepositoryDto = WithPaginationQuery<IComment>;

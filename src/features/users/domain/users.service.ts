@@ -1,20 +1,18 @@
-import { Injectable } from '@nestjs/common';
-import { IUsersService } from '../types/common';
+import { Inject, Injectable } from '@nestjs/common';
+import { IUsersQueryRepository, IUsersRepository, IUsersService, UserQueryRepoKey, UserRepoKey } from '../types/common';
 import { UserCreateModel, UserViewModel } from '../types/dto';
-import { UsersRepository } from '../dao/users.repository';
-import { UsersQueryRepository } from '../dao/users.query.repository';
 import { UsersDataMapper } from '../api/users.dm';
 import { AbstractUsersService } from './users.auth.service';
-import { UserMongoType } from '../types/dao';
 import { ServiceResult } from '../../../application/core/ServiceResult';
 import { GMailSender } from '../../../application/mails/GMailSender';
 import { UserServiceError } from '../types/errors';
+import { UserEntityRepo } from '../dao/user-entity.repo';
 
 @Injectable()
 export class UsersService extends AbstractUsersService implements IUsersService {
   constructor(
-    private readonly usersRepo: UsersRepository,
-    private readonly usersQueryRepo: UsersQueryRepository,
+    @Inject(UserRepoKey) private readonly usersRepo: IUsersRepository,
+    @Inject(UserQueryRepoKey) private readonly usersQueryRepo: IUsersQueryRepository,
     private readonly mailSender: GMailSender,
   ) {
     super();
@@ -31,7 +29,7 @@ export class UsersService extends AbstractUsersService implements IUsersService 
       return result;
     }
 
-    const user: UserMongoType = await this.usersRepo.createUser({
+    const user: UserEntityRepo = await this.usersRepo.createUser({
       login: model.login,
       email: model.email,
       password: this.hashPassword(model.password),
@@ -42,7 +40,7 @@ export class UsersService extends AbstractUsersService implements IUsersService 
       await this.mailSender.sendRegistrationMail(user.email, user.authConfirmation.code).catch((e) => console.log(e));
     }
 
-    result.setData(UsersDataMapper.toUserView(user));
+    result.setData(UsersDataMapper.toUserEntityView(user));
 
     return result;
   }

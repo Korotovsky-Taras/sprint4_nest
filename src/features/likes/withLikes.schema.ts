@@ -1,6 +1,5 @@
 import { Prop, Schema } from '@nestjs/mongoose';
 import { Like, LikeStatus } from './types';
-import { toIsoString } from '../../application/utils/date';
 
 @Schema()
 export class WithLikes {
@@ -9,7 +8,7 @@ export class WithLikes {
       {
         userId: { type: String, required: true },
         status: { type: String, enum: LikeStatus, required: true },
-        createdAt: { type: String, required: true },
+        createdAt: { type: Date, required: true },
       },
     ],
     default: [],
@@ -17,7 +16,7 @@ export class WithLikes {
   likes: {
     userId: string;
     status: LikeStatus;
-    createdAt: string;
+    createdAt: Date;
   }[];
 
   @Prop({
@@ -37,7 +36,7 @@ export class WithLikes {
       {
         userId: { type: String, required: true },
         userLogin: { type: String, required: true },
-        createdAt: { type: String, required: true },
+        createdAt: { type: Date, required: true },
       },
     ],
     default: [],
@@ -45,13 +44,18 @@ export class WithLikes {
   lastLikes: {
     userId: string;
     userLogin: string;
-    createdAt: string;
+    createdAt: Date;
   }[];
+
+  getUserStatus(userId: string): LikeStatus {
+    const myLike: Like | undefined = this.likes.find((like: Like) => like.userId === userId);
+    return myLike ? myLike.status : LikeStatus.NONE;
+  }
 
   updateLike(userId: string, userLogin: string, likeStatus: LikeStatus) {
     // Обновляем или устанавливаем лайк
     const likeIndex = this.likes.findIndex((like: Like) => like.userId === userId);
-    const likeCreatedAt = toIsoString(new Date());
+    const likeCreatedAt = new Date();
     if (likeIndex >= 0) {
       this.likes[likeIndex].status = likeStatus;
       this.likes[likeIndex].createdAt = likeCreatedAt;

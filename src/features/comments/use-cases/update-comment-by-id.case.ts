@@ -2,9 +2,10 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { UserIdReq } from '../../../application/utils/types';
 import { CommentUpdateDto } from '../dto/CommentUpdateDto';
 import { ServiceResult } from '../../../application/core/ServiceResult';
-import { CommentsRepository } from '../dao/comments.repository';
 import { CommentServiceError } from '../types/errors';
 import { validateOrRejectDto } from '../../../application/utils/validateOrRejectDto';
+import { Inject } from '@nestjs/common';
+import { CommentsRepoKey, ICommentsRepository } from '../types/common';
 
 export class UpdateCommentByIdCommand {
   constructor(
@@ -16,7 +17,7 @@ export class UpdateCommentByIdCommand {
 
 @CommandHandler(UpdateCommentByIdCommand)
 export class UpdateCommentByIdCase implements ICommandHandler<UpdateCommentByIdCommand> {
-  constructor(private readonly commentsRepo: CommentsRepository) {}
+  constructor(@Inject(CommentsRepoKey) private readonly commentsRepo: ICommentsRepository) {}
 
   async execute({ commentId, userId, dto }: UpdateCommentByIdCommand): Promise<ServiceResult> {
     await validateOrRejectDto(dto, CommentUpdateDto);

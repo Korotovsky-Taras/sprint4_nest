@@ -1,5 +1,5 @@
 import { randomUUID, UUID } from 'crypto';
-import { useTestDescribeConfig } from './utils/useTestDescribeConfig';
+import { testInit } from './utils/test.init';
 import { TestCreateUtils, UserCreationTestModel } from './utils/test.create.utils';
 import { Cookie, SessionUnit, TestCookieUtils } from './utils/test.cookie.utils';
 import { AuthRefreshTokenPayload } from '../src/features/auth/utils/tokenCreator.types';
@@ -25,12 +25,12 @@ function getUser1Session(index: number): SessionUnit {
 }
 
 describe('security testing', () => {
-  const config = useTestDescribeConfig();
+  const config = testInit();
   const utils = new TestCreateUtils(config);
   const cookieUtils = new TestCookieUtils(config);
 
   beforeAll(async () => {
-    await config.getModels().clearAll();
+    await config.getDaoUtils().clearAll();
 
     userModel1 = utils.createNewUserModel();
     userModel2 = utils.createNewUserModel();

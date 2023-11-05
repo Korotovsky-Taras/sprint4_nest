@@ -1,13 +1,13 @@
-import { useTestDescribeConfig } from './utils/useTestDescribeConfig';
+import { testInit } from './utils/test.init';
 import { authBasic64, TestCreateUtils } from './utils/test.create.utils';
 import { Status } from '../src/application/utils/types';
 
 describe('auth testing', () => {
-  const config = useTestDescribeConfig();
+  const config = testInit();
   const utils = new TestCreateUtils(config);
 
   beforeAll(async () => {
-    await config.getModels().clearAll();
+    await config.getDaoUtils().clearAll();
   });
 
   it('POST -> should create user', async () => {

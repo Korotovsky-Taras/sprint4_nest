@@ -1,9 +1,10 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { ServiceResult } from '../../../application/core/ServiceResult';
 import { validateOrRejectDto } from '../../../application/utils/validateOrRejectDto';
-import { PostsRepository } from '../dao/posts.repository';
 import { PostServiceError } from '../types/errors';
 import { PostUpdateDto } from '../dto/PostUpdateDto';
+import { Inject } from '@nestjs/common';
+import { IPostsRepository, PostRepoKey } from '../types/common';
 
 export class UpdatePostByIdCommand {
   constructor(
@@ -14,7 +15,7 @@ export class UpdatePostByIdCommand {
 
 @CommandHandler(UpdatePostByIdCommand)
 export class UpdatePostByIdCase implements ICommandHandler<UpdatePostByIdCommand> {
-  constructor(private readonly postsRepo: PostsRepository) {}
+  constructor(@Inject(PostRepoKey) private readonly postsRepo: IPostsRepository) {}
 
   async execute({ postId, dto }: UpdatePostByIdCommand): Promise<ServiceResult> {
     await validateOrRejectDto(dto, PostUpdateDto);

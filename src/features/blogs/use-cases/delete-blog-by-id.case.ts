@@ -1,8 +1,9 @@
 import { ServiceResult } from '../../../application/core/ServiceResult';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { BlogsRepository } from '../dao/blogs.repository';
-import { BlogMongoType } from '../types/dao';
+import { BlogDBType } from '../types/dao';
 import { BlogServiceError } from '../types/errors';
+import { Inject } from '@nestjs/common';
+import { BlogRepoKey, IBlogsRepository } from '../types/common';
 
 export class DeleteBlogByIdCommand {
   constructor(public readonly blogId: string) {}
@@ -10,10 +11,10 @@ export class DeleteBlogByIdCommand {
 
 @CommandHandler(DeleteBlogByIdCommand)
 export class DeleteBlogByIdCase implements ICommandHandler<DeleteBlogByIdCommand, ServiceResult> {
-  constructor(private readonly blogsRepo: BlogsRepository) {}
+  constructor(@Inject(BlogRepoKey) private readonly blogsRepo: IBlogsRepository) {}
 
   async execute({ blogId }: DeleteBlogByIdCommand): Promise<ServiceResult> {
-    const blog: BlogMongoType | null = await this.blogsRepo.getBlogById(blogId);
+    const blog: BlogDBType | null = await this.blogsRepo.getBlogById(blogId);
     const result = new ServiceResult();
 
     if (!blog) {

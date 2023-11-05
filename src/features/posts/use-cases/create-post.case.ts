@@ -2,13 +2,13 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { UserIdReq } from '../../../application/utils/types';
 import { ServiceResult } from '../../../application/core/ServiceResult';
 import { validateOrRejectDto } from '../../../application/utils/validateOrRejectDto';
-import { PostsRepository } from '../dao/posts.repository';
 import { PostCreateDto } from '../dto/PostCreateDto';
-import { PostsDataMapper } from '../api/posts.dm';
-import { BlogsRepository } from '../../blogs/dao/blogs.repository';
-import { BlogMongoType } from '../../blogs/types/dao';
+import { BlogDBType } from '../../blogs/types/dao';
 import { PostServiceError } from '../types/errors';
 import { PostViewModel } from '../types/dto';
+import { Inject } from '@nestjs/common';
+import { BlogRepoKey, IBlogsRepository } from '../../blogs/types/common';
+import { IPostsRepository, PostRepoKey } from '../types/common';
 
 export class CreatePostCommand {
   constructor(
@@ -20,8 +20,8 @@ export class CreatePostCommand {
 @CommandHandler(CreatePostCommand)
 export class CreatePostCase implements ICommandHandler<CreatePostCommand> {
   constructor(
-    private readonly postsRepo: PostsRepository,
-    private readonly blogsRepo: BlogsRepository,
+    @Inject(PostRepoKey) private readonly postsRepo: IPostsRepository,
+    @Inject(BlogRepoKey) private readonly blogsRepo: IBlogsRepository,
   ) {}
 
   async execute({ userId, dto }: CreatePostCommand): Promise<ServiceResult<PostViewModel>> {
@@ -29,7 +29,7 @@ export class CreatePostCase implements ICommandHandler<CreatePostCommand> {
 
     const result = new ServiceResult<PostViewModel>();
 
-    const blog: BlogMongoType | null = await this.blogsRepo.getBlogById(dto.blogId);
+    const blog: BlogDBType | null = await this.blogsRepo.getBlogById(dto.blogId);
 
     if (!blog) {
       result.addError({
@@ -38,15 +38,18 @@ export class CreatePostCase implements ICommandHandler<CreatePostCommand> {
       return result;
     }
 
-    const post = await this.postsRepo.createPost({
-      title: dto.title,
-      shortDescription: dto.shortDescription,
-      content: dto.content,
-      blogId: blog._id.toString(),
-      blogName: blog.name,
-    });
+    const post = await this.postsRepo.createPost(
+      {
+        title: dto.title,
+        shortDescription: dto.shortDescription,
+        content: dto.content,
+        blogId: blog._id.toString(),
+        blogName: blog.name,
+      },
+      userId,
+    );
 
-    result.setData(PostsDataMapper.toPostView(post, userId));
+    result.setData(post);
 
     return result;
   }

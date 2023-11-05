@@ -2,12 +2,13 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { AuthLoginInputModel } from '../types/dto';
 import { ServiceResult } from '../../../application/core/ServiceResult';
 import { AuthAccessTokenPass, AuthRefreshTokenPass, AuthTokens } from '../utils/tokenCreator.types';
-import { ObjectId } from 'mongodb';
 import { UsersService } from '../../users/domain/users.service';
-import { UsersRepository } from '../../users/dao/users.repository';
-import { AuthSessionRepository } from '../dao/auth.repository';
 import { AuthTokenCreator } from '../utils/tokenCreator';
 import { AuthServiceError } from '../types/errors';
+import { IUsersRepository, UserRepoKey } from '../../users/types/common';
+import { Inject } from '@nestjs/common';
+import { randomUUID } from 'crypto';
+import { AuthRepoKey, IAuthSessionRepository } from '../types/common';
 
 export class AuthLoginCommand {
   constructor(public readonly input: AuthLoginInputModel) {}
@@ -17,8 +18,8 @@ export class AuthLoginCommand {
 export class AuthLoginCase implements ICommandHandler<AuthLoginCommand, ServiceResult<AuthTokens>> {
   constructor(
     private readonly userService: UsersService,
-    private readonly usersRepo: UsersRepository,
-    private readonly sessionRepo: AuthSessionRepository,
+    @Inject(UserRepoKey) private readonly usersRepo: IUsersRepository,
+    @Inject(AuthRepoKey) private readonly authRepo: IAuthSessionRepository,
     private readonly tokenCreator: AuthTokenCreator,
   ) {}
 
@@ -49,14 +50,14 @@ export class AuthLoginCase implements ICommandHandler<AuthLoginCommand, ServiceR
       return result;
     }
 
-    const userId = user.id;
+    const userId = user._id;
 
-    const deviceId = new ObjectId();
+    const deviceId = randomUUID();
     const accessToken: AuthAccessTokenPass = this.tokenCreator.createAccessToken(userId);
-    const refreshToken: AuthRefreshTokenPass = this.tokenCreator.createRefreshToken(userId, deviceId.toString());
+    const refreshToken: AuthRefreshTokenPass = this.tokenCreator.createRefreshToken(userId, deviceId);
 
-    await this.sessionRepo.createSession({
-      deviceId: deviceId.toString(),
+    await this.authRepo.createSession({
+      deviceId,
       userId,
       userAgent: input.userAgent,
       ip: input.ip,

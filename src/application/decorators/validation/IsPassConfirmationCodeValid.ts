@@ -1,11 +1,11 @@
 import { registerDecorator, ValidationOptions, ValidatorConstraint, ValidatorConstraintInterface } from 'class-validator';
-import { Injectable } from '@nestjs/common';
-import { UsersQueryRepository } from '../../../features/users/dao/users.query.repository';
+import { Inject, Injectable } from '@nestjs/common';
+import { IUsersQueryRepository, UserQueryRepoKey } from '../../../features/users/types/common';
 
 @Injectable()
 @ValidatorConstraint({ async: true })
 export class IsPassConfirmationCodeValidator implements ValidatorConstraintInterface {
-  constructor(private usersQueryRepo: UsersQueryRepository) {}
+  constructor(@Inject(UserQueryRepoKey) private usersQueryRepo: IUsersQueryRepository) {}
   async validate(code: string) {
     const result = await this.usersQueryRepo.getPassConfirmationValidation(code);
     if (!result || result.isConfirmed) {

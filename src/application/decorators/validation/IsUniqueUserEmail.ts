@@ -1,11 +1,11 @@
 import { registerDecorator, ValidationOptions, ValidatorConstraint, ValidatorConstraintInterface } from 'class-validator';
-import { Injectable } from '@nestjs/common';
-import { UsersQueryRepository } from '../../../features/users/dao/users.query.repository';
+import { Inject, Injectable } from '@nestjs/common';
+import { IUsersQueryRepository, UserQueryRepoKey } from '../../../features/users/types/common';
 
 @Injectable()
 @ValidatorConstraint({ async: true })
 export class IsUniqueUserEmailValidator implements ValidatorConstraintInterface {
-  constructor(private usersQueryRepo: UsersQueryRepository) {}
+  constructor(@Inject(UserQueryRepoKey) private usersQueryRepo: IUsersQueryRepository) {}
   async validate(email: string) {
     const isUserWithEmailExist = await this.usersQueryRepo.isUserExistByLoginOrEmail('', email);
     return !isUserWithEmailExist;
