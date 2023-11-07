@@ -16,7 +16,7 @@ export class UsersSqlRawQueryRepository implements IUsersQueryRepository {
     const searchByLoginTerm = query.searchLoginTerm ? query.searchLoginTerm : '';
     const searchByEmailTerm = query.searchEmailTerm ? query.searchEmailTerm : '';
 
-    const sql = `SELECT *, CAST(count(*) OVER() as INTEGER) as "totalCount" FROM public."Users" as u WHERE u."login" ILIKE $3 AND u."email" ILIKE $4 ORDER BY "${query.sortBy}" ${query.sortDirection} LIMIT $1 OFFSET $2`;
+    const sql = `SELECT *, CAST(count(*) OVER() as INTEGER) as "totalCount" FROM public."Users" as u WHERE u."login" ILIKE $3 OR u."email" ILIKE $4 ORDER BY "${query.sortBy}" ${query.sortDirection} LIMIT $1 OFFSET $2`;
 
     return withSqlPagination(this.dataSource, sql, [`%${searchByLoginTerm}%`, `%${searchByEmailTerm}%`], query, mapper);
   }
