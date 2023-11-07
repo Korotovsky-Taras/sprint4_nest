@@ -16,11 +16,11 @@ export class UsersSqlRawQueryRepository implements IUsersQueryRepository {
     const searchByLoginTerm = query.searchLoginTerm ? query.searchLoginTerm : '';
     const searchByEmailTerm = query.searchEmailTerm ? query.searchEmailTerm : '';
 
-    const collateQuery = query.sortBy !== 'createdAt' ? 'COLLATE "C"' : '';
+    const sortByWithCollate = query.sortBy !== 'createdAt' ? 'COLLATE "C"' : '';
 
     const sql = `SELECT *, CAST(count(*) OVER() as INTEGER) as "totalCount" 
                  FROM public."Users" as u WHERE u."login" ILIKE $3 OR u."email" ILIKE $4 
-                 ORDER BY "${query.sortBy}" ${collateQuery} ${query.sortDirection} LIMIT $1 OFFSET $2`;
+                 ORDER BY "${query.sortBy}" ${sortByWithCollate} ${query.sortDirection} LIMIT $1 OFFSET $2`;
 
     return withSqlPagination(this.dataSource, sql, [`%${searchByLoginTerm}%`, `%${searchByEmailTerm}%`], query, mapper);
   }
