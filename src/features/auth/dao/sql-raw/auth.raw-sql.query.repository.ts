@@ -4,6 +4,7 @@ import { IAuthSession } from '../../types/dao';
 import { DataSource } from 'typeorm';
 import { WithDbId } from '../../../../application/utils/types';
 import { InjectDataSource } from '@nestjs/typeorm';
+import { isUUID } from 'class-validator';
 
 @Injectable()
 export class AuthRawSqlSessionQueryRepository implements IAuthSessionQueryRepository {
@@ -15,6 +16,9 @@ export class AuthRawSqlSessionQueryRepository implements IAuthSessionQueryReposi
   }
 
   async getSessionByUserIdDeviceId<T>(userId: string, deviceId: string, mapper: AuthSessionMapperType<T>): Promise<T | null> {
+    if (isUUID(deviceId)) {
+      return null;
+    }
     const res = await this.dataSource.query<WithDbId<IAuthSession>[]>(`SELECT * FROM public."AuthSession" as a WHERE a."userId" = $1 AND a."deviceId" = $2`, [
       userId,
       deviceId,
@@ -31,6 +35,10 @@ export class AuthRawSqlSessionQueryRepository implements IAuthSessionQueryReposi
   }
 
   async getSessionByDeviceId<T>(deviceId: string, mapper: AuthSessionMapperType<T>): Promise<T | null> {
+    if (isUUID(deviceId)) {
+      return null;
+    }
+
     const res = await this.dataSource.query<WithDbId<IAuthSession>[]>(`SELECT * FROM public."AuthSession" as a WHERE a."deviceId" = $1`, [deviceId]);
     if (res.length) {
       return mapper(res[0]);
