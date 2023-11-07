@@ -16,7 +16,7 @@ export class AuthRawSqlSessionQueryRepository implements IAuthSessionQueryReposi
   }
 
   async getSessionByUserIdDeviceId<T>(userId: string, deviceId: string, mapper: AuthSessionMapperType<T>): Promise<T | null> {
-    if (isUUID(deviceId)) {
+    if (!isUUID(deviceId)) {
       return null;
     }
     const res = await this.dataSource.query<WithDbId<IAuthSession>[]>(`SELECT * FROM public."AuthSession" as a WHERE a."userId" = $1 AND a."deviceId" = $2`, [
@@ -35,7 +35,7 @@ export class AuthRawSqlSessionQueryRepository implements IAuthSessionQueryReposi
   }
 
   async getSessionByDeviceId<T>(deviceId: string, mapper: AuthSessionMapperType<T>): Promise<T | null> {
-    if (isUUID(deviceId)) {
+    if (!isUUID(deviceId)) {
       return null;
     }
 
