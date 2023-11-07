@@ -5,6 +5,8 @@ import { Type } from 'class-transformer';
 
 enum UserQueryEnum {
   createdAt = 'createdAt',
+  login = 'login',
+  email = 'email',
 }
 
 export class UserPaginationQueryDto implements WithPaginationQuery {
