@@ -27,7 +27,7 @@ export class AuthTokenCreator extends AuthTokenCreatorAbstract {
 
   createAccessToken(userId: string): AuthAccessTokenPass {
     const expiredIn: Date = new Date();
-    expiredIn.setTime(expiredIn.getTime() + 10 * 1000);
+    expiredIn.setTime(expiredIn.getTime() + 60 * 1000 * 5);
 
     const head = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'jwt' })).toString('base64');
     const body = Buffer.from(JSON.stringify({ userId, expiredIn: toIsoString(expiredIn) })).toString('base64');
@@ -39,7 +39,7 @@ export class AuthTokenCreator extends AuthTokenCreatorAbstract {
   }
   createRefreshToken(userId: string, deviceId: string): AuthRefreshTokenPass {
     const expiredIn: Date = new Date();
-    expiredIn.setTime(expiredIn.getTime() + 20 * 1000);
+    expiredIn.setTime(expiredIn.getTime() + 60 * 1000 * 10);
 
     const uuid = randomUUID();
 
