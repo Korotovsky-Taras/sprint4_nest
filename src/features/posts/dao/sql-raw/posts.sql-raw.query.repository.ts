@@ -14,6 +14,8 @@ export class PostsSqlRawQueryRepository implements IPostsQueryRepository {
   constructor(@InjectDataSource() private dataSource: DataSource) {}
 
   async getBlogPosts(userId: string | null, blogId: string, query: PostPaginationQueryDto): Promise<WithPagination<PostViewModel>> {
+    const sortByWithCollate = query.sortBy !== 'createdAt' ? 'COLLATE "C"' : '';
+
     return withSqlPagination<IPostSqlRaw, PostViewModel>(
       this.dataSource,
       `SELECT p.* , (SELECT row_to_json(row) as "likesInfo" FROM
@@ -30,7 +32,7 @@ export class PostsSqlRawQueryRepository implements IPostsQueryRepository {
                LIMIT 3
                OFFSET 0
            ) as row)) as "lastLikes"
-       FROM public."Posts" as p WHERE p."blogId" = $3 ORDER BY "${query.sortBy}" ${query.sortDirection} LIMIT $1 OFFSET $2`,
+       FROM public."Posts" as p WHERE p."blogId" = $3 ORDER BY "${query.sortBy}" ${sortByWithCollate} ${query.sortDirection} LIMIT $1 OFFSET $2`,
       [blogId, userId],
       query,
       (items) => {

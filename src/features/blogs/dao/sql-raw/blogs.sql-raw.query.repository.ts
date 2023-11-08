@@ -14,9 +14,15 @@ export class BlogsSqlRawQueryRepository implements IBlogsQueryRepository {
 
   async getBlogs<T>(query: BlogPaginationQueryDto, mapper: BlogListMapperType<T>): Promise<WithPagination<T>> {
     const searchByTerm = query.searchNameTerm ? query.searchNameTerm : '';
+
+    const sortByWithCollate = query.sortBy !== 'createdAt' ? 'COLLATE "C"' : '';
+
     return withSqlPagination(
       this.dataSource,
-      `SELECT *, CAST(count(*) OVER() as INTEGER) as "totalCount" FROM public."Blogs" as t WHERE t."name" ILIKE $3 ORDER BY "${query.sortBy}" ${query.sortDirection} LIMIT $1 OFFSET $2`,
+      `SELECT *, CAST(count(*) OVER() as INTEGER) as "totalCount" 
+           FROM public."Blogs" as t WHERE t."name" ILIKE $3 
+           ORDER BY "${query.sortBy}" ${sortByWithCollate} ${query.sortDirection} 
+           LIMIT $1 OFFSET $2`,
       [`%${searchByTerm}%`],
       query,
       mapper,
