@@ -32,7 +32,8 @@ export class PostsSqlRawQueryRepository implements IPostsQueryRepository {
                ORDER BY pl."createdAt" DESC
                LIMIT 3
                OFFSET 0
-           ) as row)) as "lastLikes"
+           ) as row)) as "lastLikes",
+            (SELECT "name" FROM public."Blogs" as b WHERE b."_id" = p."blogId") as "blogName"
        FROM public."Posts" as p WHERE p."blogId" = $3 ORDER BY "${query.sortBy}" ${sortByWithCollate} ${query.sortDirection} LIMIT $1 OFFSET $2`,
       [blogId, userId],
       query,
@@ -59,7 +60,8 @@ export class PostsSqlRawQueryRepository implements IPostsQueryRepository {
                ORDER BY pl."createdAt" DESC
                LIMIT 3
                OFFSET 0
-           ) as row)) as "lastLikes"
+           ) as row)) as "lastLikes",
+           (SELECT "name" FROM public."Blogs" as b WHERE b."_id" = p."blogId") as "blogName"
        FROM public."Posts" as p ORDER BY "${query.sortBy}" ${query.sortDirection} LIMIT $1 OFFSET $2`,
       [userId],
       query,
