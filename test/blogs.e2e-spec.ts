@@ -35,7 +35,7 @@ describe('blogs testing', () => {
     if (user) {
       const result = await config
         .getHttp()
-        .post('/blogs')
+        .post('/sa/blogs')
         .set('Authorization', 'Basic ' + authBasic64)
         .set('Content-Type', 'application/json')
         .send(validBlogData)
@@ -60,11 +60,11 @@ describe('blogs testing', () => {
     expect(user).not.toBeNull();
     expect(createdBlogId).not.toBeNull();
 
-    await config.getHttp().post('/blogs').set('Content-Type', 'application/json').send({}).expect(Status.UNATHORIZED);
+    await config.getHttp().post('/sa/blogs').set('Content-Type', 'application/json').send({}).expect(Status.UNATHORIZED);
 
-    await config.getHttp().delete(`/blogs/${createdBlogId}`).expect(Status.UNATHORIZED);
+    await config.getHttp().delete(`/sa/blogs/${createdBlogId}`).expect(Status.UNATHORIZED);
 
-    await config.getHttp().put(`/blogs/${createdBlogId}`).set('Content-Type', 'application/json').send({}).expect(Status.UNATHORIZED);
+    await config.getHttp().put(`/sa/blogs/${createdBlogId}`).set('Content-Type', 'application/json').send({}).expect(Status.UNATHORIZED);
   });
 
   it('should create post', async () => {
@@ -102,7 +102,7 @@ describe('blogs testing', () => {
 
     await config
       .getHttp()
-      .post(`/blogs/${createdBlogId}/posts`)
+      .post(`/sa/blogs/${createdBlogId}/posts`)
       .set('Authorization', 'Basic ' + authBasic64)
       .set('Content-Type', 'application/json')
       .send({
@@ -111,27 +111,29 @@ describe('blogs testing', () => {
       .expect(Status.CREATED);
   });
 
-  it('should update post', async () => {
+  it('should update blog post', async () => {
     expect(user).not.toBeNull();
     expect(createdBlogId).not.toBeNull();
+    expect(createdPostId).not.toBeNull();
 
     if (user) {
       const newTitle = 'new title';
 
       await config
         .getHttp()
-        .put(`/posts/${createdPostId}`)
+        .put(`/sa/blogs/${createdBlogId}/posts/${createdPostId}`)
         .set('Authorization', 'Basic ' + authBasic64)
         .set('Content-Type', 'application/json')
         .send({
           title: newTitle,
           shortDescription: 'valid short description',
           content: 'valid content',
-          blogId: createdBlogId,
         })
         .expect(Status.NO_CONTENT);
 
       const result = await config.getHttp().get(`/posts/${createdPostId}`).set('Content-Type', 'application/json').expect(Status.OK);
+
+      console.log(result.body);
 
       expect(result.body).toEqual({
         id: expect.any(String),

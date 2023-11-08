@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { ICommentsRepository } from '../../types/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Comment } from './comments.schema';
@@ -7,15 +7,15 @@ import { DeleteResult, ObjectId, UpdateResult } from 'mongodb';
 import { CommentUpdateDto } from '../../dto/CommentUpdateDto';
 import { CommentCreateModel } from '../../types/dto';
 import { LikeStatus } from '../../../likes/types';
-import { User } from '../../../users/dao/mongo/users.schema';
-import { IUserModel, UserDocumentType } from '../../../users/types/dao';
 import { Error } from 'mongoose';
+import { IUsersRepository, UserRepoKey } from '../../../users/types/common';
+import { UserEntityRepo } from '../../../users/dao/user-entity.repo';
 
 @Injectable()
 export class CommentsMongoRepository implements ICommentsRepository {
   constructor(
     @InjectModel(Comment.name) private commentModel: ICommentModel,
-    @InjectModel(User.name) private userModel: IUserModel,
+    @Inject(UserRepoKey) private usersRepo: IUsersRepository,
   ) {}
 
   async updateCommentById(commentId: string, input: CommentUpdateDto): Promise<boolean> {
@@ -31,7 +31,7 @@ export class CommentsMongoRepository implements ICommentsRepository {
 
   async updateLike(commentId: string, userId: string, status: LikeStatus): Promise<boolean> {
     const comment: CommentDocumentType | null = await this.commentModel.findOne({ _id: new ObjectId(commentId) }).exec();
-    const user: UserDocumentType | null = await this.userModel.findOne({ _id: new ObjectId(userId) }).exec();
+    const user: UserEntityRepo | null = await this.usersRepo.getUserById(userId);
     if (!user || !comment) {
       throw new Error(`Comment -> update like data error`);
     }

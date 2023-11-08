@@ -14,7 +14,7 @@ export class DeletePostByIdCase implements ICommandHandler<DeletePostByIdCommand
 
   async execute({ postId }: DeletePostByIdCommand): Promise<ServiceResult> {
     const result = new ServiceResult();
-    const isPostExist: boolean = await this.postsRepo.isPostExist(postId);
+    const isPostExist: boolean = await this.postsRepo.isPostByIdExist(postId);
     if (!isPostExist) {
       result.addError({
         code: PostServiceError.POST_NOT_FOUND,

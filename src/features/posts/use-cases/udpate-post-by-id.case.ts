@@ -21,7 +21,7 @@ export class UpdatePostByIdCase implements ICommandHandler<UpdatePostByIdCommand
     await validateOrRejectDto(dto, PostUpdateDto);
     const result = new ServiceResult();
 
-    const isPostExist: boolean = await this.postsRepo.isPostExist(postId);
+    const isPostExist: boolean = await this.postsRepo.isPostByIdExist(postId);
     if (!isPostExist) {
       result.addError({
         code: PostServiceError.POST_NOT_FOUND,

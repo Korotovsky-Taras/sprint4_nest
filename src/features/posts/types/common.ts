@@ -10,6 +10,7 @@ import { PostCommentCreateDto } from '../dto/PostCommentCreateDto';
 import { LikeStatus } from '../../likes/types';
 import { PostPaginationQueryDto } from '../dto/PostPaginationQueryDto';
 import { CommentsPaginationQueryDto } from '../../comments/dto/CommentsPaginationQueryDto';
+import { BlogPostUpdateDto } from '../../blogs/dto/BlogPostUpdateDto';
 
 export interface IPostsService extends IService {}
 
@@ -29,9 +30,12 @@ export interface IPostsRepository extends IRepository<IPost> {
   createPost(input: PostCreateModel, userId: UserIdReq): Promise<PostViewModel>;
   updatePostById(id: string, input: PostUpdateDto): Promise<boolean>;
   getPostById(id: string): Promise<PostDBType | null>;
-  isPostExist(id: string): Promise<boolean>;
+  isPostByIdExist(id: string): Promise<boolean>;
   updateLike(postId: string, likeStatus: LikeStatus, userId: string, userLogin: string): Promise<boolean>;
   deletePostById(id: string): Promise<boolean>;
+  isBlogPostByIdExist(blogId: string, postId: string): Promise<boolean>;
+  updateBlogPostById(blogId: string, postId: string, dto: BlogPostUpdateDto): Promise<boolean>;
+  deleteBlogPostById(blogId: string, postId: string): Promise<boolean>;
 }
 
 export const PostQueryRepoKey = Symbol('POSTS_QUERY_REPO');

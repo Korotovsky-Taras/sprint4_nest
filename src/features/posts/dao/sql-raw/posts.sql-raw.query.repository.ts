@@ -82,7 +82,8 @@ export class PostsSqlRawQueryRepository implements IPostsQueryRepository {
               ORDER BY pl."createdAt" DESC 
               LIMIT 3
               OFFSET 0
-          ) as row)) as "lastLikes"
+          ) as row)) as "lastLikes",
+          (SELECT "name" FROM public."Blogs" as b WHERE b."_id" = p."blogId") as "blogName"
        FROM public."Posts" as p WHERE p."_id" = $1`,
       [postId, userId],
     );

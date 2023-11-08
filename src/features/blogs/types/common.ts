@@ -9,6 +9,7 @@ import { BlogCreateDto } from '../dto/BlogCreateDto';
 import { BlogUpdateDto } from '../dto/BlogUpdateDto';
 import { BlogPaginationQueryDto } from '../dto/BlogPaginationQueryDto';
 import { PostPaginationQueryDto } from '../../posts/dto/PostPaginationQueryDto';
+import { BlogPostUpdateDto } from '../dto/BlogPostUpdateDto';
 
 export type BlogMapperType<T> = (blog: BlogDBType) => T;
 export type BlogListMapperType<T> = (blog: BlogDBType[]) => T[];
@@ -18,11 +19,18 @@ export interface IBlogService extends IService {}
 export interface IBlogsController {
   getAll(query: BlogPaginationQueryDto): Promise<WithPagination<BlogViewModel>>;
   getBlog(blogId: string): Promise<BlogViewModel>;
-  createBlog(input: BlogCreateDto): Promise<BlogViewModel | null>;
   getBlogPosts(blogId: string, query: PostPaginationQueryDto, req: Request): Promise<WithPagination<PostViewModel>>;
-  createBlogPost(blogId: string, input: BlogPostCreateDto, req: Request): Promise<PostViewModel>;
+}
+
+export interface IBlogsAdminController {
+  getAll(query: BlogPaginationQueryDto): Promise<WithPagination<BlogViewModel>>;
+  createBlog(input: BlogCreateDto): Promise<BlogViewModel | null>;
   updateBlog(blogId: string, input: BlogUpdateDto): Promise<void>;
   deleteBlog(blogId: string): Promise<void>;
+  getBlogPosts(blogId: string, query: PostPaginationQueryDto, req: Request): Promise<WithPagination<PostViewModel>>;
+  createBlogPost(blogId: string, input: BlogPostCreateDto, req: Request): Promise<PostViewModel>;
+  updateBlogPost(blogId: string, postId: string, dto: BlogPostUpdateDto): Promise<void>;
+  deleteBlogPost(blogId: string, postId: string): Promise<void>;
 }
 
 export const BlogRepoKey = Symbol('BLOGS_REPO');

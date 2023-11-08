@@ -1,5 +1,5 @@
 import { testInit } from './utils/test.init';
-import { TestCreateUtils } from './utils/test.create.utils';
+import { authBasic64, TestCreateUtils } from './utils/test.create.utils';
 import { BlogViewModel } from '../src/features/blogs/types/dto';
 import { PostViewModel } from '../src/features/posts/types/dto';
 import { UserViewModel } from '../src/features/users/types/dto';
@@ -21,6 +21,41 @@ describe('posts testing', () => {
     user = await utils.createUser(utils.createNewUserModel());
     blog = await utils.createBlog(user.id);
     post = await utils.createPost(user.id, blog.id);
+  });
+
+  it('should update post', async () => {
+    expect(user).not.toBeNull();
+    expect(blog).not.toBeNull();
+
+    if (user && blog && post) {
+      const newTitle = 'new title';
+
+      await config
+        .getHttp()
+        .put(`/posts/${post.id}`)
+        .set('Authorization', 'Basic ' + authBasic64)
+        .set('Content-Type', 'application/json')
+        .send({
+          title: newTitle,
+          shortDescription: 'valid short description',
+          content: 'valid content',
+          blogId: blog.id,
+        })
+        .expect(Status.NO_CONTENT);
+
+      const result = await config.getHttp().get(`/posts/${post.id}`).set('Content-Type', 'application/json').expect(Status.OK);
+
+      expect(result.body).toEqual({
+        id: expect.any(String),
+        title: newTitle,
+        shortDescription: expect.any(String),
+        content: expect.any(String),
+        blogName: expect.any(String),
+        blogId: expect.any(String),
+        createdAt: expect.any(String),
+        extendedLikesInfo: expect.any(Object),
+      });
+    }
   });
 
   it('should add likes', async () => {

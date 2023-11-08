@@ -13,6 +13,7 @@ import { BlogsSqlRawRepository } from './dao/sql-raw/blogs.sql-raw.repository';
 import { BlogsSqlRawQueryRepository } from './dao/sql-raw/blogs.sql-raw.query.repository';
 import { BlogQueryRepoKey, BlogRepoKey } from './types/common';
 import { withDbTypedClass } from '../../application/utils/withTypedClass';
+import { BlogsAdminController } from './api/blogs.admin.controller';
 
 const BlogQueryRepoTyped = withDbTypedClass(BlogQueryRepoKey, { Mongo: BlogsMongoQueryRepository, SQLRaw: BlogsSqlRawQueryRepository });
 const BlogRepoTyped = withDbTypedClass(BlogRepoKey, { Mongo: BlogsMongoRepository, SQLRaw: BlogsSqlRawRepository });
@@ -28,7 +29,7 @@ const BlogRepoTyped = withDbTypedClass(BlogRepoKey, { Mongo: BlogsMongoRepositor
     ]),
     forwardRef(() => PostsModule),
   ],
-  controllers: [BlogsController],
+  controllers: [BlogsController, BlogsAdminController],
   providers: [BlogsService, BlogQueryRepoTyped, BlogRepoTyped, IsBlogIdExistValidator, ...blogCases],
   exports: [BlogQueryRepoTyped, BlogRepoTyped],
 })

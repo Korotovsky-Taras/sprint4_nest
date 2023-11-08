@@ -19,7 +19,7 @@ export class TestCreateUtils extends TestCommonUtils {
   async createBlog(userId: string, model: BlogCreationTestModel = validBlogData): Promise<BlogViewModel> {
     const result = await this.config
       .getHttp()
-      .post('/blogs')
+      .post('/sa/blogs')
       .set('Authorization', 'Basic ' + authBasic64)
       .set('Content-Type', 'application/json')
       .send(model);

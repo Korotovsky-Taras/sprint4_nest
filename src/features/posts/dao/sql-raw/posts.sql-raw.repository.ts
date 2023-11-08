@@ -7,6 +7,7 @@ import { LikeStatus } from '../../../likes/types';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { PostsSqlRawDataMapper } from '../../api/posts.sql-raw.dm';
+import { isNumber } from 'class-validator';
 
 @Injectable()
 export class PostsSqlRawRepository implements IPostsRepository {
@@ -34,7 +35,7 @@ RETURNING *, (SELECT b."name" as "blogName" FROM public."Blogs" as b WHERE b._id
 
   async updatePostById(id: string, dto: PostUpdateDto): Promise<boolean> {
     const [, count] = await this.dataSource.query(
-      `UPDATE public."Posts" as p SET "title"=$3, "shortDescription"=$4, "content"=$4 WHERE p."_id" = $1 AND p."blogId" = $2`,
+      `UPDATE public."Posts" as p SET "blogId" = $2, "title"=$3, "shortDescription"=$4, "content"=$5 WHERE p."_id" = $1`,
       [id, dto.blogId, dto.title, dto.shortDescription, dto.content],
     );
     return count > 0;
@@ -64,12 +65,18 @@ RETURNING *, (SELECT b."name" as "blogName" FROM public."Blogs" as b WHERE b._id
     return true;
   }
 
-  async isPostExist(id: string): Promise<boolean> {
+  async isPostByIdExist(id: string): Promise<boolean> {
+    if (!isNumber(Number(id))) {
+      return false;
+    }
     const res = await this.dataSource.query<PostDBType[]>(`SELECT "_id" FROM public."Posts" as p WHERE p."_id" = $1 `, [id]);
     return !!res[0];
   }
 
   async getPostById(id: string): Promise<PostDBType | null> {
+    if (!isNumber(Number(id))) {
+      return null;
+    }
     const res = await this.dataSource.query<PostDBType[]>(`SELECT "_id" FROM public."Posts" as p WHERE p."_id" = $1 `, [id]);
     const post = res[0];
     if (post) {
@@ -80,6 +87,24 @@ RETURNING *, (SELECT b."name" as "blogName" FROM public."Blogs" as b WHERE b._id
 
   async deletePostById(id: string): Promise<boolean> {
     const [, count] = await this.dataSource.query(`DELETE FROM public."Posts" as p WHERE p."_id" = $1`, [id]);
+    return count > 0;
+  }
+
+  async isBlogPostByIdExist(blogId: string, postId: string): Promise<boolean> {
+    const res = await this.dataSource.query<PostDBType[]>(`SELECT "_id" FROM public."Posts" as p WHERE p."_id" = $2 AND p."blogId" = $1 `, [blogId, postId]);
+    return !!res[0];
+  }
+
+  async updateBlogPostById(blogId: string, postId: string, dto: PostUpdateDto): Promise<boolean> {
+    const [, count] = await this.dataSource.query(
+      `UPDATE public."Posts" as p SET "title"=$3, "shortDescription"=$4, "content"=$5 WHERE p."_id" = $2 AND p."blogId" = $1`,
+      [blogId, postId, dto.title, dto.shortDescription, dto.content],
+    );
+    return count > 0;
+  }
+
+  async deleteBlogPostById(blogId: string, postId: string): Promise<boolean> {
+    const [, count] = await this.dataSource.query(`DELETE FROM public."Posts" as p WHERE p."blogId" = $1 AND p."_id" = $2`, [blogId, postId]);
     return count > 0;
   }
 

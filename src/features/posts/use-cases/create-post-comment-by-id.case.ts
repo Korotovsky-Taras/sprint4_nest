@@ -48,7 +48,7 @@ export class CreatePostCommentByIdCase implements ICommandHandler<CreatePostComm
       return result;
     }
 
-    const postExist: boolean = await this.postsRepo.isPostExist(postId);
+    const postExist: boolean = await this.postsRepo.isPostByIdExist(postId);
 
     if (!postExist) {
       result.addError({
