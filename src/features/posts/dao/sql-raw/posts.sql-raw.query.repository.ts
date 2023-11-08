@@ -18,11 +18,12 @@ export class PostsSqlRawQueryRepository implements IPostsQueryRepository {
 
     return withSqlPagination<IPostSqlRaw, PostViewModel>(
       this.dataSource,
-      `SELECT p.* , (SELECT row_to_json(row) as "likesInfo" FROM
-          (SELECT (SELECT count(*) FROM public."PostsLikes" WHERE "postId" = p._id and "likeStatus" = 1) as "likesCount",
-                  (SELECT count(*) FROM public."PostsLikes" WHERE "postId" = p._id and "likeStatus" = 0) as "dislikesCount",
-                  (SELECT "likeStatus" FROM public."PostsLikes" WHERE "postId" = p._id and "userId" = $4) as "myStatus"
-          ) as row),
+      `SELECT p.*, CAST(count(*) OVER() as INTEGER) as "totalCount",
+          (SELECT row_to_json(row) as "likesInfo" FROM
+            (SELECT (SELECT count(*) FROM public."PostsLikes" WHERE "postId" = p._id and "likeStatus" = 1) as "likesCount",
+                    (SELECT count(*) FROM public."PostsLikes" WHERE "postId" = p._id and "likeStatus" = 0) as "dislikesCount",
+                    (SELECT "likeStatus" FROM public."PostsLikes" WHERE "postId" = p._id and "userId" = $4) as "myStatus"
+            ) as row),
           (SELECT array(SELECT row_to_json(row) FROM (
                SELECT pl."createdAt", U.login, U._id as "userId"
                FROM "PostsLikes" pl
