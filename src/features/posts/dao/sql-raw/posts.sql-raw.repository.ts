@@ -43,18 +43,24 @@ RETURNING *, (SELECT b."name" as "blogName" FROM public."Blogs" as b WHERE b._id
 
   async updateLike(postId: string, status: LikeStatus, userId: string): Promise<boolean> {
     if (status === LikeStatus.NONE) {
-      const [, count] = await this.dataSource.query(`DELETE FROM public."PostsLikes" as p WHERE p."_id" = $1 AND p."userId" = $2`, [postId, userId]);
+      const [, count] = await this.dataSource.query(`DELETE FROM public."PostsLikes" as p WHERE p."_id" = $1 AND p."userId" = $2`, [
+        Number(postId),
+        Number(userId),
+      ]);
       return count > 0;
     }
 
-    const res = await this.dataSource.query(`SELECT * FROM public."PostsLikes" as pcl WHERE pcl."postId" = $1 AND pcl."userId" = $2`, [postId, userId]);
+    const res = await this.dataSource.query(`SELECT * FROM public."PostsLikes" as pcl WHERE pcl."postId" = $1 AND pcl."userId" = $2`, [
+      Number(postId),
+      Number(userId),
+    ]);
 
     const nextStatus = status === LikeStatus.DISLIKE ? 0 : 1;
 
     if (res.length > 0) {
       const [, count] = await this.dataSource.query(`UPDATE public."PostsLikes" as pcl  SET "likeStatus"=$3 WHERE pcl."userId" = $1 AND pcl."postId" = $2`, [
-        userId,
-        postId,
+        Number(userId),
+        Number(postId),
         nextStatus,
       ]);
       return count > 0;

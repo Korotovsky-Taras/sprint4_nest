@@ -35,7 +35,7 @@ export class PostsSqlRawQueryRepository implements IPostsQueryRepository {
            ) as row)) as "lastLikes",
             (SELECT "name" FROM public."Blogs" as b WHERE b."_id" = p."blogId") as "blogName"
        FROM public."Posts" as p WHERE p."blogId" = $3 ORDER BY "${query.sortBy}" ${sortByWithCollate} ${query.sortDirection} LIMIT $1 OFFSET $2`,
-      [blogId, userId],
+      [Number(blogId), Number(userId)],
       query,
       (items) => {
         return PostsSqlRawDataMapper.toPostsView(items);
@@ -63,7 +63,7 @@ export class PostsSqlRawQueryRepository implements IPostsQueryRepository {
            ) as row)) as "lastLikes",
            (SELECT "name" FROM public."Blogs" as b WHERE b."_id" = p."blogId") as "blogName"
        FROM public."Posts" as p ORDER BY "${query.sortBy}" ${query.sortDirection} LIMIT $1 OFFSET $2`,
-      [userId],
+      [Number(userId)],
       query,
       (items) => {
         return PostsSqlRawDataMapper.toPostsView(items);
@@ -90,7 +90,7 @@ export class PostsSqlRawQueryRepository implements IPostsQueryRepository {
           ) as row)) as "lastLikes",
           (SELECT "name" FROM public."Blogs" as b WHERE b."_id" = p."blogId") as "blogName"
        FROM public."Posts" as p WHERE p."_id" = $1`,
-      [postId, userId],
+      [Number(postId), Number(userId)],
     );
 
     if (res.length > 0) {
@@ -101,7 +101,7 @@ export class PostsSqlRawQueryRepository implements IPostsQueryRepository {
   }
 
   async isPostExist(postId: string): Promise<boolean> {
-    const res = await this.dataSource.query<PostDBType[]>(`SELECT * FROM public."Posts" as p WHERE p."_id" = $1`, [postId]);
+    const res = await this.dataSource.query<PostDBType[]>(`SELECT * FROM public."Posts" as p WHERE p."_id" = $1`, [Number(postId)]);
     return res.length > 0;
   }
 }
