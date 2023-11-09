@@ -25,7 +25,7 @@ export class PostsSqlRawQueryRepository implements IPostsQueryRepository {
                     (SELECT "likeStatus" FROM public."PostsLikes" WHERE "postId" = p._id and "userId" = $4) as "myStatus"
             ) as row),
           (SELECT array(SELECT row_to_json(row) FROM (
-               SELECT pl."createdAt", U.login, U._id as "userId"
+               SELECT pl."createdAt", U.login as "userLogin", U._id as "userId"
                FROM "PostsLikes" pl
                LEFT JOIN "Users" U ON pl."userId" = U._id
                WHERE pl."likeStatus" = 1 AND pl."postId" = p._id
@@ -53,7 +53,7 @@ export class PostsSqlRawQueryRepository implements IPostsQueryRepository {
                     (SELECT "likeStatus" FROM public."PostsLikes" WHERE "postId" = p._id and "userId" = $3) as "myStatus"
             ) as row),
           (SELECT array(SELECT row_to_json(row) FROM (
-               SELECT pl."createdAt", U.login, U._id as "userId"
+               SELECT pl."createdAt", U.login as "userLogin", U._id as "userId"
                FROM "PostsLikes" pl
                LEFT JOIN "Users" U ON pl."userId" = U._id
                WHERE pl."likeStatus" = 1 AND pl."postId" = p._id
@@ -80,7 +80,7 @@ export class PostsSqlRawQueryRepository implements IPostsQueryRepository {
                   
           ) as row),
          (SELECT array(SELECT row_to_json(row) FROM (
-              SELECT pl."createdAt", U.login, U._id as "userId"
+              SELECT pl."createdAt", U.login as "userLogin", U._id as "userId"
               FROM "PostsLikes" pl
               LEFT JOIN "Users" U ON pl."userId" = U._id
               WHERE pl."likeStatus" = 1 AND pl."postId" = p._id
