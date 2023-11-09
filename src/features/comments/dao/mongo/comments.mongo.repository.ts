@@ -35,7 +35,8 @@ export class CommentsMongoRepository implements ICommentsRepository {
     if (!user || !comment) {
       throw new Error(`Comment -> update like data error`);
     }
-    await comment.updateLike(userId, user.login, status);
+    comment.updateLike(userId, user.login, status);
+    await this.saveDoc(comment);
     return true;
   }
 

@@ -50,7 +50,7 @@ export class UpdateCommentLikeStatusCase implements ICommandHandler<UpdateCommen
       return result;
     }
 
-    await this.commentsRepo.updateLike(userModel._id, model.commentId, model.status);
+    await this.commentsRepo.updateLike(model.commentId, userModel._id, model.status);
 
     return result;
   }

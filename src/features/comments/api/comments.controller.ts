@@ -8,7 +8,6 @@ import {
   Inject,
   Injectable,
   NotFoundException,
-  Param,
   Put,
   Req,
   UnauthorizedException,
@@ -29,6 +28,7 @@ import { UpdateCommentByIdCommand } from '../use-cases/update-comment-by-id.case
 import { CommentServiceError } from '../types/errors';
 import { DeleteCommentByIdCommand } from '../use-cases/delete-comment-by-id.case';
 import { UpdateCommentLikeStatusCommand } from '../use-cases/update-comment-like-status.case';
+import { ParamId } from '../../../application/decorators/params/getParamNumberId';
 
 @Injectable()
 @Controller('comments')
@@ -43,7 +43,7 @@ export class CommentsController implements ICommentsController {
   @SetTokenGuardParams({ throwError: false })
   @UseGuards(AuthTokenGuard)
   @HttpCode(Status.OK)
-  async getComment(@Param('id') commentId: string, @Req() req: Request): Promise<CommentViewModel> {
+  async getComment(@ParamId('id') commentId: string, @Req() req: Request): Promise<CommentViewModel> {
     const comment: CommentViewModel | null = await this.commentsQueryRepo.getCommentById(req.userId, commentId);
     if (comment) {
       return comment;
@@ -54,7 +54,7 @@ export class CommentsController implements ICommentsController {
   @Put('/:id')
   @UseGuards(AuthTokenGuard)
   @HttpCode(Status.NO_CONTENT)
-  async updateComment(@Param('id') commentId: string, @Body() dto: CommentUpdateDto, @Req() req: Request): Promise<void> {
+  async updateComment(@ParamId('id') commentId: string, @Body() dto: CommentUpdateDto, @Req() req: Request): Promise<void> {
     const result: ServiceResult = await this.commandBus.execute<UpdateCommentByIdCommand, ServiceResult>(
       new UpdateCommentByIdCommand(commentId, req.userId, dto),
     );
@@ -71,7 +71,7 @@ export class CommentsController implements ICommentsController {
   @Put('/:id/like-status')
   @UseGuards(AuthTokenGuard)
   @HttpCode(Status.NO_CONTENT)
-  async updateCommentLikeStatus(@Param('id') commentId: string, @Body() input: LikeStatusUpdateDto, @Req() req: Request): Promise<void> {
+  async updateCommentLikeStatus(@ParamId('id') commentId: string, @Body() input: LikeStatusUpdateDto, @Req() req: Request): Promise<void> {
     const result: ServiceResult = await this.commandBus.execute<UpdateCommentLikeStatusCommand, ServiceResult>(
       new UpdateCommentLikeStatusCommand(req.userId, {
         commentId: commentId,
@@ -91,7 +91,7 @@ export class CommentsController implements ICommentsController {
   @Delete('/:id')
   @UseGuards(AuthTokenGuard)
   @HttpCode(Status.NO_CONTENT)
-  async deleteComment(@Param('id') commentId: string, @Req() req: Request): Promise<void> {
+  async deleteComment(@ParamId('id') commentId: string, @Req() req: Request): Promise<void> {
     const result: ServiceResult = await this.commandBus.execute<DeleteCommentByIdCommand, ServiceResult>(new DeleteCommentByIdCommand(commentId, req.userId));
 
     if (result.hasErrorCode(CommentServiceError.COMMENT_NOT_FOUND)) {

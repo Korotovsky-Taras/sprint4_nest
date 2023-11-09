@@ -294,7 +294,7 @@ describe('comments testing', () => {
     expect(user).not.toBeNull();
     expect(comment).not.toBeNull();
 
-    const fakeCommentId = '64b92eac872655d706c510f1';
+    const fakeCommentId = 'sdf23';
 
     if (post && blog && user && comment) {
       await config
@@ -305,14 +305,16 @@ describe('comments testing', () => {
         .send({
           content: utils.generateString(20),
         })
-        .expect(Status.NOT_FOUND);
+        .expect(Status.BAD_REQUEST);
+
+      await config.getHttp().get(`/comments/${fakeCommentId}`).set('Content-Type', 'application/json').expect(Status.BAD_REQUEST);
 
       await config
         .getHttp()
         .delete(`/comments/${fakeCommentId}`)
         .set('Content-Type', 'application/json')
         .set('Authorization', 'Bearer ' + utils.createAccessToken(user.id))
-        .expect(Status.NOT_FOUND);
+        .expect(Status.BAD_REQUEST);
     }
   });
 

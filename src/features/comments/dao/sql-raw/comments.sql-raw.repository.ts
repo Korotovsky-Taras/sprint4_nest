@@ -12,30 +12,33 @@ export class CommentsSqlRawRepository implements ICommentsRepository {
   constructor(@InjectDataSource() private dataSource: DataSource) {}
 
   async updateCommentById(commentId: string, input: CommentUpdateDto): Promise<boolean> {
-    const [, count] = await this.dataSource.query(`UPDATE public."PostsComments" as pc SET "content" = $2 WHERE pc."_id" = $1`, [commentId, input.content]);
+    const [, count] = await this.dataSource.query(`UPDATE public."PostsComments" as pc SET "content" = $2 WHERE pc."_id" = $1`, [
+      Number(commentId),
+      input.content,
+    ]);
     return count > 0;
   }
 
   async createComment(dto: CommentCreateModel): Promise<string> {
     const res = await this.dataSource.query<ICommentSqlRaw[]>(
       `INSERT INTO public."PostsComments" ("postId", "content", "userId") VALUES ($1, $2, $3) RETURNING "_id"`,
-      [dto.postId, dto.content, dto.commentatorInfo.userId],
+      [Number(dto.postId), dto.content, Number(dto.commentatorInfo.userId)],
     );
     return String(res[0]._id);
   }
 
-  async updateLike(userId: string, commentId: string, status: LikeStatus): Promise<boolean> {
+  async updateLike(commentId: string, userId: string, status: LikeStatus): Promise<boolean> {
     if (status === LikeStatus.NONE) {
       const [, count] = await this.dataSource.query(`DELETE FROM public."PostsCommentsLikes" as pc WHERE pc."userId" = $1 AND pc."_id" = $2`, [
-        userId,
-        commentId,
+        Number(userId),
+        Number(commentId),
       ]);
       return count > 0;
     }
 
     const res = await this.dataSource.query(`SELECT * FROM public."PostsCommentsLikes" as pcl WHERE pcl."commentId" = $1 AND pcl."userId" = $2`, [
-      commentId,
-      userId,
+      Number(commentId),
+      Number(userId),
     ]);
 
     if (res.length > 0) {
@@ -47,8 +50,8 @@ export class CommentsSqlRawRepository implements ICommentsRepository {
     }
 
     await this.dataSource.query(`INSERT INTO public."PostsCommentsLikes" as pc ("userId", "commentId", "likeStatus") VALUES ($1, $2, $3)`, [
-      userId,
-      commentId,
+      Number(userId),
+      Number(commentId),
       status === LikeStatus.DISLIKE ? 0 : 1,
     ]);
 
@@ -67,8 +70,8 @@ export class CommentsSqlRawRepository implements ICommentsRepository {
 
   async isUserCommentOwner(commentId: string, userId: string): Promise<boolean> {
     const res = await this.dataSource.query<ICommentSqlRaw[]>(`SELECT * FROM public."PostsComments" as pc WHERE pc."_id" = $1 AND pc."userId" = $2`, [
-      commentId,
-      userId,
+      Number(commentId),
+      Number(userId),
     ]);
     return res.length > 0;
   }

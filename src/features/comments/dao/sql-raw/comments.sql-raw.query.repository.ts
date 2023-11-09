@@ -21,11 +21,11 @@ export class CommentsSqlRawQueryRepository implements ICommentsQueryRepository {
                                       (SELECT "likeStatus" FROM public."PostsCommentsLikes" WHERE "postId" = pc._id AND "userId" = $3) as "myStatus"
                                ) as row),
                         (SELECT row_to_json(row) as "commentatorInfo"
-                         FROM (SELECT "_id" as "userId", "login" as "userLogin" FROM public."Users" as u WHERE u."_id" = $3 ) as row)
+                         FROM (SELECT "_id" as "userId", "login" as "userLogin" FROM public."Users" as u WHERE u."_id" = pc."userId" ) as row)
                  FROM public."PostsComments" as pc ORDER BY "${query.sortBy}" ${query.sortDirection} LIMIT $1 OFFSET $2
     `;
 
-    return withSqlPagination<ICommentSqlRaw, CommentViewModel>(this.dataSource, sql, [userId], query, (items) => {
+    return withSqlPagination<ICommentSqlRaw, CommentViewModel>(this.dataSource, sql, [Number(userId)], query, (items) => {
       return CommentsSqlRawDataMapper.toCommentsView(items);
     });
   }
@@ -39,9 +39,9 @@ export class CommentsSqlRawQueryRepository implements ICommentsQueryRepository {
                                   (SELECT "likeStatus" FROM public."PostsCommentsLikes" WHERE "commentId" = pc._id AND "userId" = $2) as "myStatus"
                           ) as row),
                     (SELECT row_to_json(row) as "commentatorInfo"
-                     FROM (SELECT "_id" as "userId", "login" as "userLogin" FROM public."Users" as u WHERE u."_id" = $2 ) as row)
+                     FROM (SELECT "_id" as "userId", "login" as "userLogin" FROM public."Users" as u WHERE u."_id" = pc."userId" ) as row)
                FROM public."PostsComments" as pc WHERE pc."_id" = $1`,
-      [commentId, userId],
+      [Number(commentId), Number(userId)],
     );
     if (res.length > 0) {
       return CommentsSqlRawDataMapper.toCommentView(res[0]);

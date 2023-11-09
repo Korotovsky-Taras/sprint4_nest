@@ -10,7 +10,10 @@ export class CommentsMongoDataMapper {
     return {
       id: comment._id.toString(),
       content: comment.content,
-      commentatorInfo: comment.commentatorInfo,
+      commentatorInfo: {
+        userId: comment.commentatorInfo.userId,
+        userLogin: comment.commentatorInfo.userLogin,
+      },
       createdAt: toIsoString(comment.createdAt),
       likesInfo: {
         likesCount: comment.likesInfo.likesCount,
