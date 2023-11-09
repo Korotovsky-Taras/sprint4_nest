@@ -38,7 +38,7 @@ export class UpdatePostLikeStatusCase implements ICommandHandler<UpdatePostLikeS
       return result;
     }
 
-    const isPostUpdated = await this.postsRepo.updateLike(post._id.toString(), model.status, user._id.toString(), user.login);
+    const isPostUpdated = await this.postsRepo.updateLike(post._id.toString(), model.status, user._id, user.login);
 
     if (!isPostUpdated) {
       result.addError({

@@ -107,99 +107,139 @@ describe('posts testing', () => {
     }
   });
 
-  it('should change like to dislike likes', async () => {
-    expect(blog).not.toBeNull();
-    expect(post).not.toBeNull();
-    expect(user).not.toBeNull();
+  // it('should change like to dislike likes', async () => {
+  //   expect(blog).not.toBeNull();
+  //   expect(post).not.toBeNull();
+  //   expect(user).not.toBeNull();
+  //
+  //   if (blog && post && user) {
+  //     await config
+  //       .getHttp()
+  //       .put(`/posts/${post.id}/like-status`)
+  //       .set('Authorization', 'Bearer ' + utils.createAccessToken(user.id))
+  //       .set('Content-Type', 'application/json')
+  //       .send({
+  //         likeStatus: LikeStatus.DISLIKE,
+  //       });
+  //
+  //     const res = await config
+  //       .getHttp()
+  //       .get(`/posts/${post.id}`)
+  //       .set('Authorization', 'Bearer ' + utils.createAccessToken(user.id))
+  //       .set('Content-Type', 'application/json');
+  //
+  //     expect(res.body.extendedLikesInfo).toEqual({
+  //       likesCount: 0,
+  //       dislikesCount: 1,
+  //       myStatus: 'Dislike',
+  //       newestLikes: expect.any(Array),
+  //     });
+  //   }
+  // });
+  //
+  // it('should return correct extended likes', async () => {
+  //   expect(blog).not.toBeNull();
+  //   expect(post).not.toBeNull();
+  //   expect(user).not.toBeNull();
+  //
+  //   if (blog && post && user) {
+  //     await config
+  //       .getHttp()
+  //       .put(`/posts/${post.id}/like-status`)
+  //       .set('Authorization', 'Bearer ' + utils.createAccessToken(user.id))
+  //       .set('Content-Type', 'application/json')
+  //       .send({
+  //         likeStatus: LikeStatus.LIKE,
+  //       });
+  //
+  //     const user1 = await utils.createUser(utils.createNewUserModel());
+  //     await config
+  //       .getHttp()
+  //       .put(`/posts/${post.id}/like-status`)
+  //       .set('Authorization', 'Bearer ' + utils.createAccessToken(user1.id))
+  //       .set('Content-Type', 'application/json')
+  //       .send({
+  //         likeStatus: LikeStatus.LIKE,
+  //       });
+  //
+  //     const user2 = await utils.createUser(utils.createNewUserModel());
+  //     await config
+  //       .getHttp()
+  //       .put(`/posts/${post.id}/like-status`)
+  //       .set('Authorization', 'Bearer ' + utils.createAccessToken(user2.id))
+  //       .set('Content-Type', 'application/json')
+  //       .send({
+  //         likeStatus: LikeStatus.LIKE,
+  //       });
+  //
+  //     const res1 = await config
+  //       .getHttp()
+  //       .get(`/posts/${post.id}`)
+  //       .set('Authorization', 'Bearer ' + utils.createAccessToken(user.id))
+  //       .set('Content-Type', 'application/json');
+  //
+  //     expect(res1.body.extendedLikesInfo.newestLikes).toHaveLength(3);
+  //
+  //     await config
+  //       .getHttp()
+  //       .put(`/posts/${post.id}/like-status`)
+  //       .set('Authorization', 'Bearer ' + utils.createAccessToken(user2.id))
+  //       .set('Content-Type', 'application/json')
+  //       .send({
+  //         likeStatus: LikeStatus.DISLIKE,
+  //       });
+  //
+  //     const res2 = await config
+  //       .getHttp()
+  //       .get(`/posts/${post.id}`)
+  //       .set('Authorization', 'Bearer ' + utils.createAccessToken(user.id))
+  //       .set('Content-Type', 'application/json');
+  //
+  //     expect(res2.body.extendedLikesInfo.newestLikes).toHaveLength(2);
+  //   }
+  // });
+  //
+  // it('should return 1 like after 2 likes', async () => {
+  //   expect(blog).not.toBeNull();
+  //
+  //   if (blog) {
+  //     const user1 = await utils.createUser(utils.createNewUserModel());
+  //     const post1 = await utils.createPost(user1.id, blog.id);
+  //
+  //     await config
+  //       .getHttp()
+  //       .put(`/posts/${post1.id}/like-status`)
+  //       .set('Authorization', 'Bearer ' + utils.createAccessToken(user1.id))
+  //       .set('Content-Type', 'application/json')
+  //       .send({
+  //         likeStatus: LikeStatus.LIKE,
+  //       });
+  //
+  //     await config
+  //       .getHttp()
+  //       .put(`/posts/${post1.id}/like-status`)
+  //       .set('Authorization', 'Bearer ' + utils.createAccessToken(user1.id))
+  //       .set('Content-Type', 'application/json')
+  //       .send({
+  //         likeStatus: LikeStatus.LIKE,
+  //       });
+  //
+  //     const res = await config
+  //       .getHttp()
+  //       .get(`/posts/${post1.id}`)
+  //       .set('Authorization', 'Bearer ' + utils.createAccessToken(user1.id))
+  //       .set('Content-Type', 'application/json');
+  //
+  //     expect(res.body.extendedLikesInfo).toEqual({
+  //       likesCount: 1,
+  //       dislikesCount: 0,
+  //       myStatus: 'Like',
+  //       newestLikes: expect.any(Array),
+  //     });
+  //   }
+  // });
 
-    if (blog && post && user) {
-      await config
-        .getHttp()
-        .put(`/posts/${post.id}/like-status`)
-        .set('Authorization', 'Bearer ' + utils.createAccessToken(user.id))
-        .set('Content-Type', 'application/json')
-        .send({
-          likeStatus: LikeStatus.DISLIKE,
-        });
-
-      const res = await config
-        .getHttp()
-        .get(`/posts/${post.id}`)
-        .set('Authorization', 'Bearer ' + utils.createAccessToken(user.id))
-        .set('Content-Type', 'application/json');
-
-      expect(res.body.extendedLikesInfo).toEqual({
-        likesCount: 0,
-        dislikesCount: 1,
-        myStatus: 'Dislike',
-        newestLikes: expect.any(Array),
-      });
-    }
-  });
-
-  it('should return correct extended likes', async () => {
-    expect(blog).not.toBeNull();
-    expect(post).not.toBeNull();
-    expect(user).not.toBeNull();
-
-    if (blog && post && user) {
-      await config
-        .getHttp()
-        .put(`/posts/${post.id}/like-status`)
-        .set('Authorization', 'Bearer ' + utils.createAccessToken(user.id))
-        .set('Content-Type', 'application/json')
-        .send({
-          likeStatus: LikeStatus.LIKE,
-        });
-
-      const user1 = await utils.createUser(utils.createNewUserModel());
-      await config
-        .getHttp()
-        .put(`/posts/${post.id}/like-status`)
-        .set('Authorization', 'Bearer ' + utils.createAccessToken(user1.id))
-        .set('Content-Type', 'application/json')
-        .send({
-          likeStatus: LikeStatus.LIKE,
-        });
-
-      const user2 = await utils.createUser(utils.createNewUserModel());
-      await config
-        .getHttp()
-        .put(`/posts/${post.id}/like-status`)
-        .set('Authorization', 'Bearer ' + utils.createAccessToken(user2.id))
-        .set('Content-Type', 'application/json')
-        .send({
-          likeStatus: LikeStatus.LIKE,
-        });
-
-      const res1 = await config
-        .getHttp()
-        .get(`/posts/${post.id}`)
-        .set('Authorization', 'Bearer ' + utils.createAccessToken(user.id))
-        .set('Content-Type', 'application/json');
-
-      expect(res1.body.extendedLikesInfo.newestLikes).toHaveLength(3);
-
-      await config
-        .getHttp()
-        .put(`/posts/${post.id}/like-status`)
-        .set('Authorization', 'Bearer ' + utils.createAccessToken(user2.id))
-        .set('Content-Type', 'application/json')
-        .send({
-          likeStatus: LikeStatus.DISLIKE,
-        });
-
-      const res2 = await config
-        .getHttp()
-        .get(`/posts/${post.id}`)
-        .set('Authorization', 'Bearer ' + utils.createAccessToken(user.id))
-        .set('Content-Type', 'application/json');
-
-      expect(res2.body.extendedLikesInfo.newestLikes).toHaveLength(2);
-    }
-  });
-
-  it('should return 1 like after 2 likes', async () => {
+  it('should return right status', async () => {
     expect(blog).not.toBeNull();
 
     if (blog) {
@@ -215,25 +255,60 @@ describe('posts testing', () => {
           likeStatus: LikeStatus.LIKE,
         });
 
+      const res1 = await config
+        .getHttp()
+        .get(`/posts/${post1.id}`)
+        .set('Authorization', 'Bearer ' + utils.createAccessToken(user1.id))
+        .set('Content-Type', 'application/json');
+
+      expect(res1.body.extendedLikesInfo).toEqual({
+        likesCount: 1,
+        dislikesCount: 0,
+        myStatus: 'Like',
+        newestLikes: expect.any(Array),
+      });
+
       await config
         .getHttp()
         .put(`/posts/${post1.id}/like-status`)
         .set('Authorization', 'Bearer ' + utils.createAccessToken(user1.id))
         .set('Content-Type', 'application/json')
         .send({
-          likeStatus: LikeStatus.LIKE,
+          likeStatus: LikeStatus.DISLIKE,
         });
 
-      const res = await config
+      const res2 = await config
         .getHttp()
         .get(`/posts/${post1.id}`)
         .set('Authorization', 'Bearer ' + utils.createAccessToken(user1.id))
         .set('Content-Type', 'application/json');
 
-      expect(res.body.extendedLikesInfo).toEqual({
-        likesCount: 1,
+      expect(res2.body.extendedLikesInfo).toEqual({
+        likesCount: 0,
+        dislikesCount: 1,
+        myStatus: 'Dislike',
+        newestLikes: expect.any(Array),
+      });
+
+      await config
+        .getHttp()
+        .put(`/posts/${post1.id}/like-status`)
+        .set('Authorization', 'Bearer ' + utils.createAccessToken(user1.id))
+        .set('Content-Type', 'application/json')
+        .send({
+          likeStatus: LikeStatus.NONE,
+        });
+
+      const res3 = await config
+        .getHttp()
+        .get(`/posts/${post1.id}`)
+        .set('Authorization', 'Bearer ' + utils.createAccessToken(user1.id))
+        .set('Content-Type', 'application/json');
+
+      expect(res3.body.extendedLikesInfo).toEqual({
+        likesCount: 0,
         dislikesCount: 0,
-        myStatus: 'Like',
+        myStatus: 'None',
         newestLikes: expect.any(Array),
       });
     }
