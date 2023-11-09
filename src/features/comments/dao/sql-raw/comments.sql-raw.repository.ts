@@ -58,8 +58,8 @@ export class CommentsSqlRawRepository implements ICommentsRepository {
     return true;
   }
 
-  async deleteCommentById(PostsComments: string): Promise<boolean> {
-    const [, count] = await this.dataSource.query(`DELETE FROM public."PostsComments" as pc WHERE pc."_id" = $1`, [PostsComments]);
+  async deleteCommentById(commentId: string): Promise<boolean> {
+    const [, count] = await this.dataSource.query(`DELETE FROM public."PostsComments" as pc WHERE pc."_id" = $1`, [commentId]);
     return count > 0;
   }
 
