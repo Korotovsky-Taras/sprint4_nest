@@ -22,7 +22,7 @@ export class CommentsSqlRawQueryRepository implements ICommentsQueryRepository {
                                ) as row),
                         (SELECT row_to_json(row) as "commentatorInfo"
                          FROM (SELECT "_id" as "userId", "login" as "userLogin" FROM public."Users" as u WHERE u."_id" = pc."userId" ) as row)
-                 FROM public."PostsComments" as pc WHERE pc."postId" = $3 ORDER BY "${query.sortBy}" ${query.sortDirection} LIMIT $1 OFFSET $2
+                 FROM public."PostsComments" as pc WHERE pc."postId" = $4 ORDER BY "${query.sortBy}" ${query.sortDirection} LIMIT $1 OFFSET $2
     `;
 
     return withSqlPagination<ICommentSqlRaw, CommentViewModel>(this.dataSource, sql, [Number(userId), Number(postId)], query, (items) => {
