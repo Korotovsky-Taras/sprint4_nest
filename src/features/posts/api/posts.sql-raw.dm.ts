@@ -31,7 +31,7 @@ export class PostsSqlRawDataMapper {
       newestLikes: model.lastLikes.map((lastLike: LastLike) => {
         return {
           login: lastLike.userLogin,
-          userId: lastLike.userId,
+          userId: String(lastLike.userId),
           addedAt: toIsoString(lastLike.createdAt),
         };
       }),
