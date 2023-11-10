@@ -43,7 +43,8 @@ export class PostsSqlRawQueryRepository implements IPostsQueryRepository {
     );
   }
 
-  async getAllPosts(userId: string | null, query: PostPaginationQueryDto): Promise<WithPagination<PostViewModel>> {
+  async getAllPosts(userId: UserIdReq, query: PostPaginationQueryDto): Promise<WithPagination<PostViewModel>> {
+    console.log({ allPostsUserId: userId });
     return withSqlPagination<IPostSqlRaw, PostViewModel>(
       this.dataSource,
       `SELECT p.*, CAST(count(*) OVER() as INTEGER) as "totalCount",
