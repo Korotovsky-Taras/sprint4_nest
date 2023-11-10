@@ -24,7 +24,7 @@ export class BlogsController implements IBlogsController {
 
   @Get()
   @HttpCode(Status.OK)
-  async getAll(@Query() query: BlogPaginationQueryDto): Promise<WithPagination<any>> {
+  async getAll(@Query() query: BlogPaginationQueryDto): Promise<WithPagination<BlogViewModel>> {
     return await this.blogsQueryRepo.getBlogs(query, BlogsDataMapper.toBlogsView);
   }
 

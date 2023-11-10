@@ -29,7 +29,7 @@ export class CommentsSqlRawRepository implements ICommentsRepository {
 
   async updateLike(commentId: string, userId: string, status: LikeStatus): Promise<boolean> {
     if (status === LikeStatus.NONE) {
-      const [, count] = await this.dataSource.query(`DELETE FROM public."PostsCommentsLikes" as pc WHERE pc."userId" = $1 AND pc."_id" = $2`, [
+      const [, count] = await this.dataSource.query(`DELETE FROM public."PostsCommentsLikes" as pc WHERE pc."userId" = $1 AND pc."commentId" = $2`, [
         Number(userId),
         Number(commentId),
       ]);
