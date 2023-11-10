@@ -29,9 +29,9 @@ export class CommentsSqlRawRepository implements ICommentsRepository {
 
   async updateLike(commentId: string, userId: string, status: LikeStatus): Promise<boolean> {
     if (status === LikeStatus.NONE) {
-      const [, count] = await this.dataSource.query(`DELETE FROM public."PostsCommentsLikes" as pc WHERE pc."userId" = $1 AND pc."commentId" = $2`, [
-        Number(userId),
+      const [, count] = await this.dataSource.query(`DELETE FROM public."PostsCommentsLikes" as pc WHERE pc."commentId" = $1 AND pc."userId" = $2`, [
         Number(commentId),
+        Number(userId),
       ]);
       return count > 0;
     }
@@ -41,30 +41,32 @@ export class CommentsSqlRawRepository implements ICommentsRepository {
       Number(userId),
     ]);
 
+    const nextStatus = status === LikeStatus.DISLIKE ? 0 : 1;
+
     if (res.length > 0) {
       const [, count] = await this.dataSource.query(
-        `UPDATE public."PostsCommentsLikes" as pcl  SET "likeStatus"=$3 WHERE pcl."userId" = $1 AND pcl."commentId" = $2`,
-        [userId, commentId, status === LikeStatus.DISLIKE ? 0 : 1],
+        `UPDATE public."PostsCommentsLikes" as pcl  SET "likeStatus"=$3 WHERE pcl."commentId" = $1 AND pcl."userId" = $2`,
+        [Number(commentId), Number(userId), nextStatus],
       );
       return count > 0;
     }
 
-    await this.dataSource.query(`INSERT INTO public."PostsCommentsLikes" as pc ("userId", "commentId", "likeStatus") VALUES ($1, $2, $3)`, [
-      Number(userId),
+    await this.dataSource.query(`INSERT INTO public."PostsCommentsLikes" as pc ("commentId", "userId", "likeStatus") VALUES ($1, $2, $3)`, [
       Number(commentId),
-      status === LikeStatus.DISLIKE ? 0 : 1,
+      Number(userId),
+      nextStatus,
     ]);
 
     return true;
   }
 
   async deleteCommentById(commentId: string): Promise<boolean> {
-    const [, count] = await this.dataSource.query(`DELETE FROM public."PostsComments" as pc WHERE pc."_id" = $1`, [commentId]);
+    const [, count] = await this.dataSource.query(`DELETE FROM public."PostsComments" as pc WHERE pc."_id" = $1`, [Number(commentId)]);
     return count > 0;
   }
 
   async isCommentExist(commentId: string): Promise<boolean> {
-    const res = await this.dataSource.query<ICommentSqlRaw[]>(`SELECT * FROM public."PostsComments" as pc WHERE pc."_id" = $1`, [commentId]);
+    const res = await this.dataSource.query<ICommentSqlRaw[]>(`SELECT * FROM public."PostsComments" as pc WHERE pc."_id" = $1`, [Number(commentId)]);
     return res.length > 0;
   }
 
