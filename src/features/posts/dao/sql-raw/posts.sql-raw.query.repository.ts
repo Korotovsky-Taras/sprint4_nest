@@ -16,19 +16,21 @@ export class PostsSqlRawQueryRepository implements IPostsQueryRepository {
   async getBlogPosts(userId: string | null, blogId: string, query: PostPaginationQueryDto): Promise<WithPagination<PostViewModel>> {
     const sortByWithCollate = query.sortBy !== 'createdAt' ? 'COLLATE "C"' : '';
 
+    console.log({ blogPostsUserId: userId });
+
     return withSqlPagination<IPostSqlRaw, PostViewModel>(
       this.dataSource,
       `SELECT p.*, CAST(count(*) OVER() as INTEGER) as "totalCount",
           (SELECT row_to_json(row) as "likesInfo" FROM
-            (SELECT (SELECT count(*) FROM public."PostsLikes" WHERE "postId" = p._id and "likeStatus" = 1) as "likesCount",
-                    (SELECT count(*) FROM public."PostsLikes" WHERE "postId" = p._id and "likeStatus" = 0) as "dislikesCount",
-                    (SELECT "likeStatus" FROM public."PostsLikes" WHERE "postId" = p._id and "userId" = $4) as "myStatus"
+            (SELECT (SELECT count(*) FROM public."PostsLikes" WHERE "postId" = p."_id" AND "likeStatus" = 1) as "likesCount",
+                    (SELECT count(*) FROM public."PostsLikes" WHERE "postId" = p."_id" AND "likeStatus" = 0) as "dislikesCount",
+                    (SELECT "likeStatus" FROM public."PostsLikes" WHERE "postId" = p."_id" AND "userId" = $4) as "myStatus"
             ) as row),
           (SELECT array(SELECT row_to_json(row) FROM (
-               SELECT pl."createdAt", U.login as "userLogin", U._id as "userId"
+               SELECT pl."createdAt", U.login as "userLogin", U."_id" as "userId"
                FROM "PostsLikes" pl
-               LEFT JOIN "Users" U ON pl."userId" = U._id
-               WHERE pl."likeStatus" = 1 AND pl."postId" = p._id
+               LEFT JOIN "Users" U ON pl."userId" = U."_id"
+               WHERE pl."likeStatus" = 1 AND pl."postId" = p."_id"
                ORDER BY pl."createdAt" DESC
                LIMIT 3
                OFFSET 0
@@ -44,14 +46,17 @@ export class PostsSqlRawQueryRepository implements IPostsQueryRepository {
   }
 
   async getAllPosts(userId: UserIdReq, query: PostPaginationQueryDto): Promise<WithPagination<PostViewModel>> {
+    const sortByWithCollate = query.sortBy !== 'createdAt' ? 'COLLATE "C"' : '';
+
     console.log({ allPostsUserId: userId });
+
     return withSqlPagination<IPostSqlRaw, PostViewModel>(
       this.dataSource,
       `SELECT p.*, CAST(count(*) OVER() as INTEGER) as "totalCount",
           (SELECT row_to_json(row) as "likesInfo" FROM
-            (SELECT (SELECT count(*) FROM public."PostsLikes" WHERE "postId" = p._id and "likeStatus" = 1) as "likesCount",
-                    (SELECT count(*) FROM public."PostsLikes" WHERE "postId" = p._id and "likeStatus" = 0) as "dislikesCount",
-                    (SELECT "likeStatus" FROM public."PostsLikes" WHERE "postId" = p._id and "userId" = $3) as "myStatus"
+            (SELECT (SELECT count(*) FROM public."PostsLikes" WHERE "postId" = p."_id" AND "likeStatus" = 1) as "likesCount",
+                    (SELECT count(*) FROM public."PostsLikes" WHERE "postId" = p."_id" AND "likeStatus" = 0) as "dislikesCount",
+                    (SELECT "likeStatus" FROM public."PostsLikes" WHERE "postId" = p."_id" AND "userId" = $3) as "myStatus"
             ) as row),
           (SELECT array(SELECT row_to_json(row) FROM (
                SELECT pl."createdAt", U.login as "userLogin", U._id as "userId"
@@ -63,7 +68,7 @@ export class PostsSqlRawQueryRepository implements IPostsQueryRepository {
                OFFSET 0
            ) as row)) as "lastLikes",
            (SELECT "name" FROM public."Blogs" as b WHERE b."_id" = p."blogId") as "blogName"
-       FROM public."Posts" as p ORDER BY "${query.sortBy}" ${query.sortDirection} LIMIT $1 OFFSET $2`,
+       FROM public."Posts" as p ORDER BY "${query.sortBy}" ${sortByWithCollate} ${query.sortDirection} LIMIT $1 OFFSET $2`,
       [Number(userId)],
       query,
       (items) => {

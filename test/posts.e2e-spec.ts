@@ -440,7 +440,7 @@ describe('posts testing', () => {
 
       const res = await config
         .getHttp()
-        .get(`/posts`)
+        .get(`/blogs/${blog.id}/posts`)
         .set('Authorization', 'Bearer ' + utils.createAccessToken(user1.id))
         .set('Content-Type', 'application/json');
 
