@@ -1,4 +1,4 @@
-import { Controller, Get, HttpCode, Inject, Injectable, NotFoundException, Param, Query, Req } from '@nestjs/common';
+import { Controller, Get, HttpCode, Inject, Injectable, NotFoundException, Param, Query, Req, UseGuards } from '@nestjs/common';
 import { BlogsDataMapper } from './blogs.dm';
 import { Request } from 'express';
 import { BlogQueryRepoKey, IBlogsController, IBlogsQueryRepository } from '../types/common';
@@ -10,6 +10,8 @@ import { Promise } from 'mongoose';
 import { BlogPaginationQueryDto } from '../dto/BlogPaginationQueryDto';
 import { PostPaginationQueryDto } from '../../posts/dto/PostPaginationQueryDto';
 import { IPostsQueryRepository, PostQueryRepoKey } from '../../posts/types/common';
+import { AuthTokenGuard } from '../../../application/guards/AuthTokenGuard';
+import { SetTokenGuardParams } from '../../../application/decorators/skipTokenError';
 
 @Injectable()
 @Controller('blogs')
@@ -37,6 +39,8 @@ export class BlogsController implements IBlogsController {
   }
 
   @Get('/:id/posts')
+  @SetTokenGuardParams({ throwError: false })
+  @UseGuards(AuthTokenGuard)
   @HttpCode(Status.OK)
   async getBlogPosts(@Param('id') blogId: string, @Query() query: PostPaginationQueryDto, @Req() req: Request): Promise<WithPagination<PostViewModel>> {
     const blog: BlogViewModel | null = await this.blogsQueryRepo.getBlogById(blogId, BlogsDataMapper.toBlogView);
