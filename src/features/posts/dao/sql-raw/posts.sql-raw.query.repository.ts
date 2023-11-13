@@ -20,7 +20,7 @@ export class PostsSqlRawQueryRepository implements IPostsQueryRepository {
 
     return withSqlPagination<IPostSqlRaw, PostViewModel>(
       this.dataSource,
-      `SELECT p.*, CAST(count(*) OVER() as INTEGER) as "totalCount",
+      `SELECT res.* FROM (SELECT p.*, CAST(count(*) OVER() as INTEGER) as "totalCount",
           (SELECT row_to_json(row) as "likesInfo" FROM
             (SELECT (SELECT count(*) FROM public."PostsLikes" WHERE "postId" = p."_id" AND "likeStatus" = 1) as "likesCount",
                     (SELECT count(*) FROM public."PostsLikes" WHERE "postId" = p."_id" AND "likeStatus" = 0) as "dislikesCount",
@@ -35,8 +35,9 @@ export class PostsSqlRawQueryRepository implements IPostsQueryRepository {
                LIMIT 3
                OFFSET 0
            ) as row)) as "lastLikes",
-            (SELECT "name" FROM public."Blogs" as b WHERE b."_id" = p."blogId") as "blogName"
-       FROM public."Posts" as p WHERE p."blogId" = $3 ORDER BY "${query.sortBy}" ${sortByWithCollate} ${query.sortDirection} LIMIT $1 OFFSET $2`,
+           (SELECT "name" FROM public."Blogs" as b WHERE b."_id" = p."blogId") as "blogName"
+       FROM public."Posts" as p WHERE p."blogId" = $3) as res
+       ORDER BY "${query.sortBy}" ${sortByWithCollate} ${query.sortDirection} LIMIT $1 OFFSET $2`,
       [Number(blogId), Number(userId)],
       query,
       (items) => {
@@ -52,7 +53,7 @@ export class PostsSqlRawQueryRepository implements IPostsQueryRepository {
 
     return withSqlPagination<IPostSqlRaw, PostViewModel>(
       this.dataSource,
-      `SELECT p.*, CAST(count(*) OVER() as INTEGER) as "totalCount",
+      `SELECT res.* FROM (SELECT p.*, CAST(count(*) OVER() as INTEGER) as "totalCount",
           (SELECT row_to_json(row) as "likesInfo" FROM
             (SELECT (SELECT count(*) FROM public."PostsLikes" WHERE "postId" = p."_id" AND "likeStatus" = 1) as "likesCount",
                     (SELECT count(*) FROM public."PostsLikes" WHERE "postId" = p."_id" AND "likeStatus" = 0) as "dislikesCount",
@@ -67,8 +68,9 @@ export class PostsSqlRawQueryRepository implements IPostsQueryRepository {
                LIMIT 3
                OFFSET 0
            ) as row)) as "lastLikes",
-           (SELECT "name" FROM public."Blogs" as b WHERE b."_id" = p."blogId") as "blogName"
-       FROM public."Posts" as p ORDER BY "${query.sortBy}" ${sortByWithCollate} ${query.sortDirection} LIMIT $1 OFFSET $2`,
+          (SELECT "name" FROM public."Blogs" as b WHERE b."_id" = p."blogId") as "blogName" 
+       FROM public."Posts" as p ) as res
+       ORDER BY "${query.sortBy}" ${sortByWithCollate} ${query.sortDirection} LIMIT $1 OFFSET $2`,
       [Number(userId)],
       query,
       (items) => {
@@ -79,7 +81,7 @@ export class PostsSqlRawQueryRepository implements IPostsQueryRepository {
 
   async getPostById(userId: UserIdReq, postId: string): Promise<PostViewModel | null> {
     const res = await this.dataSource.query<IPostSqlRaw[]>(
-      `SELECT p.* , (SELECT row_to_json(row) as "likesInfo" FROM
+      `SELECT res.* FROM (SELECT p.*, (SELECT row_to_json(row) as "likesInfo" FROM
           (SELECT (SELECT count(*) FROM public."PostsLikes" WHERE "postId" = p._id and "likeStatus" = 1) as "likesCount",
                   (SELECT count(*) FROM public."PostsLikes" WHERE "postId" = p._id and "likeStatus" = 0) as "dislikesCount",
                   (SELECT "likeStatus" FROM public."PostsLikes" WHERE "postId" = p._id and "userId" = $2) as "myStatus"
@@ -94,8 +96,9 @@ export class PostsSqlRawQueryRepository implements IPostsQueryRepository {
               LIMIT 3
               OFFSET 0
           ) as row)) as "lastLikes",
-          (SELECT "name" FROM public."Blogs" as b WHERE b."_id" = p."blogId") as "blogName"
-       FROM public."Posts" as p WHERE p."_id" = $1`,
+        (SELECT "name" FROM public."Blogs" as b WHERE b."_id" = p."blogId") as "blogName" 
+       FROM public."Posts" as p WHERE p."_id" = $1) as res
+       `,
       [Number(postId), Number(userId)],
     );
 
