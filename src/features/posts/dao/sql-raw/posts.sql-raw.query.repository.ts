@@ -16,8 +16,6 @@ export class PostsSqlRawQueryRepository implements IPostsQueryRepository {
   async getBlogPosts(userId: string | null, blogId: string, query: PostPaginationQueryDto): Promise<WithPagination<PostViewModel>> {
     const sortByWithCollate = query.sortBy !== 'createdAt' ? 'COLLATE "C"' : '';
 
-    console.log({ blogPostsUserId: userId });
-
     return withSqlPagination<IPostSqlRaw, PostViewModel>(
       this.dataSource,
       `SELECT res.* FROM (SELECT p.*, CAST(count(*) OVER() as INTEGER) as "totalCount",
@@ -48,8 +46,6 @@ export class PostsSqlRawQueryRepository implements IPostsQueryRepository {
 
   async getAllPosts(userId: UserIdReq, query: PostPaginationQueryDto): Promise<WithPagination<PostViewModel>> {
     const sortByWithCollate = query.sortBy !== 'createdAt' ? 'COLLATE "C"' : '';
-
-    console.log({ allPostsUserId: userId });
 
     return withSqlPagination<IPostSqlRaw, PostViewModel>(
       this.dataSource,

@@ -30,7 +30,6 @@ export class AuthTokenGuard implements CanActivate {
 
       if (verifiedAccessToken) {
         request.userId = verifiedAccessToken.userId;
-        console.log({ userId: verifiedAccessToken.userId });
       } else if (this.throwError) {
         throw new UnauthorizedException();
       }

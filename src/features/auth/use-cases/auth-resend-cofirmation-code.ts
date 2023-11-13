@@ -43,13 +43,9 @@ export class AuthResendConfirmationCodeCase implements ICommandHandler<AuthResen
 
     user.setAuthConfirmation(this.usersService.createUserConfirmation());
 
-    const t1 = Date.now();
-
     await user.save();
 
     await this.mailSender.sendRegistrationMail(user.email, user.authConfirmation.code).catch((e) => console.log(e));
-
-    console.log('TIME', (Date.now() - t1) / 1000 / 60);
 
     return result;
   }
