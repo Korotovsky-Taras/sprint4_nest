@@ -9,12 +9,12 @@ async function bootstrap() {
     logger: WinstonModule.createLogger({
       transports: [
         new transports.File({
-          filename: `public/error.log`,
+          filename: `src/public/logs/error.log`,
           level: 'error',
           format: format.combine(format.timestamp(), format.json()),
         }),
         new transports.File({
-          filename: `public/combined.log`,
+          filename: `src/public/logs/combined.log`,
           format: format.combine(format.timestamp(), format.json()),
         }),
         new transports.Console({
