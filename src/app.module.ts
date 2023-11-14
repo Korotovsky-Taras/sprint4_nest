@@ -12,9 +12,10 @@ import { AuthModule } from './features/auth/auth.module';
 import { SharedModule } from './shared.module';
 import { TestsModule } from './features/tests/tests.module';
 import { DbModule } from './db/db.module';
+import { LogsModule } from './features/logs/logs.module';
 
 @Module({
-  imports: [configModule, DbModule, SharedModule, BlogsModule, PostsModule, CommentsModule, UsersModule, AuthModule, TestsModule],
+  imports: [configModule, DbModule, SharedModule, BlogsModule, PostsModule, CommentsModule, UsersModule, AuthModule, TestsModule, LogsModule],
   controllers: [AppController],
   providers: [AppService],
 })
