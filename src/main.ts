@@ -8,18 +8,15 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     logger: WinstonModule.createLogger({
       transports: [
-        // let's log errors into its own file
         new transports.File({
-          filename: `assets/logs/error.log`,
+          filename: `.output/static/logs/error.log`,
           level: 'error',
           format: format.combine(format.timestamp(), format.json()),
         }),
-        // logging all level
         new transports.File({
-          filename: `assets/logs/combined.log`,
+          filename: `.output/static/logs/combined.log`,
           format: format.combine(format.timestamp(), format.json()),
         }),
-        // we also want to see logs in our console
         new transports.Console({
           format: format.combine(
             format.cli(),
