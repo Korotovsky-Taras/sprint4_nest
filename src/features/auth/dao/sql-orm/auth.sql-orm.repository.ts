@@ -57,6 +57,6 @@ export class AuthSqlOrmRepository implements IAuthSessionRepository<AuthEntity> 
   }
 
   async clear(): Promise<void> {
-    await this.authRepo.createQueryBuilder().delete().from(UsersEntity).where('1=1').execute();
+    await this.authRepo.createQueryBuilder().delete().from(AuthEntity).where('1=1').execute();
   }
 }

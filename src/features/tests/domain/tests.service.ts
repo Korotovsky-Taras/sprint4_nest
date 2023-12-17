@@ -24,10 +24,10 @@ export class TestsService {
   }
 
   async clearAll() {
-    // await this.blogsRepo.clear();
-    // await this.postsRepo.clear();
     await this.authRepo.clear();
     await this.usersRepo.clear();
     // await this.commentsRepo.clear();
+    // await this.postsRepo.clear();
+    // await this.blogsRepo.clear();
   }
 }
