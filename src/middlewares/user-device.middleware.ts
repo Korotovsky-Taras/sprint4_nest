@@ -6,6 +6,7 @@ export class UserDeviceMiddleware implements NestMiddleware {
   use(req: Request, res: Response, next: NextFunction) {
     req.userId = req.get('userId') || null;
     req.deviceId = req.get('deviceId') || null;
+    console.log(`[${req.method}] : ${req.body}`);
     next();
   }
 }
