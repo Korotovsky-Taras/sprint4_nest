@@ -14,7 +14,7 @@ export class UpdatePostLikeStatusCommand {
 export class UpdatePostLikeStatusCase implements ICommandHandler<UpdatePostLikeStatusCommand> {
   constructor(
     @Inject(PostRepoKey) private readonly postsRepo: IPostsRepository,
-    @Inject(UserRepoKey) private readonly usersRepo: IUsersRepository,
+    @Inject(UserRepoKey) private readonly usersRepo: IUsersRepository<any>,
   ) {}
 
   async execute({ model }: UpdatePostLikeStatusCommand): Promise<ServiceResult> {

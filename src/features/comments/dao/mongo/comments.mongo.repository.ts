@@ -15,7 +15,7 @@ import { UserEntityRepo } from '../../../users/dao/user-entity.repo';
 export class CommentsMongoRepository implements ICommentsRepository {
   constructor(
     @InjectModel(Comment.name) private commentModel: ICommentModel,
-    @Inject(UserRepoKey) private usersRepo: IUsersRepository,
+    @Inject(UserRepoKey) private usersRepo: IUsersRepository<any>,
   ) {}
 
   async updateCommentById(commentId: string, input: CommentUpdateDto): Promise<boolean> {

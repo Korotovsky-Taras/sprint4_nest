@@ -4,7 +4,7 @@ import { WithDbId } from '../../../../application/utils/types';
 import { EntityRepoResult } from '../../../entity.repo.result';
 import { AuthSessionUpdateModel } from '../../types/dto';
 
-export class AuthRawSqlResult extends EntityRepoResult implements IAuthSession, IAuthSessionMethods {
+export class AuthSqlRawResult extends EntityRepoResult implements IAuthSession, IAuthSessionMethods {
   _id: string;
   deviceId: string;
   userId: string;

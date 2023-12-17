@@ -4,7 +4,7 @@ import { IPostsQueryRepository } from '../../types/common';
 import { UserIdReq, WithPagination } from '../../../../application/utils/types';
 import { DataSource } from 'typeorm';
 import { InjectDataSource } from '@nestjs/typeorm';
-import { withSqlPagination } from '../../../../application/utils/withSqlPagination';
+import { withSqlRawPagination } from '../../../../application/utils/withSqlRawPagination';
 import { PostPaginationQueryDto } from '../../dto/PostPaginationQueryDto';
 import { PostsSqlRawDataMapper } from '../../api/posts.sql-raw.dm';
 import { PostViewModel } from '../../types/dto';
@@ -16,7 +16,7 @@ export class PostsSqlRawQueryRepository implements IPostsQueryRepository {
   async getBlogPosts(userId: string | null, blogId: string, query: PostPaginationQueryDto): Promise<WithPagination<PostViewModel>> {
     const sortByWithCollate = query.sortBy !== 'createdAt' ? 'COLLATE "C"' : '';
 
-    return withSqlPagination<IPostSqlRaw, PostViewModel>(
+    return withSqlRawPagination<IPostSqlRaw, PostViewModel>(
       this.dataSource,
       `SELECT res.* FROM (SELECT p.*, CAST(count(*) OVER() as INTEGER) as "totalCount",
           (SELECT row_to_json(row) as "likesInfo" FROM
@@ -47,7 +47,7 @@ export class PostsSqlRawQueryRepository implements IPostsQueryRepository {
   async getAllPosts(userId: UserIdReq, query: PostPaginationQueryDto): Promise<WithPagination<PostViewModel>> {
     const sortByWithCollate = query.sortBy !== 'createdAt' ? 'COLLATE "C"' : '';
 
-    return withSqlPagination<IPostSqlRaw, PostViewModel>(
+    return withSqlRawPagination<IPostSqlRaw, PostViewModel>(
       this.dataSource,
       `SELECT res.* FROM (SELECT p.*, CAST(count(*) OVER() as INTEGER) as "totalCount",
           (SELECT row_to_json(row) as "likesInfo" FROM

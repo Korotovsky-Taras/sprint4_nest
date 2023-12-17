@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ICommentsQueryRepository } from '../../types/common';
 import { ICommentSqlRaw } from '../../types/dao';
 import { UserIdReq, WithPagination } from '../../../../application/utils/types';
-import { withSqlPagination } from '../../../../application/utils/withSqlPagination';
+import { withSqlRawPagination } from '../../../../application/utils/withSqlRawPagination';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { CommentsPaginationQueryDto } from '../../dto/CommentsPaginationQueryDto';
@@ -25,7 +25,7 @@ export class CommentsSqlRawQueryRepository implements ICommentsQueryRepository {
                  FROM public."PostsComments" as pc WHERE pc."postId" = $4 ORDER BY "${query.sortBy}" ${query.sortDirection} LIMIT $1 OFFSET $2
     `;
 
-    return withSqlPagination<ICommentSqlRaw, CommentViewModel>(this.dataSource, sql, [Number(userId), Number(postId)], query, (items) => {
+    return withSqlRawPagination<ICommentSqlRaw, CommentViewModel>(this.dataSource, sql, [Number(userId), Number(postId)], query, (items) => {
       return CommentsSqlRawDataMapper.toCommentsView(items);
     });
   }

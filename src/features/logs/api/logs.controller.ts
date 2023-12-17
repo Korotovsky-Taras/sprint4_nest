@@ -11,7 +11,7 @@ export class LogsController {
   @HttpCode(Status.OK)
   async getAll(@Query() query: LogsQueryDto) {
     const level = query.level ? query.level : 'combined';
-    const file = path.join(process.cwd(), 'public', 'logs', `${level}.log`);
+    const file = path.join(process.cwd(), 'public', 'logs', `${level}.txt`);
     const buffer = readFileSync(file, 'utf8');
     return buffer.toString();
   }

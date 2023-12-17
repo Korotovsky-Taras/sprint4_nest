@@ -16,7 +16,7 @@ export class AuthResendPassConfirmationCodeCommand {
 @CommandHandler(AuthResendPassConfirmationCodeCommand)
 export class AuthResendPassConfirmationCodeCase implements ICommandHandler<AuthResendPassConfirmationCodeCommand> {
   constructor(
-    @Inject(UserRepoKey) private readonly usersRepo: IUsersRepository,
+    @Inject(UserRepoKey) private readonly usersRepo: IUsersRepository<any>,
     private readonly usersService: UsersService,
     private readonly mailSender: GMailSender,
   ) {}

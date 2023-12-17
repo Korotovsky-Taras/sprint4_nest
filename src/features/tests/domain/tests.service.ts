@@ -10,8 +10,8 @@ export class TestsService {
   constructor(
     @Inject(BlogRepoKey) private readonly blogsRepo: IBlogsRepository,
     @Inject(PostRepoKey) private readonly postsRepo: IPostsRepository,
-    @Inject(UserRepoKey) private readonly usersRepo: IUsersRepository,
-    @Inject(AuthRepoKey) private readonly authRepo: IAuthSessionRepository,
+    @Inject(UserRepoKey) private readonly usersRepo: IUsersRepository<any>,
+    @Inject(AuthRepoKey) private readonly authRepo: IAuthSessionRepository<any>,
     @Inject(CommentsRepoKey) private readonly commentsRepo: ICommentsRepository,
   ) {}
 
@@ -24,10 +24,10 @@ export class TestsService {
   }
 
   async clearAll() {
-    await this.blogsRepo.clear();
-    await this.postsRepo.clear();
+    // await this.blogsRepo.clear();
+    // await this.postsRepo.clear();
     await this.usersRepo.clear();
-    await this.commentsRepo.clear();
+    // await this.commentsRepo.clear();
     await this.authRepo.clear();
   }
 }

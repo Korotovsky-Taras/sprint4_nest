@@ -3,7 +3,7 @@ import { DataSource } from 'typeorm';
 
 type SqlQueryWithTotalCount<T> = T & { totalCount: number };
 
-export const withSqlPagination = async <T, O>(
+export const withSqlRawPagination = async <T, O>(
   dataSource: DataSource,
   sql: string,
   sqlParams: any[],

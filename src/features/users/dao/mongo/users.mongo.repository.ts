@@ -10,7 +10,7 @@ import { UserEntityFactory } from '../user-entity.factory';
 import { UserEntityRepo } from '../user-entity.repo';
 
 @Injectable()
-export class UsersMongoRepository implements IUsersRepository {
+export class UsersMongoRepository implements IUsersRepository<UserDocumentType> {
   constructor(@InjectModel(User.name) private userModel: IUserModel) {}
 
   async isUserAuthConfirmed(userId: string): Promise<boolean> {

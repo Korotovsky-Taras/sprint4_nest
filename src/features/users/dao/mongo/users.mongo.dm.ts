@@ -1,9 +1,9 @@
-import { UserMeViewModel, UserViewModel } from '../types/dto';
-import { UserMongoType } from '../types/dao';
-import { toIsoString } from '../../../application/utils/date';
-import { UserEntityRepo } from '../dao/user-entity.repo';
+import { UserMeViewModel, UserViewModel } from '../../types/dto';
+import { UserMongoType } from '../../types/dao';
+import { toIsoString } from '../../../../application/utils/date';
+import { UserEntityRepo } from '../user-entity.repo';
 
-export class UsersDataMapper {
+export class UsersMongoDataMapper {
   static toMeView(input: UserMongoType): UserMeViewModel {
     return {
       userId: input._id.toString(),
@@ -29,7 +29,7 @@ export class UsersDataMapper {
   }
   static toUsersView(list: UserMongoType[]): UserViewModel[] {
     return list.map((item) => {
-      return UsersDataMapper.toUserView(item);
+      return UsersMongoDataMapper.toUserView(item);
     });
   }
 }

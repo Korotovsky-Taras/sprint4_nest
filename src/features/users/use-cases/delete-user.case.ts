@@ -10,7 +10,7 @@ export class DeleteUserCommand {
 
 @CommandHandler(DeleteUserCommand)
 export class DeleteUserCase implements ICommandHandler<DeleteUserCommand> {
-  constructor(@Inject(UserRepoKey) private readonly usersRepo: IUsersRepository) {}
+  constructor(@Inject(UserRepoKey) private readonly usersRepo: IUsersRepository<any>) {}
 
   async execute({ userId }: DeleteUserCommand): Promise<ServiceResult> {
     const result = new ServiceResult();

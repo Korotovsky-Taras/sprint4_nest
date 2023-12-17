@@ -27,10 +27,10 @@ import { DbMongooseService } from './db-mongoose.service';
           },
           connectionFactory: (connection: Connection) => {
             if (connection.readyState === 1) {
-              Logger.log('DB connected');
+              Logger.log('MongoDB connected');
             }
             connection.on('disconnected', () => {
-              Logger.log('DB disconnected');
+              Logger.log('MongoDB disconnected');
             });
             return connection;
           },
@@ -42,6 +42,7 @@ import { DbMongooseService } from './db-mongoose.service';
       inject: [ConfigService],
       useFactory(configService: ConfigService<AppConfiguration, true>): Promise<TypeOrmModuleOptions> | TypeOrmModuleOptions {
         const env = configService.get('sql', { infer: true });
+
         return {
           type: 'postgres',
           host: env.DB_HOST,
@@ -49,8 +50,9 @@ import { DbMongooseService } from './db-mongoose.service';
           username: env.DB_USER,
           password: env.DB_PASS,
           database: env.DB_NAME,
-          autoLoadEntities: false,
-          synchronize: false,
+          ssl: env.DB_SSL,
+          autoLoadEntities: env.DB_AUTOLOAD_ENTITIES,
+          synchronize: env.DB_SYNCHRONIZE,
         };
       },
     }),

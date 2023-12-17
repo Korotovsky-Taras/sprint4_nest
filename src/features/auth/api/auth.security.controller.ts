@@ -1,5 +1,4 @@
 import { Controller, Delete, ForbiddenException, Get, HttpCode, Inject, Injectable, NotFoundException, Param, UseGuards } from '@nestjs/common';
-import { AuthDataMapper } from './auth.dm';
 import { Status } from '../../../application/utils/types';
 import { GetUserId } from '../../../application/decorators/params/getUserId';
 import { AuthSessionGuard } from '../../../application/guards/AuthSessionGuard';
@@ -11,7 +10,7 @@ import { AuthRepoKey, AuthRepoQueryKey, IAuthSessionQueryRepository, IAuthSessio
 @Controller('security/devices')
 export class AuthSecurityController {
   constructor(
-    @Inject(AuthRepoKey) private readonly authRepo: IAuthSessionRepository,
+    @Inject(AuthRepoKey) private readonly authRepo: IAuthSessionRepository<any>,
     @Inject(AuthRepoQueryKey) private readonly authQueryRepo: IAuthSessionQueryRepository,
   ) {}
 
@@ -19,7 +18,7 @@ export class AuthSecurityController {
   @UseGuards(AuthSessionGuard)
   @HttpCode(Status.OK)
   async getAll(@GetUserId() userId: string) {
-    return await this.authQueryRepo.getAll(userId, AuthDataMapper.toSessionsView);
+    return await this.authQueryRepo.getAll(userId);
   }
 
   @Delete()
@@ -41,7 +40,7 @@ export class AuthSecurityController {
   @UseGuards(AuthSessionGuard)
   @HttpCode(Status.NO_CONTENT)
   async deleteDevice(@GetAuthSessionInfo() sessionInfo: AuthSessionInfoModel, @Param('id') sessionId: string) {
-    const session = await this.authQueryRepo.getSessionByDeviceId(sessionId, AuthDataMapper.toUserSessionValidate);
+    const session = await this.authQueryRepo.getSessionByDeviceId(sessionId);
 
     if (session === null) {
       throw new NotFoundException();

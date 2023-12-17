@@ -13,7 +13,7 @@ export class AuthVerifyRegistrationCodeCommand {
 
 @CommandHandler(AuthVerifyRegistrationCodeCommand)
 export class AuthVerifyRegistrationCodeCase implements ICommandHandler<AuthVerifyRegistrationCodeCommand> {
-  constructor(@Inject(UserRepoKey) private readonly usersRepo: IUsersRepository) {}
+  constructor(@Inject(UserRepoKey) private readonly usersRepo: IUsersRepository<any>) {}
 
   async execute({ dto }: AuthVerifyRegistrationCodeCommand): Promise<ServiceResult> {
     await validateOrRejectDto(dto, AuthConfirmationCodeDto);

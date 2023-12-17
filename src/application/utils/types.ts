@@ -104,4 +104,4 @@ export type WithExpiredIn = {
   expiredIn: string;
 };
 
-export type WithDbId<T> = T & { _id: string };
+export type WithDbId<T> = T & { _id: any };

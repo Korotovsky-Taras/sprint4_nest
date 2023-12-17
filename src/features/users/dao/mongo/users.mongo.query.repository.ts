@@ -1,19 +1,20 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { IUsersQueryRepository, UserListMapperType, UserMapperType } from '../../types/common';
+import { IUsersQueryRepository } from '../../types/common';
 import { IUserModel, UserConfirmation, UserDocumentType, UserMongoType } from '../../types/dao';
 import { User } from './users.schema';
-import { UserConfirmationCodeValidateResult } from '../../types/dto';
+import { UserConfirmationCodeValidateResult, UserMeViewModel, UserViewModel } from '../../types/dto';
 import { FilterQuery } from 'mongoose';
 import { WithPagination } from '../../../../application/utils/types';
 import { withMongoPagination } from '../../../../application/utils/withMongoPagination';
 import { UserPaginationQueryDto } from '../../dto/UserPaginationQueryDto';
+import { UsersMongoDataMapper } from './users.mongo.dm';
 
 @Injectable()
 export class UsersMongoQueryRepository implements IUsersQueryRepository {
   constructor(@InjectModel(User.name) private userModel: IUserModel) {}
 
-  async getUsers<T>(query: UserPaginationQueryDto, mapper: UserListMapperType<T>): Promise<WithPagination<T>> {
+  async getUsers(query: UserPaginationQueryDto): Promise<WithPagination<UserViewModel>> {
     let filter: FilterQuery<UserMongoType> = {};
 
     const searchLoginTermFilter: FilterQuery<UserMongoType> | null =
@@ -43,13 +44,15 @@ export class UsersMongoQueryRepository implements IUsersQueryRepository {
       filter = searchEmailTermFilter;
     }
 
-    return withMongoPagination<UserMongoType, T>(this.userModel, filter, query, mapper);
+    return withMongoPagination<UserMongoType, UserViewModel>(this.userModel, filter, query, (users) => {
+      return UsersMongoDataMapper.toUsersView(users);
+    });
   }
 
-  async getUserById<T>(userId: string, mapper: UserMapperType<T>): Promise<T | null> {
+  async getUserById(userId: string): Promise<UserMeViewModel | null> {
     const user: UserMongoType | null = await this.userModel.findById(userId).lean();
     if (user) {
-      return mapper(user);
+      return UsersMongoDataMapper.toMeView(user);
     }
     return null;
   }
@@ -57,14 +60,6 @@ export class UsersMongoQueryRepository implements IUsersQueryRepository {
   async isUserExistByLoginOrEmail(login: string, email: string): Promise<boolean> {
     const user: UserMongoType | null = await this.userModel.findOne().or([{ email }, { login }]).lean();
     return !!user;
-  }
-
-  async getUserByLoginOrEmail<T>(login: string, email: string, mapper: UserMapperType<T>): Promise<T | null> {
-    const user: UserMongoType | null = await this.userModel.findOne().or([{ email }, { login }]).lean();
-    if (user) {
-      return mapper(user);
-    }
-    return null;
   }
 
   async getAuthConfirmationValidation(code: string): Promise<UserConfirmationCodeValidateResult | null> {

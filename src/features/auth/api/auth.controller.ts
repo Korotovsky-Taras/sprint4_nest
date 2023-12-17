@@ -6,7 +6,6 @@ import { AuthTokens } from '../utils/tokenCreator.types';
 import { AuthSessionInfoModel } from '../types/dto';
 import { Request, Response } from 'express';
 import { Status } from '../../../application/utils/types';
-import { UsersDataMapper } from '../../users/api/users.dm';
 import { UserMeViewModel, UserViewModel } from '../../users/types/dto';
 import { ServiceResult } from '../../../application/core/ServiceResult';
 import { AuthHelper } from '../../../application/authHelper';
@@ -116,7 +115,7 @@ export class AuthController implements IAuthRouterController {
   @UseGuards(AuthTokenGuard)
   @HttpCode(Status.OK)
   async me(@GetUserId() userId: string) {
-    const user: UserMeViewModel | null = await this.usersQueryRepo.getUserById(userId, UsersDataMapper.toMeView);
+    const user: UserMeViewModel | null = await this.usersQueryRepo.getUserById(userId);
 
     if (!user) {
       throw new UnauthorizedException();

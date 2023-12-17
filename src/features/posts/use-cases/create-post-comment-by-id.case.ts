@@ -24,7 +24,7 @@ export class CreatePostCommentByIdCase implements ICommandHandler<CreatePostComm
     @Inject(CommentsRepoKey) private readonly commentsRepo: ICommentsRepository,
     @Inject(CommentsQueryRepoKey) private readonly commentsQueryRepo: ICommentsQueryRepository,
     @Inject(PostRepoKey) private readonly postsRepo: IPostsRepository,
-    @Inject(UserRepoKey) private readonly usersRepo: IUsersRepository,
+    @Inject(UserRepoKey) private readonly usersRepo: IUsersRepository<any>,
   ) {}
 
   async execute({ postId, userId, dto }: CreatePostCommentByIdCommand): Promise<ServiceResult<CommentViewModel>> {

@@ -14,4 +14,6 @@ export type AuthSessionValidationModel = Pick<IAuthSession, 'uuid' | 'deviceId'>
 
 export type AuthSessionViewModel = Pick<IAuthSession, 'ip' | 'deviceId'> & { title: string; lastActiveDate: string };
 
-export type AuthSessionDataModel = Pick<IAuthSession, 'uuid' | 'userId' | 'deviceId'>;
+export type AuthSessionUuidViewModel = Pick<IAuthSession, 'uuid'>;
+
+export type AuthSessionByDeviceViewModel = Pick<IAuthSession, 'uuid' | 'userId' | 'deviceId'>;

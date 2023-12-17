@@ -15,7 +15,7 @@ export class AuthRecoverPasswordWithCodeCommand {
 @CommandHandler(AuthRecoverPasswordWithCodeCommand)
 export class AuthRecoverPasswordWithCodeCase implements ICommandHandler<AuthRecoverPasswordWithCodeCommand> {
   constructor(
-    @Inject(UserRepoKey) private readonly usersRepo: IUsersRepository,
+    @Inject(UserRepoKey) private readonly usersRepo: IUsersRepository<any>,
     private readonly userService: UsersService,
   ) {}
 

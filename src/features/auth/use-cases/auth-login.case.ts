@@ -18,8 +18,8 @@ export class AuthLoginCommand {
 export class AuthLoginCase implements ICommandHandler<AuthLoginCommand, ServiceResult<AuthTokens>> {
   constructor(
     private readonly userService: UsersService,
-    @Inject(UserRepoKey) private readonly usersRepo: IUsersRepository,
-    @Inject(AuthRepoKey) private readonly authRepo: IAuthSessionRepository,
+    @Inject(UserRepoKey) private readonly usersRepo: IUsersRepository<any>,
+    @Inject(AuthRepoKey) private readonly authRepo: IAuthSessionRepository<any>,
     private readonly tokenCreator: AuthTokenCreator,
   ) {}
 

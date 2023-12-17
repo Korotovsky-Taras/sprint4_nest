@@ -6,7 +6,7 @@ import { BlogListMapperType, BlogMapperType, IBlogsQueryRepository } from '../..
 import { WithPagination } from '../../../../application/utils/types';
 import { BlogDBType } from '../../types/dao';
 import { BlogPaginationQueryDto } from '../../dto/BlogPaginationQueryDto';
-import { withSqlPagination } from '../../../../application/utils/withSqlPagination';
+import { withSqlRawPagination } from '../../../../application/utils/withSqlRawPagination';
 
 @Injectable()
 export class BlogsSqlRawQueryRepository implements IBlogsQueryRepository {
@@ -17,7 +17,7 @@ export class BlogsSqlRawQueryRepository implements IBlogsQueryRepository {
 
     const sortByWithCollate = query.sortBy !== 'createdAt' ? 'COLLATE "C"' : '';
 
-    return withSqlPagination(
+    return withSqlRawPagination(
       this.dataSource,
       `SELECT *, CAST(count(*) OVER() as INTEGER) as "totalCount" 
            FROM public."Blogs" as t WHERE t."name" ILIKE $3 

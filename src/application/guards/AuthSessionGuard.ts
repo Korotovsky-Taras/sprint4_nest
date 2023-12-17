@@ -1,7 +1,6 @@
 import { CanActivate, ExecutionContext, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { AuthTokenCreator } from '../../features/auth/utils/tokenCreator';
 import { AuthHelper } from '../authHelper';
-import { AuthDataMapper } from '../../features/auth/api/auth.dm';
 import { AuthRefreshTokenPayload } from '../../features/auth/utils/tokenCreator.types';
 import { AuthRepoQueryKey, IAuthSessionQueryRepository } from '../../features/auth/types/common';
 
@@ -28,7 +27,7 @@ export class AuthSessionGuard implements CanActivate {
       throw new UnauthorizedException();
     }
 
-    const session = await this.authQueryRepo.getSessionByUserIdDeviceId(tokenPass.userId, tokenPass.deviceId, AuthDataMapper.toSessionValidate);
+    const session = await this.authQueryRepo.getSessionUuidByUserIdDeviceId(tokenPass.userId, tokenPass.deviceId);
 
     if (session === null || session.uuid !== tokenPass.uuid) {
       throw new UnauthorizedException();

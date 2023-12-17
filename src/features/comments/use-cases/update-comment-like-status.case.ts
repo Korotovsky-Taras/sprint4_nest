@@ -19,7 +19,7 @@ export class UpdateCommentLikeStatusCase implements ICommandHandler<UpdateCommen
   constructor(
     @Inject(CommentsQueryRepoKey) private readonly commentsQueryRepo: ICommentsQueryRepository,
     @Inject(CommentsRepoKey) private readonly commentsRepo: ICommentsRepository,
-    @Inject(UserRepoKey) private readonly usersRepo: IUsersRepository,
+    @Inject(UserRepoKey) private readonly usersRepo: IUsersRepository<any>,
   ) {}
 
   async execute({ userId, model }: UpdateCommentLikeStatusCommand): Promise<ServiceResult> {

@@ -6,11 +6,11 @@ import { DataSource } from 'typeorm';
 import { WithDbId } from '../../../../application/utils/types';
 import { AuthEntityRepo } from '../auth-entity.repo';
 import { AuthEntityFactory } from '../auth-entity.factory';
-import { AuthRawSqlResult } from './auth.raw-sql.result';
+import { AuthSqlRawResult } from './auth.sql-raw.result';
 import { InjectDataSource } from '@nestjs/typeorm';
 
 @Injectable()
-export class AuthRawSqlSessionRepository implements IAuthSessionRepository {
+export class AuthSqlRawRepository implements IAuthSessionRepository<void> {
   constructor(@InjectDataSource() private dataSource: DataSource) {}
 
   async createSession(input: AuthSessionCreateModel): Promise<string> {
@@ -32,7 +32,7 @@ export class AuthRawSqlSessionRepository implements IAuthSessionRepository {
   async getSessionByDeviceId(deviceId: string): Promise<AuthEntityRepo | null> {
     const res = await this.dataSource.query<WithDbId<IAuthSession>[]>(`SELECT * FROM public."AuthSession" as a WHERE a."deviceId" = $1`, [deviceId]);
     if (res.length > 0) {
-      return AuthEntityFactory.createSqlRawEntity(new AuthRawSqlResult(this.dataSource, res[0]));
+      return AuthEntityFactory.createSqlRawEntity(new AuthSqlRawResult(this.dataSource, res[0]));
     }
     return null;
   }

@@ -14,7 +14,6 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { IUsersAdminController, IUsersQueryRepository, UserQueryRepoKey } from '../types/common';
-import { UsersDataMapper } from './users.dm';
 import { UserListViewModel, UserViewModel } from '../types/dto';
 import { Status } from '../../../application/utils/types';
 import { ServiceResult } from '../../../application/core/ServiceResult';
@@ -37,7 +36,7 @@ export class UsersAdminController implements IUsersAdminController {
   @Get('/users')
   @HttpCode(Status.OK)
   async getAll(@Query() query: UserPaginationQueryDto): Promise<UserListViewModel> {
-    return await this.usersQueryRepo.getUsers(query, UsersDataMapper.toUsersView);
+    return await this.usersQueryRepo.getUsers(query);
   }
 
   @Post('/users')

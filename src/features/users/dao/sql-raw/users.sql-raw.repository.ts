@@ -10,7 +10,7 @@ import { UserEntityRepo } from '../user-entity.repo';
 import { UserEntityFactory } from '../user-entity.factory';
 
 @Injectable()
-export class UsersSqlRawRepository implements IUsersRepository {
+export class UsersSqlRawRepository implements IUsersRepository<void> {
   constructor(@InjectDataSource() private dataSource: DataSource) {}
 
   async isUserAuthConfirmed(userId: string): Promise<boolean> {

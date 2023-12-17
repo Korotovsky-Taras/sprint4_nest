@@ -1,12 +1,9 @@
-import { IUser, UserConfirmation, UserMongoType } from './dao';
+import { UserConfirmation } from './dao';
 import { IRepository, IService } from '../../types';
-import { UserConfirmationCodeValidateResult, UserCreateInputModel, UserCreateModel, UserListViewModel, UserViewModel } from './dto';
+import { UserConfirmationCodeValidateResult, UserCreateInputModel, UserCreateModel, UserListViewModel, UserMeViewModel, UserViewModel } from './dto';
 import { WithPagination } from '../../../application/utils/types';
 import { UserPaginationQueryDto } from '../dto/UserPaginationQueryDto';
 import { UserEntityRepo } from '../dao/user-entity.repo';
-
-export type UserMapperType<T> = (post: UserMongoType) => T;
-export type UserListMapperType<T> = (post: UserMongoType[]) => T[];
 
 export interface IUsersService extends IService {}
 
@@ -18,7 +15,7 @@ export interface IUsersAdminController {
 
 export const UserRepoKey = Symbol('USERS_REPO');
 
-export interface IUsersRepository extends IRepository<IUser> {
+export interface IUsersRepository<T> extends IRepository<T> {
   isUserAuthConfirmed(userId: string): Promise<boolean>;
   deleteUserById(userId: string): Promise<boolean>;
   isUserExist(userId: string): Promise<boolean>;
@@ -33,10 +30,9 @@ export interface IUsersRepository extends IRepository<IUser> {
 export const UserQueryRepoKey = Symbol('USERS_QUERY_REPO');
 
 export interface IUsersQueryRepository {
-  getUsers<T>(query: UserPaginationQueryDto, mapper: UserListMapperType<T>): Promise<WithPagination<T>>;
-  getUserById<T>(userId: string, mapper: UserMapperType<T>): Promise<T | null>;
+  getUsers(query: UserPaginationQueryDto): Promise<WithPagination<UserViewModel>>;
+  getUserById(userId: string): Promise<UserMeViewModel | null>;
   isUserExistByLoginOrEmail(login: string, email: string): Promise<boolean>;
-  getUserByLoginOrEmail<T>(login: string, email: string, mapper: UserMapperType<T>): Promise<T | null>;
   getAuthConfirmationValidation(code: string): Promise<UserConfirmationCodeValidateResult | null>;
   getPassConfirmationValidation(code: string): Promise<UserConfirmationCodeValidateResult | null>;
   getUserRegistrationConfirmationByEmail(email: string): Promise<UserConfirmation | null>;

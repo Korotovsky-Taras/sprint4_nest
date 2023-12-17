@@ -9,13 +9,23 @@ import { Comment, CommentsSchema } from './dao/mongo/comments.schema';
 import { UsersModule } from '../users/users.module';
 import { commentsCases } from './use-cases';
 import { CqrsModule } from '@nestjs/cqrs';
-import { withDbTypedClass } from '../../application/utils/withTypedClass';
+import { withDbTypedClass } from '../../application/utils/withTyped';
 import { CommentsQueryRepoKey, CommentsRepoKey } from './types/common';
 import { CommentsSqlRawQueryRepository } from './dao/sql-raw/comments.sql-raw.query.repository';
 import { CommentsSqlRawRepository } from './dao/sql-raw/comments.sql-raw.repository';
+import { CommentsSqlOrmQueryRepository } from './dao/sql-orm/comments.sql-orm.query.repository';
+import { CommentsSqlOrmRepository } from './dao/sql-orm/comments.sql-orm.repository';
 
-const CommentsQueryRepoTyped = withDbTypedClass(CommentsQueryRepoKey, { Mongo: CommentsMongoQueryRepository, SQLRaw: CommentsSqlRawQueryRepository });
-const CommentsRepoTyped = withDbTypedClass(CommentsRepoKey, { Mongo: CommentsMongoRepository, SQLRaw: CommentsSqlRawRepository });
+const CommentsQueryRepoTyped = withDbTypedClass(CommentsQueryRepoKey, {
+  Mongo: CommentsMongoQueryRepository,
+  SQLRaw: CommentsSqlRawQueryRepository,
+  SQLOrm: CommentsSqlOrmQueryRepository,
+});
+const CommentsRepoTyped = withDbTypedClass(CommentsRepoKey, {
+  Mongo: CommentsMongoRepository,
+  SQLRaw: CommentsSqlRawRepository,
+  SQLOrm: CommentsSqlOrmRepository,
+});
 
 @Module({
   imports: [

@@ -13,8 +13,8 @@ export class AuthLogoutCommand {
 @CommandHandler(AuthLogoutCommand)
 export class AuthLogoutCase implements ICommandHandler<AuthLogoutCommand, ServiceResult> {
   constructor(
-    @Inject(UserRepoKey) private readonly usersRepo: IUsersRepository,
-    @Inject(AuthRepoKey) private readonly authRepo: IAuthSessionRepository,
+    @Inject(UserRepoKey) private readonly usersRepo: IUsersRepository<any>,
+    @Inject(AuthRepoKey) private readonly authRepo: IAuthSessionRepository<any>,
   ) {}
 
   async execute({ input }: AuthLogoutCommand): Promise<ServiceResult> {

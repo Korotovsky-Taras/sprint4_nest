@@ -9,7 +9,7 @@ import { AuthEntityRepo } from '../auth-entity.repo';
 import { AuthEntityFactory } from '../auth-entity.factory';
 
 @Injectable()
-export class AuthSessionRepository implements IAuthSessionRepository {
+export class AuthMongoRepository implements IAuthSessionRepository<AuthSessionDocumentType> {
   constructor(@InjectModel(AuthSession.name) private authSessionModel: IAuthSessionModel) {}
 
   async createSession(input: AuthSessionCreateModel): Promise<string> {

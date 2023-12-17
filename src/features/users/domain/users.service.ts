@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { IUsersQueryRepository, IUsersRepository, IUsersService, UserQueryRepoKey, UserRepoKey } from '../types/common';
 import { UserCreateModel, UserViewModel } from '../types/dto';
-import { UsersDataMapper } from '../api/users.dm';
+import { UsersMongoDataMapper } from '../dao/mongo/users.mongo.dm';
 import { AbstractUsersService } from './users.auth.service';
 import { ServiceResult } from '../../../application/core/ServiceResult';
 import { GMailSender } from '../../../application/mails/GMailSender';
@@ -11,7 +11,7 @@ import { UserEntityRepo } from '../dao/user-entity.repo';
 @Injectable()
 export class UsersService extends AbstractUsersService implements IUsersService {
   constructor(
-    @Inject(UserRepoKey) private readonly usersRepo: IUsersRepository,
+    @Inject(UserRepoKey) private readonly usersRepo: IUsersRepository<any>,
     @Inject(UserQueryRepoKey) private readonly usersQueryRepo: IUsersQueryRepository,
     private readonly mailSender: GMailSender,
   ) {
@@ -40,7 +40,7 @@ export class UsersService extends AbstractUsersService implements IUsersService 
       await this.mailSender.sendRegistrationMail(user.email, user.authConfirmation.code).catch((e) => console.log(e));
     }
 
-    result.setData(UsersDataMapper.toUserEntityView(user));
+    result.setData(UsersMongoDataMapper.toUserEntityView(user));
 
     return result;
   }
