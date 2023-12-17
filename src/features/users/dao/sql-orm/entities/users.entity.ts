@@ -50,7 +50,7 @@ export class UsersEntity implements WithDbId<IUser> {
   }
 
   isPassExpired(): boolean {
-    return new Date().getTime() > new Date(this.authConfirmation.expiredIn).getTime();
+    return new Date().getTime() > new Date(this.passConfirmation.expiredIn).getTime();
   }
 
   setPassword(password: UserEncodedPassword): void {

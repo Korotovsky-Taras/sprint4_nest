@@ -95,7 +95,14 @@ export class UsersSqlOrmRepository implements IUsersRepository<UsersEntity> {
   }
 
   async getUserByEmail(email: string): Promise<UserEntityRepo | null> {
-    const user: UsersEntity | null = await this.userRepo.findOne({ where: { email } });
+    const user: UsersEntity | null = await this.userRepo.findOne({
+      where: { email },
+      relations: {
+        password: true,
+        passConfirmation: true,
+        authConfirmation: true,
+      },
+    });
     if (user) {
       return UserEntityFactory.createTypeOrmEntity(user, () => this.saveDoc(user));
     }
