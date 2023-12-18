@@ -15,15 +15,12 @@ export class UsersSqlOrmQueryRepository implements IUsersQueryRepository {
   constructor(@InjectRepository(UsersEntity) private userRepo: Repository<UsersEntity>) {}
 
   async getUsers(query: UserPaginationQueryDto): Promise<WithPagination<UserViewModel>> {
-    const queryBuilder = this.userRepo.createQueryBuilder('user').where('1=1');
+    const searchByLoginTerm = query.searchLoginTerm ?? '';
+    const searchByEmailTerm = query.searchEmailTerm ?? '';
 
-    if (query.searchLoginTerm) {
-      queryBuilder.andWhere('user.login like :login', { login: `%${query.searchLoginTerm}%` });
-    }
-
-    if (query.searchEmailTerm) {
-      queryBuilder.andWhere('user.email like :email', { email: `%${query.searchEmailTerm}%` });
-    }
+    const queryBuilder = this.userRepo
+      .createQueryBuilder('u')
+      .where(`u.login ILIKE :login OR u.email ILIKE :email`, { login: `%${searchByLoginTerm}%`, email: `%${searchByEmailTerm}%` });
 
     const sortByWithCollate = query.sortBy !== 'createdAt' ? 'COLLATE "C"' : '';
 
