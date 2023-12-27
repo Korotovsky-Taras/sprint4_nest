@@ -7,7 +7,7 @@ import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { CommentsPaginationQueryDto } from '../../dto/CommentsPaginationQueryDto';
 import { CommentViewModel } from '../../types/dto';
-import { CommentsSqlRawDataMapper } from '../../api/comments.sql-raw.dm';
+import { CommentsSqlRawDataMapper } from './comments.sql-raw.dm';
 
 @Injectable()
 export class CommentsSqlRawQueryRepository implements ICommentsQueryRepository {

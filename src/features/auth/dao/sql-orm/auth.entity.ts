@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { UsersEntity } from '../../../users/dao/sql-orm/entities/users.entity';
 import { AuthSessionCreateModel, AuthSessionUpdateModel } from '../../types/dto';
 
@@ -7,7 +7,7 @@ export class AuthEntity {
   @PrimaryGeneratedColumn()
   _id: number;
 
-  @Column()
+  @Column({ type: 'number' })
   userId: number;
 
   @Column({ type: 'uuid' })
@@ -25,7 +25,7 @@ export class AuthEntity {
   @Column({ type: 'timestamp with time zone' })
   lastActiveDate: Date;
 
-  @OneToOne(() => UsersEntity, (user) => user.auth, { cascade: ['insert', 'update'] })
+  @ManyToOne(() => UsersEntity, (user) => user.auth, { cascade: ['insert', 'update'] })
   @JoinColumn({ name: 'userId' })
   user: UsersEntity;
 

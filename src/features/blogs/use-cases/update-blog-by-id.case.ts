@@ -1,11 +1,11 @@
 import { ServiceResult } from '../../../application/core/ServiceResult';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { validateOrRejectDto } from '../../../application/utils/validateOrRejectDto';
-import { BlogDBType } from '../types/dao';
 import { BlogUpdateDto } from '../dto/BlogUpdateDto';
 import { BlogServiceError } from '../types/errors';
 import { Inject } from '@nestjs/common';
 import { BlogRepoKey, IBlogsRepository } from '../types/common';
+import { BlogViewModel } from '../types/dto';
 
 export class UpdateBlogByIdCommand {
   constructor(
@@ -16,12 +16,12 @@ export class UpdateBlogByIdCommand {
 
 @CommandHandler(UpdateBlogByIdCommand)
 export class UpdateBlogByIdCase implements ICommandHandler<UpdateBlogByIdCommand, ServiceResult> {
-  constructor(@Inject(BlogRepoKey) private readonly blogsRepo: IBlogsRepository) {}
+  constructor(@Inject(BlogRepoKey) private readonly blogsRepo: IBlogsRepository<any>) {}
 
   async execute({ dto, blogId }: UpdateBlogByIdCommand): Promise<ServiceResult> {
     await validateOrRejectDto(dto, BlogUpdateDto);
 
-    const blog: BlogDBType | null = await this.blogsRepo.getBlogById(blogId);
+    const blog: BlogViewModel | null = await this.blogsRepo.getBlogById(blogId);
     const result = new ServiceResult();
 
     if (!blog) {

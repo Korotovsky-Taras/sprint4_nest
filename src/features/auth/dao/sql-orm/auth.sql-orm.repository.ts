@@ -6,7 +6,6 @@ import { AuthEntityRepo } from '../auth-entity.repo';
 import { AuthEntityFactory } from '../auth-entity.factory';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DeleteResult, Repository } from 'typeorm';
-import { UsersEntity } from '../../../users/dao/sql-orm/entities/users.entity';
 
 @Injectable()
 export class AuthSqlOrmRepository implements IAuthSessionRepository<AuthEntity> {
@@ -40,8 +39,8 @@ export class AuthSqlOrmRepository implements IAuthSessionRepository<AuthEntity> 
     const result: DeleteResult = await this.authRepo
       .createQueryBuilder()
       .delete()
-      .from(UsersEntity)
-      .where('userId = :userId AND deviceId != :deviceId', { userId: Number(model.userId), deviceId: model.deviceId })
+      .from(AuthEntity)
+      .where('"userId" = :userId AND NOT "deviceId" = :deviceId', { userId: Number(model.userId), deviceId: model.deviceId })
       .execute();
 
     return result.affected != null && result.affected > 0;

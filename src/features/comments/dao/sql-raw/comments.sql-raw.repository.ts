@@ -8,7 +8,7 @@ import { DataSource } from 'typeorm';
 import { LikeStatus } from '../../../likes/types';
 
 @Injectable()
-export class CommentsSqlRawRepository implements ICommentsRepository {
+export class CommentsSqlRawRepository implements ICommentsRepository<void> {
   constructor(@InjectDataSource() private dataSource: DataSource) {}
 
   async updateCommentById(commentId: string, input: CommentUpdateDto): Promise<boolean> {

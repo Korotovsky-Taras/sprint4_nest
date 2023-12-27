@@ -1,7 +1,7 @@
-import { BlogPaginationQueryModel, BlogPaginationRepositoryModel, BlogViewModel } from '../types/dto';
-import { BlogDBType } from '../types/dao';
-import { withExternalDirection, withExternalNumber, withExternalString, withExternalTerm } from '../../../application/utils/withExternalQuery';
-import { toIsoString } from '../../../application/utils/date';
+import { BlogPaginationQueryModel, BlogPaginationRepositoryModel, BlogViewModel } from '../../types/dto';
+import { BlogDBType } from '../../types/dao';
+import { withExternalDirection, withExternalNumber, withExternalString, withExternalTerm } from '../../../../application/utils/withExternalQuery';
+import { toIsoString } from '../../../../application/utils/date';
 
 const initialQuery: BlogPaginationRepositoryModel = {
   sortBy: 'createdAt',
@@ -11,12 +11,10 @@ const initialQuery: BlogPaginationRepositoryModel = {
   pageSize: 10,
 };
 
-export class BlogsDataMapper {
-  constructor() {}
-
+export class BlogsMongoDataMapper {
   static toBlogsView(items: BlogDBType[]): BlogViewModel[] {
     return items.map((item) => {
-      return BlogsDataMapper.toBlogView(item);
+      return BlogsMongoDataMapper.toBlogView(item);
     });
   }
 

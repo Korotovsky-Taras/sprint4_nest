@@ -1,5 +1,4 @@
 import { Body, Controller, Delete, Get, HttpCode, Inject, Injectable, NotFoundException, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
-import { BlogsDataMapper } from './blogs.dm';
 import { Request } from 'express';
 import { BlogQueryRepoKey, IBlogsAdminController, IBlogsQueryRepository } from '../types/common';
 import { BlogViewModel } from '../types/dto';
@@ -40,7 +39,7 @@ export class BlogsAdminController implements IBlogsAdminController {
   @Get()
   @HttpCode(Status.OK)
   async getAll(@Query() query: BlogPaginationQueryDto): Promise<WithPagination<any>> {
-    return await this.blogsQueryRepo.getBlogs(query, BlogsDataMapper.toBlogsView);
+    return await this.blogsQueryRepo.getBlogs(query);
   }
 
   @Post()
@@ -74,7 +73,7 @@ export class BlogsAdminController implements IBlogsAdminController {
   @UseGuards(AuthTokenGuard)
   @HttpCode(Status.OK)
   async getBlogPosts(@ParamId('id') blogId: string, @Query() query: PostPaginationQueryDto, @Req() req: Request): Promise<WithPagination<PostViewModel>> {
-    const blog: BlogViewModel | null = await this.blogsQueryRepo.getBlogById(blogId, BlogsDataMapper.toBlogView);
+    const blog: BlogViewModel | null = await this.blogsQueryRepo.getBlogById(blogId);
     if (blog) {
       return await this.postsQueryRepo.getBlogPosts(req.userId, blogId, query);
     }

@@ -19,7 +19,7 @@ import { PostsSqlOrmRepository } from './dao/sql-orm/posts.sql-orm.repository';
 import { PostsSqlOrmQueryRepository } from './dao/sql-orm/posts.sql-orm.query.repository';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { PostsEntity } from './dao/sql-orm/entities/posts.entity';
-import { PostsCommentsEntity } from './dao/sql-orm/entities/posts-comments.entity';
+import { PostsLikesEntity } from './dao/sql-orm/entities/posts-likes.entity';
 
 const PostQueryRepoTyped = withDbTypedClass(PostQueryRepoKey, {
   Mongo: PostsMongoQueryRepository,
@@ -34,7 +34,7 @@ const PostDbModuleTyped = withDbTypedModule({
       schema: PostSchema,
     },
   ]),
-  SQLOrm: TypeOrmModule.forFeature([PostsEntity, PostsCommentsEntity]),
+  SQLOrm: TypeOrmModule.forFeature([PostsEntity, PostsLikesEntity]),
 });
 
 @Module({

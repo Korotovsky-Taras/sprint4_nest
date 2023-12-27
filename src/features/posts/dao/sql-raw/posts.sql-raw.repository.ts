@@ -6,11 +6,11 @@ import { PostUpdateDto } from '../../dto/PostUpdateDto';
 import { LikeStatus } from '../../../likes/types';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import { PostsSqlRawDataMapper } from '../../api/posts.sql-raw.dm';
+import { PostsSqlRawDataMapper } from './posts.sql-raw.dm';
 import { isNumber } from 'class-validator';
 
 @Injectable()
-export class PostsSqlRawRepository implements IPostsRepository {
+export class PostsSqlRawRepository implements IPostsRepository<void> {
   constructor(@InjectDataSource() private dataSource: DataSource) {}
 
   async createPost(input: PostCreateModel): Promise<PostViewModel> {
@@ -77,18 +77,6 @@ RETURNING *, (SELECT b."name" as "blogName" FROM public."Blogs" as b WHERE b._id
     }
     const res = await this.dataSource.query<PostDBType[]>(`SELECT "_id" FROM public."Posts" as p WHERE p."_id" = $1 `, [id]);
     return !!res[0];
-  }
-
-  async getPostById(id: string): Promise<PostDBType | null> {
-    if (!isNumber(Number(id))) {
-      return null;
-    }
-    const res = await this.dataSource.query<PostDBType[]>(`SELECT "_id" FROM public."Posts" as p WHERE p."_id" = $1 `, [id]);
-    const post = res[0];
-    if (post) {
-      return post;
-    }
-    return null;
   }
 
   async deletePostById(id: string): Promise<boolean> {

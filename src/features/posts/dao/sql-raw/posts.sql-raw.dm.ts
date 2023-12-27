@@ -1,7 +1,7 @@
-import { PostViewModel } from '../types/dto';
-import { IPostSqlRaw } from '../types/dao';
-import { LastLike, LikesExtendedInfo, LikeStatus } from '../../likes/types';
-import { toIsoString } from '../../../application/utils/date';
+import { PostViewModel } from '../../types/dto';
+import { IPostSqlRaw } from '../../types/dao';
+import { LastLike, LikesExtendedInfo, LikeStatus } from '../../../likes/types';
+import { toIsoString } from '../../../../application/utils/date';
 
 export class PostsSqlRawDataMapper {
   static toPostsView(items: IPostSqlRaw[]): PostViewModel[] {

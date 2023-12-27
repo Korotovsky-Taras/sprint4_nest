@@ -8,7 +8,7 @@ import { withMongoPagination } from '../../../../application/utils/withMongoPagi
 import { ObjectId } from 'mongodb';
 import { CommentsPaginationQueryDto } from '../../dto/CommentsPaginationQueryDto';
 import { CommentViewModel } from '../../types/dto';
-import { CommentsMongoDataMapper } from '../../api/comments.mongo.dm';
+import { CommentsMongoDataMapper } from './comments.mongo.dm';
 
 @Injectable()
 export class CommentsMongoQueryRepository implements ICommentsQueryRepository {

@@ -1,5 +1,4 @@
 import { UserIdReq, WithPagination } from '../../../application/utils/types';
-import { IComment } from './dao';
 import { IRepository, IService } from '../../types';
 import { CommentCreateModel, CommentViewModel } from './dto';
 import { Request } from 'express';
@@ -17,7 +16,7 @@ export interface ICommentsController {
 
 export const CommentsRepoKey = Symbol('COMMENTS_REPO');
 
-export interface ICommentsRepository extends IRepository<IComment> {
+export interface ICommentsRepository<T> extends IRepository<T> {
   createComment(dto: CommentCreateModel): Promise<string>;
   updateCommentById(commentId: string, input: CommentUpdateDto): Promise<boolean>;
   updateLike(commentId: string, userId: string, status: LikeStatus): Promise<boolean>;

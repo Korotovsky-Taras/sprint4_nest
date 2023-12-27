@@ -1,5 +1,4 @@
 import { registerDecorator, ValidationOptions, ValidatorConstraint, ValidatorConstraintInterface } from 'class-validator';
-import { BlogsDataMapper } from '../../../features/blogs/api/blogs.dm';
 import { Inject, Injectable } from '@nestjs/common';
 import { BlogQueryRepoKey, IBlogsQueryRepository } from '../../../features/blogs/types/common';
 
@@ -8,7 +7,7 @@ import { BlogQueryRepoKey, IBlogsQueryRepository } from '../../../features/blogs
 export class IsBlogIdExistValidator implements ValidatorConstraintInterface {
   constructor(@Inject(BlogQueryRepoKey) private blogsQueryRepo: IBlogsQueryRepository) {}
   validate(blogId: string) {
-    return this.blogsQueryRepo.getBlogById(blogId, BlogsDataMapper.toBlogView).then((blog) => {
+    return this.blogsQueryRepo.getBlogById(blogId).then((blog) => {
       return !!blog;
     });
   }

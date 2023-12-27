@@ -1,7 +1,7 @@
-import { CommentViewModel } from '../types/dto';
-import { toIsoString } from '../../../application/utils/date';
-import { LikeStatus } from '../../likes/types';
-import { ICommentSqlRaw } from '../types/dao';
+import { CommentViewModel } from '../../types/dto';
+import { toIsoString } from '../../../../application/utils/date';
+import { LikeStatus } from '../../../likes/types';
+import { ICommentSqlRaw } from '../../types/dao';
 
 export class CommentsSqlRawDataMapper {
   static toCommentView(comment: ICommentSqlRaw): CommentViewModel {

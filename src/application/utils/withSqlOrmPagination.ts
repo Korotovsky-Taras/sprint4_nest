@@ -11,13 +11,17 @@ export const withSqlOrmPagination = async <T, O>(
   sortByWithCollate: string,
   mapper: (input: T[]) => O[],
 ): Promise<WithPagination<O>> => {
-  const totalCount = await queryBuilder.getCount();
-
   const items = await queryBuilder
+    .addSelect(`CAST(count(*) OVER() as INTEGER)`, 'totalCount')
     .orderBy(`"${q.sortBy}" ${sortByWithCollate}`, sqlSortDirectionUpper(q.sortDirection))
     .skip(Math.max(q.pageNumber - 1, 0) * q.pageSize)
     .take(q.pageSize)
-    .getMany();
+    .getRawMany();
+
+  let totalCount = 0;
+  if (items.length > 0 && items[0].totalCount) {
+    totalCount = items[0].totalCount;
+  }
 
   return {
     pagesCount: Math.ceil(totalCount / q.pageSize),

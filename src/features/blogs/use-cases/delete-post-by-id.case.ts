@@ -13,7 +13,7 @@ export class DeleteBlogPostByIdCommand {
 
 @CommandHandler(DeleteBlogPostByIdCommand)
 export class DeleteBlogPostByIdCase implements ICommandHandler<DeleteBlogPostByIdCommand> {
-  constructor(@Inject(PostRepoKey) private readonly postsRepo: IPostsRepository) {}
+  constructor(@Inject(PostRepoKey) private readonly postsRepo: IPostsRepository<any>) {}
 
   async execute({ blogId, postId }: DeleteBlogPostByIdCommand): Promise<ServiceResult> {
     const result = new ServiceResult();

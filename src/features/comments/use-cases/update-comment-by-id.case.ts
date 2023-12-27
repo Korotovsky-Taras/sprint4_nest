@@ -17,7 +17,7 @@ export class UpdateCommentByIdCommand {
 
 @CommandHandler(UpdateCommentByIdCommand)
 export class UpdateCommentByIdCase implements ICommandHandler<UpdateCommentByIdCommand> {
-  constructor(@Inject(CommentsRepoKey) private readonly commentsRepo: ICommentsRepository) {}
+  constructor(@Inject(CommentsRepoKey) private readonly commentsRepo: ICommentsRepository<any>) {}
 
   async execute({ commentId, userId, dto }: UpdateCommentByIdCommand): Promise<ServiceResult> {
     await validateOrRejectDto(dto, CommentUpdateDto);

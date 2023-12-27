@@ -12,7 +12,7 @@ import { IUsersRepository, UserRepoKey } from '../../../users/types/common';
 import { UserEntityRepo } from '../../../users/dao/user-entity.repo';
 
 @Injectable()
-export class CommentsMongoRepository implements ICommentsRepository {
+export class CommentsMongoRepository implements ICommentsRepository<CommentDocumentType> {
   constructor(
     @InjectModel(Comment.name) private commentModel: ICommentModel,
     @Inject(UserRepoKey) private usersRepo: IUsersRepository<any>,

@@ -16,7 +16,7 @@ export class UpdateBlogPostByIdCommand {
 
 @CommandHandler(UpdateBlogPostByIdCommand)
 export class UpdateBlogPostByIdCase implements ICommandHandler<UpdateBlogPostByIdCommand> {
-  constructor(@Inject(PostRepoKey) private readonly postsRepo: IPostsRepository) {}
+  constructor(@Inject(PostRepoKey) private readonly postsRepo: IPostsRepository<any>) {}
 
   async execute({ blogId, postId, dto }: UpdateBlogPostByIdCommand): Promise<ServiceResult> {
     await validateOrRejectDto(dto, BlogPostUpdateDto);

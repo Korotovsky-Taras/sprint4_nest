@@ -27,7 +27,9 @@ export const testConfig = async (): Promise<AppConfig> => {
     tokenCreator,
     closeConnections: async (): Promise<void> => {
       await mongoDbService.getConnection().close();
-      await dataSource.destroy();
+      if (dataSource.isInitialized) {
+        await dataSource.destroy();
+      }
     },
   };
 };

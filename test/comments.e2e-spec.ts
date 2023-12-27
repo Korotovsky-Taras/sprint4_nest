@@ -100,7 +100,6 @@ describe('comments testing', () => {
         .set('Content-Type', 'application/json')
         .set('Authorization', 'Bearer ' + utils.createAccessToken(user.id))
         .expect(Status.OK);
-      console.log({ res: res2.body });
 
       expect(res2.body).toEqual({
         id: expect.any(String),
@@ -305,16 +304,16 @@ describe('comments testing', () => {
         .send({
           content: utils.generateString(20),
         })
-        .expect(Status.BAD_REQUEST);
+        .expect(Status.NOT_FOUND);
 
-      await config.getHttp().get(`/comments/${fakeCommentId}`).set('Content-Type', 'application/json').expect(Status.BAD_REQUEST);
+      await config.getHttp().get(`/comments/${fakeCommentId}`).set('Content-Type', 'application/json').expect(Status.NOT_FOUND);
 
       await config
         .getHttp()
         .delete(`/comments/${fakeCommentId}`)
         .set('Content-Type', 'application/json')
         .set('Authorization', 'Bearer ' + utils.createAccessToken(user.id))
-        .expect(Status.BAD_REQUEST);
+        .expect(Status.NOT_FOUND);
     }
   });
 

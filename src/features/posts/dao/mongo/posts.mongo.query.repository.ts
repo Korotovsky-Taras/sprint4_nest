@@ -7,7 +7,7 @@ import { withMongoPagination } from '../../../../application/utils/withMongoPagi
 import { UserIdReq, WithPagination } from '../../../../application/utils/types';
 import { PostPaginationQueryDto } from '../../dto/PostPaginationQueryDto';
 import { PostViewModel } from '../../types/dto';
-import { PostsMongoDataMapper } from '../../api/posts.mongo.dm';
+import { PostsMongoDataMapper } from './posts.mongo.dm';
 
 @Injectable()
 export class PostsMongoQueryRepository implements IPostsQueryRepository {

@@ -2,20 +2,22 @@ import { DeleteResult, ObjectId, UpdateResult } from 'mongodb';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Blog } from './blogs.mongo.schema';
-import { BlogMapperType, IBlogsRepository } from '../../types/common';
-import { BlogDBType, BlogDocumentType, IBlogModel } from '../../types/dao';
+import { IBlogsRepository } from '../../types/common';
+import { BlogDocumentType, IBlogModel } from '../../types/dao';
 import { BlogCreateDto } from '../../dto/BlogCreateDto';
 import { BlogUpdateDto } from '../../dto/BlogUpdateDto';
 import { isValidObjectId } from 'mongoose';
+import { BlogsMongoDataMapper } from './blogs.mongo.dm';
+import { BlogViewModel } from '../../types/dto';
 
 @Injectable()
-export class BlogsMongoRepository implements IBlogsRepository {
+export class BlogsMongoRepository implements IBlogsRepository<BlogDocumentType> {
   constructor(@InjectModel(Blog.name) private blogModel: IBlogModel) {}
 
-  async createBlog<T>(input: BlogCreateDto, mapper: BlogMapperType<T>): Promise<T> {
+  async createBlog(input: BlogCreateDto): Promise<BlogViewModel> {
     const model: BlogDocumentType = this.blogModel.createBlog(input);
     await this.saveDoc(model);
-    return mapper(model);
+    return BlogsMongoDataMapper.toBlogView(model);
   }
 
   async updateBlogById(id: string, input: BlogUpdateDto): Promise<boolean> {
@@ -32,11 +34,15 @@ export class BlogsMongoRepository implements IBlogsRepository {
     return res.deletedCount > 0;
   }
 
-  async getBlogById(id: string): Promise<BlogDBType | null> {
+  async getBlogById(id: string): Promise<BlogViewModel | null> {
     if (!isValidObjectId(id)) {
       return null;
     }
-    return this.blogModel.findById(id).lean();
+    const blog: BlogDocumentType | null = await this.blogModel.findById(id).exec();
+    if (blog != null) {
+      return BlogsMongoDataMapper.toBlogView(blog);
+    }
+    return null;
   }
 
   async saveDoc(doc: BlogDocumentType): Promise<void> {

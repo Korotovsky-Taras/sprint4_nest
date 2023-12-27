@@ -1,5 +1,4 @@
-import { BlogViewModel } from './dto';
-import { BlogDBType, IBlog } from './dao';
+import { BlogPaginationQueryModel, BlogPaginationRepositoryModel, BlogViewModel } from './dto';
 import { Request } from 'express';
 import { PostViewModel } from '../../posts/types/dto';
 import { IRepository, IService } from '../../types';
@@ -10,9 +9,6 @@ import { BlogUpdateDto } from '../dto/BlogUpdateDto';
 import { BlogPaginationQueryDto } from '../dto/BlogPaginationQueryDto';
 import { PostPaginationQueryDto } from '../../posts/dto/PostPaginationQueryDto';
 import { BlogPostUpdateDto } from '../dto/BlogPostUpdateDto';
-
-export type BlogMapperType<T> = (blog: BlogDBType) => T;
-export type BlogListMapperType<T> = (blog: BlogDBType[]) => T[];
 
 export interface IBlogService extends IService {}
 
@@ -35,16 +31,22 @@ export interface IBlogsAdminController {
 
 export const BlogRepoKey = Symbol('BLOGS_REPO');
 
-export interface IBlogsRepository extends IRepository<IBlog> {
-  createBlog<T>(input: BlogCreateDto, mapper: BlogMapperType<T>): Promise<T>;
+export interface IBlogsRepository<T> extends IRepository<T> {
+  createBlog(input: BlogCreateDto): Promise<BlogViewModel>;
   updateBlogById(id: string, input: BlogUpdateDto): Promise<boolean>;
   deleteBlogById(id: string): Promise<boolean>;
-  getBlogById(id: string): Promise<BlogDBType | null>;
+  getBlogById(id: string): Promise<BlogViewModel | null>;
 }
 
 export const BlogQueryRepoKey = Symbol('BLOGS_QUERY_REPO');
 
 export interface IBlogsQueryRepository {
-  getBlogs<T>(query: WithPaginationQuery & { searchNameTerm: string | null }, mapper: BlogListMapperType<T>): Promise<WithPagination<T>>;
-  getBlogById<T>(id: string, mapper: BlogMapperType<T>): Promise<T | null>;
+  getBlogs(query: WithPaginationQuery & { searchNameTerm: string | null }): Promise<WithPagination<BlogViewModel>>;
+  getBlogById(id: string): Promise<BlogViewModel | null>;
+}
+
+export interface IBlogDataMapper<T> {
+  toBlogsView(items: T[]): BlogViewModel[];
+  toBlogView(item: T): BlogViewModel;
+  toRepoQuery(query: BlogPaginationQueryModel): BlogPaginationRepositoryModel;
 }

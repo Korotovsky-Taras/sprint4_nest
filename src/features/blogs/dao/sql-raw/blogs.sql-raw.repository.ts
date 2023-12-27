@@ -1,22 +1,24 @@
 import { Injectable } from '@nestjs/common';
-import { BlogMapperType, IBlogsRepository } from '../../types/common';
+import { IBlogsRepository } from '../../types/common';
 import { BlogDBType } from '../../types/dao';
 import { BlogCreateDto } from '../../dto/BlogCreateDto';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { BlogUpdateDto } from '../../dto/BlogUpdateDto';
+import { BlogViewModel } from '../../types/dto';
+import { BlogsSqlRawDataMapper } from './blogs.sql-raw.dm';
 
 @Injectable()
-export class BlogsSqlRawRepository implements IBlogsRepository {
+export class BlogsSqlRawRepository implements IBlogsRepository<void> {
   constructor(@InjectDataSource() private dataSource: DataSource) {}
 
-  async createBlog<T>(input: BlogCreateDto, mapper: BlogMapperType<T>): Promise<T> {
+  async createBlog(input: BlogCreateDto): Promise<BlogViewModel> {
     const res = await this.dataSource.query<BlogDBType[]>(`INSERT INTO public."Blogs"(name, description, "websiteUrl") VALUES ($1, $2, $3) RETURNING *;`, [
       input.name,
       input.description,
       input.websiteUrl,
     ]);
-    return mapper(res[0]);
+    return BlogsSqlRawDataMapper.toBlogView(res[0]);
   }
 
   async updateBlogById(id: string, input: BlogUpdateDto): Promise<boolean> {
@@ -36,10 +38,10 @@ export class BlogsSqlRawRepository implements IBlogsRepository {
     return count > 0;
   }
 
-  async getBlogById(id: string): Promise<BlogDBType | null> {
+  async getBlogById(id: string): Promise<BlogViewModel | null> {
     const res = await this.dataSource.query<BlogDBType[]>(`SELECT *FROM public."Blogs" as b WHERE b."_id" = $1`, [id]);
     if (res.length > 0) {
-      return res[0];
+      return BlogsSqlRawDataMapper.toBlogView(res[0]);
     }
     return null;
   }

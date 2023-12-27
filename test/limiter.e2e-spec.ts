@@ -14,6 +14,8 @@ describe('security testing', () => {
     await config.getDaoUtils().clearAll();
 
     userModel = utils.createNewUserModel();
+
+    await utils.createUser(userModel);
   });
 
   it('should not login by limiter', async () => {

@@ -1,5 +1,4 @@
 import { PostCreateModel, PostViewModel } from './dto';
-import { IPost, PostDBType } from './dao';
 import { IRepository, IService } from '../../types';
 import { Request } from 'express';
 import { CommentViewModel } from '../../comments/types/dto';
@@ -26,10 +25,9 @@ export interface IPostsController {
 
 export const PostRepoKey = Symbol('POSTS_REPO');
 
-export interface IPostsRepository extends IRepository<IPost> {
+export interface IPostsRepository<T> extends IRepository<T> {
   createPost(input: PostCreateModel, userId: UserIdReq): Promise<PostViewModel>;
   updatePostById(id: string, input: PostUpdateDto): Promise<boolean>;
-  getPostById(id: string): Promise<PostDBType | null>;
   isPostByIdExist(id: string): Promise<boolean>;
   updateLike(postId: string, likeStatus: LikeStatus, userId: string, userLogin: string): Promise<boolean>;
   deletePostById(id: string): Promise<boolean>;

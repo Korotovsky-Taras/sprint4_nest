@@ -8,11 +8,11 @@ import { CommentsRepoKey, ICommentsRepository } from '../../comments/types/commo
 
 export class TestsService {
   constructor(
-    @Inject(BlogRepoKey) private readonly blogsRepo: IBlogsRepository,
-    @Inject(PostRepoKey) private readonly postsRepo: IPostsRepository,
+    @Inject(BlogRepoKey) private readonly blogsRepo: IBlogsRepository<any>,
+    @Inject(PostRepoKey) private readonly postsRepo: IPostsRepository<any>,
     @Inject(UserRepoKey) private readonly usersRepo: IUsersRepository<any>,
     @Inject(AuthRepoKey) private readonly authRepo: IAuthSessionRepository<any>,
-    @Inject(CommentsRepoKey) private readonly commentsRepo: ICommentsRepository,
+    @Inject(CommentsRepoKey) private readonly commentsRepo: ICommentsRepository<any>,
   ) {}
 
   async getUserAuthConfirmationByLogin(login: string): Promise<UserConfirmation | null> {
@@ -26,8 +26,8 @@ export class TestsService {
   async clearAll() {
     await this.authRepo.clear();
     await this.usersRepo.clear();
-    // await this.commentsRepo.clear();
-    // await this.postsRepo.clear();
-    // await this.blogsRepo.clear();
+    await this.postsRepo.clear();
+    await this.blogsRepo.clear();
+    await this.commentsRepo.clear();
   }
 }

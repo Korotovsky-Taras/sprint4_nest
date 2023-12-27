@@ -13,7 +13,7 @@ export class UpdatePostLikeStatusCommand {
 @CommandHandler(UpdatePostLikeStatusCommand)
 export class UpdatePostLikeStatusCase implements ICommandHandler<UpdatePostLikeStatusCommand> {
   constructor(
-    @Inject(PostRepoKey) private readonly postsRepo: IPostsRepository,
+    @Inject(PostRepoKey) private readonly postsRepo: IPostsRepository<any>,
     @Inject(UserRepoKey) private readonly usersRepo: IUsersRepository<any>,
   ) {}
 
@@ -29,16 +29,16 @@ export class UpdatePostLikeStatusCase implements ICommandHandler<UpdatePostLikeS
       return result;
     }
 
-    const post = await this.postsRepo.getPostById(model.postId);
+    const postExist = await this.postsRepo.isPostByIdExist(model.postId);
 
-    if (!post) {
+    if (!postExist) {
       result.addError({
         code: PostServiceError.POST_NOT_FOUND,
       });
       return result;
     }
 
-    const isPostUpdated = await this.postsRepo.updateLike(post._id.toString(), model.status, user._id, user.login);
+    const isPostUpdated = await this.postsRepo.updateLike(model.postId, model.status, user._id, user.login);
 
     if (!isPostUpdated) {
       result.addError({

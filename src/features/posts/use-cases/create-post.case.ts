@@ -3,12 +3,12 @@ import { UserIdReq } from '../../../application/utils/types';
 import { ServiceResult } from '../../../application/core/ServiceResult';
 import { validateOrRejectDto } from '../../../application/utils/validateOrRejectDto';
 import { PostCreateDto } from '../dto/PostCreateDto';
-import { BlogDBType } from '../../blogs/types/dao';
 import { PostServiceError } from '../types/errors';
 import { PostViewModel } from '../types/dto';
 import { Inject } from '@nestjs/common';
 import { BlogRepoKey, IBlogsRepository } from '../../blogs/types/common';
 import { IPostsRepository, PostRepoKey } from '../types/common';
+import { BlogViewModel } from '../../blogs/types/dto';
 
 export class CreatePostCommand {
   constructor(
@@ -20,8 +20,8 @@ export class CreatePostCommand {
 @CommandHandler(CreatePostCommand)
 export class CreatePostCase implements ICommandHandler<CreatePostCommand> {
   constructor(
-    @Inject(PostRepoKey) private readonly postsRepo: IPostsRepository,
-    @Inject(BlogRepoKey) private readonly blogsRepo: IBlogsRepository,
+    @Inject(PostRepoKey) private readonly postsRepo: IPostsRepository<any>,
+    @Inject(BlogRepoKey) private readonly blogsRepo: IBlogsRepository<any>,
   ) {}
 
   async execute({ userId, dto }: CreatePostCommand): Promise<ServiceResult<PostViewModel>> {
@@ -29,7 +29,7 @@ export class CreatePostCase implements ICommandHandler<CreatePostCommand> {
 
     const result = new ServiceResult<PostViewModel>();
 
-    const blog: BlogDBType | null = await this.blogsRepo.getBlogById(dto.blogId);
+    const blog: BlogViewModel | null = await this.blogsRepo.getBlogById(dto.blogId);
 
     if (!blog) {
       result.addError({
@@ -43,7 +43,7 @@ export class CreatePostCase implements ICommandHandler<CreatePostCommand> {
         title: dto.title,
         shortDescription: dto.shortDescription,
         content: dto.content,
-        blogId: blog._id.toString(),
+        blogId: blog.id,
         blogName: blog.name,
       },
       userId,

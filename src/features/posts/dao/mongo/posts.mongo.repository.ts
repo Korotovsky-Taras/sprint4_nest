@@ -7,13 +7,13 @@ import { IPostsRepository } from '../../types/common';
 import { PostCreateModel, PostViewModel } from '../../types/dto';
 import { PostUpdateDto } from '../../dto/PostUpdateDto';
 import { LikeStatus } from '../../../likes/types';
-import { PostsMongoDataMapper } from '../../api/posts.mongo.dm';
+import { PostsMongoDataMapper } from './posts.mongo.dm';
 import { UserIdReq } from '../../../../application/utils/types';
 import { FilterQuery, isValidObjectId } from 'mongoose';
 import { BlogPostUpdateDto } from '../../../blogs/dto/BlogPostUpdateDto';
 
 @Injectable()
-export class PostsMongoRepository implements IPostsRepository {
+export class PostsMongoRepository implements IPostsRepository<PostDocumentType> {
   constructor(@InjectModel(Post.name) private postModel: IPostModel) {}
 
   async createPost(input: PostCreateModel, userId: UserIdReq): Promise<PostViewModel> {
@@ -54,13 +54,6 @@ export class PostsMongoRepository implements IPostsRepository {
       return false;
     }
     return this.isPostExist({ _id: new ObjectId(postId) });
-  }
-
-  async getPostById(postId: string): Promise<PostDBType | null> {
-    if (!isValidObjectId(postId)) {
-      return null;
-    }
-    return this.postModel.findById(postId).lean();
   }
 
   async deletePostById(postId: string): Promise<boolean> {

@@ -3,10 +3,11 @@ import { UsersCredentialsEntity } from './users-credentials.entity';
 import { UsersRecoveryConfirmationEntity } from './users-recovery-confirmation.entity';
 import { UsersRegistrationConfirmationEntity } from './users-registration-confirmation.entity';
 import { AuthEntity } from '../../../../auth/dao/sql-orm/auth.entity';
-import { PostsCommentsEntity } from '../../../../posts/dao/sql-orm/entities/posts-comments.entity';
+import { PostsCommentsEntity } from '../../../../comments/dao/sql-orm/entities/posts-comments.entity';
 import { UserCreateInputModel } from '../../../types/dto';
 import { IUser, UserConfirmation, UserEncodedPassword } from '../../../types/dao';
 import { WithDbId } from '../../../../../application/utils/types';
+import { PostsLikesEntity } from '../../../../posts/dao/sql-orm/entities/posts-likes.entity';
 
 @Entity({ name: 'Users' })
 export class UsersEntity implements WithDbId<IUser> {
@@ -25,7 +26,10 @@ export class UsersEntity implements WithDbId<IUser> {
   @OneToMany(() => PostsCommentsEntity, (postComments) => postComments.user)
   postComments: PostsCommentsEntity[];
 
-  @OneToOne(() => AuthEntity, (auth) => auth.user)
+  @OneToMany(() => PostsLikesEntity, (postLikes) => postLikes.user)
+  postLikes: PostsLikesEntity[];
+
+  @OneToMany(() => AuthEntity, (auth) => auth.user)
   auth: AuthEntity;
 
   @OneToOne(() => UsersCredentialsEntity, (credentials) => credentials.user, { cascade: ['insert', 'update'] })

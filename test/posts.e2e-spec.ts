@@ -1,12 +1,14 @@
 import { testInit } from './utils/test.init';
-import { TestCreateUtils } from './utils/test.create.utils';
+import { authBasic64, TestCreateUtils } from './utils/test.create.utils';
 import { BlogViewModel } from '../src/features/blogs/types/dto';
 import { PostViewModel } from '../src/features/posts/types/dto';
 import { UserViewModel } from '../src/features/users/types/dto';
 import { LikeStatus } from '../src/features/likes/types';
+import { Status } from '../src/application/utils/types';
+import { randomUUID } from 'crypto';
 
 let blog: BlogViewModel | null = null;
-const post: PostViewModel | null = null;
+let post: PostViewModel | null = null;
 let user: UserViewModel | null = null;
 
 describe('posts testing', () => {
@@ -444,8 +446,6 @@ describe('posts testing', () => {
         .set('Authorization', 'Bearer ' + utils.createAccessToken(user1.id))
         .set('Content-Type', 'application/json');
 
-      console.log(JSON.stringify(res.body));
-
       let myStatusLike = 0;
       let myStatusDislike = 0;
       let myStatusNone = 0;
@@ -513,7 +513,7 @@ describe('posts testing', () => {
     expect(blog).not.toBeNull();
     expect(post).not.toBeNull();
     expect(user).not.toBeNull();
-    const fakePostId = new ObjectId().toString();
+    const fakePostId = randomUUID();
 
     if (blog && post && user) {
       await config

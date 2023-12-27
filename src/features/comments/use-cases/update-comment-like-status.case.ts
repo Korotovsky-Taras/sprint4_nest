@@ -18,7 +18,7 @@ export class UpdateCommentLikeStatusCommand {
 export class UpdateCommentLikeStatusCase implements ICommandHandler<UpdateCommentLikeStatusCommand> {
   constructor(
     @Inject(CommentsQueryRepoKey) private readonly commentsQueryRepo: ICommentsQueryRepository,
-    @Inject(CommentsRepoKey) private readonly commentsRepo: ICommentsRepository,
+    @Inject(CommentsRepoKey) private readonly commentsRepo: ICommentsRepository<any>,
     @Inject(UserRepoKey) private readonly usersRepo: IUsersRepository<any>,
   ) {}
 

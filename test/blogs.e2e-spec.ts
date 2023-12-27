@@ -133,8 +133,6 @@ describe('blogs testing', () => {
 
       const result = await config.getHttp().get(`/posts/${createdPostId}`).set('Content-Type', 'application/json').expect(Status.OK);
 
-      console.log(result.body);
-
       expect(result.body).toEqual({
         id: expect.any(String),
         title: newTitle,

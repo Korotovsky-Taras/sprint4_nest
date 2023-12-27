@@ -6,7 +6,7 @@ import { DataSource } from 'typeorm';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { withSqlRawPagination } from '../../../../application/utils/withSqlRawPagination';
 import { PostPaginationQueryDto } from '../../dto/PostPaginationQueryDto';
-import { PostsSqlRawDataMapper } from '../../api/posts.sql-raw.dm';
+import { PostsSqlRawDataMapper } from './posts.sql-raw.dm';
 import { PostViewModel } from '../../types/dto';
 
 @Injectable()

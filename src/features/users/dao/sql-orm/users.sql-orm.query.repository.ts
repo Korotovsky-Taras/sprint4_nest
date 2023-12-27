@@ -20,6 +20,7 @@ export class UsersSqlOrmQueryRepository implements IUsersQueryRepository {
 
     const queryBuilder = this.userRepo
       .createQueryBuilder('u')
+      .select('u.*')
       .where(`u.login ILIKE :login OR u.email ILIKE :email`, { login: `%${searchByLoginTerm}%`, email: `%${searchByEmailTerm}%` });
 
     const sortByWithCollate = query.sortBy !== 'createdAt' ? 'COLLATE "C"' : '';

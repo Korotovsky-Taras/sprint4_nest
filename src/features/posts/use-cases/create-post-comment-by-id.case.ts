@@ -21,9 +21,9 @@ export class CreatePostCommentByIdCommand {
 @CommandHandler(CreatePostCommentByIdCommand)
 export class CreatePostCommentByIdCase implements ICommandHandler<CreatePostCommentByIdCommand> {
   constructor(
-    @Inject(CommentsRepoKey) private readonly commentsRepo: ICommentsRepository,
     @Inject(CommentsQueryRepoKey) private readonly commentsQueryRepo: ICommentsQueryRepository,
-    @Inject(PostRepoKey) private readonly postsRepo: IPostsRepository,
+    @Inject(CommentsRepoKey) private readonly commentsRepo: ICommentsRepository<any>,
+    @Inject(PostRepoKey) private readonly postsRepo: IPostsRepository<any>,
     @Inject(UserRepoKey) private readonly usersRepo: IUsersRepository<any>,
   ) {}
 
@@ -57,17 +57,8 @@ export class CreatePostCommentByIdCase implements ICommandHandler<CreatePostComm
       return result;
     }
 
-    const post = await this.postsRepo.getPostById(postId);
-
-    if (!post) {
-      result.addError({
-        code: PostServiceError.POST_NOT_FOUND,
-      });
-      return result;
-    }
-
     const commentId = await this.commentsRepo.createComment({
-      postId: post._id.toString(),
+      postId: postId,
       content: dto.content,
       commentatorInfo: {
         userId: user._id,

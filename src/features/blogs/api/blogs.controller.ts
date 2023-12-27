@@ -1,5 +1,4 @@
 import { Controller, Get, HttpCode, Inject, Injectable, NotFoundException, Param, Query, Req, UseGuards } from '@nestjs/common';
-import { BlogsDataMapper } from './blogs.dm';
 import { Request } from 'express';
 import { BlogQueryRepoKey, IBlogsController, IBlogsQueryRepository } from '../types/common';
 import { BlogViewModel } from '../types/dto';
@@ -19,19 +18,19 @@ export class BlogsController implements IBlogsController {
   constructor(
     private readonly commandBus: CommandBus,
     @Inject(BlogQueryRepoKey) private readonly blogsQueryRepo: IBlogsQueryRepository,
-    @Inject(PostQueryRepoKey) private postsQueryRepo: IPostsQueryRepository,
+    @Inject(PostQueryRepoKey) private readonly postsQueryRepo: IPostsQueryRepository,
   ) {}
 
   @Get()
   @HttpCode(Status.OK)
   async getAll(@Query() query: BlogPaginationQueryDto): Promise<WithPagination<BlogViewModel>> {
-    return await this.blogsQueryRepo.getBlogs(query, BlogsDataMapper.toBlogsView);
+    return await this.blogsQueryRepo.getBlogs(query);
   }
 
   @Get('/:id')
   @HttpCode(Status.OK)
   async getBlog(@Param('id') blogId: string): Promise<BlogViewModel> {
-    const blog: BlogViewModel | null = await this.blogsQueryRepo.getBlogById(blogId, BlogsDataMapper.toBlogView);
+    const blog: BlogViewModel | null = await this.blogsQueryRepo.getBlogById(blogId);
     if (blog) {
       return blog;
     }
@@ -43,7 +42,7 @@ export class BlogsController implements IBlogsController {
   @UseGuards(AuthTokenGuard)
   @HttpCode(Status.OK)
   async getBlogPosts(@Param('id') blogId: string, @Query() query: PostPaginationQueryDto, @Req() req: Request): Promise<WithPagination<PostViewModel>> {
-    const blog: BlogViewModel | null = await this.blogsQueryRepo.getBlogById(blogId, BlogsDataMapper.toBlogView);
+    const blog: BlogViewModel | null = await this.blogsQueryRepo.getBlogById(blogId);
     if (blog) {
       return await this.postsQueryRepo.getBlogPosts(req.userId, blogId, query);
     }

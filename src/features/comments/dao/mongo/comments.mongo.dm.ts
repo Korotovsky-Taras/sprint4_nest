@@ -1,8 +1,8 @@
-import { UserIdReq } from '../../../application/utils/types';
-import { CommentViewModel } from '../types/dto';
-import { toIsoString } from '../../../application/utils/date';
-import { Like, LikeStatus } from '../../likes/types';
-import { CommentMongoType } from '../types/dao';
+import { UserIdReq } from '../../../../application/utils/types';
+import { CommentViewModel } from '../../types/dto';
+import { toIsoString } from '../../../../application/utils/date';
+import { Like, LikeStatus } from '../../../likes/types';
+import { CommentMongoType } from '../../types/dao';
 
 export class CommentsMongoDataMapper {
   static toCommentView(comment: CommentMongoType, userId: UserIdReq): CommentViewModel {

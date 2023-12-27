@@ -14,7 +14,7 @@ export class DeleteCommentByIdCommand {
 
 @CommandHandler(DeleteCommentByIdCommand)
 export class DeleteCommentByIdCase implements ICommandHandler<DeleteCommentByIdCommand> {
-  constructor(@Inject(CommentsRepoKey) private readonly commentsRepo: ICommentsRepository) {}
+  constructor(@Inject(CommentsRepoKey) private readonly commentsRepo: ICommentsRepository<any>) {}
 
   async execute({ commentId, userId }: DeleteCommentByIdCommand): Promise<ServiceResult> {
     const result = new ServiceResult();

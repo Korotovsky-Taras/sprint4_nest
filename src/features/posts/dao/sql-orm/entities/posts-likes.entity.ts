@@ -1,10 +1,9 @@
 import { Check, Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { COMMENT_CONTENT_MAX, COMMENT_CONTENT_MIN } from '../../../dto/dto.variables';
-import { PostsEntity } from './posts.entity';
 import { UsersEntity } from '../../../../users/dao/sql-orm/entities/users.entity';
+import { PostsEntity } from './posts.entity';
 
-@Entity({ name: 'PostsComments' })
-export class PostsCommentsEntity {
+@Entity({ name: 'PostsLikes' })
+export class PostsLikesEntity {
   @PrimaryGeneratedColumn()
   _id: number;
 
@@ -15,17 +14,17 @@ export class PostsCommentsEntity {
   postId: number;
 
   @Column()
-  @Check(`length(("content")::text) > ${COMMENT_CONTENT_MIN} AND length(("content")::text) < ${COMMENT_CONTENT_MAX}`)
-  content: string;
+  @Check(`"likeStatus" = ANY (ARRAY[0, 1])`)
+  likeStatus: number;
 
   @Column({ type: 'timestamp with time zone', default: () => 'now()' })
   createdAt: Date;
 
-  @ManyToOne(() => UsersEntity, (user) => user.postComments)
+  @ManyToOne(() => UsersEntity, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'userId' })
   user: UsersEntity;
 
-  @ManyToOne(() => PostsEntity, (post) => post.postComments)
+  @ManyToOne(() => PostsEntity, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'postId' })
   post: PostsEntity;
 }
