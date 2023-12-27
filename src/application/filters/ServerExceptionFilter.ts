@@ -18,6 +18,7 @@ export class ServerExceptionFilter implements ExceptionFilter {
     const method = request.method;
 
     if (!(exception instanceof HttpException) || exception.getStatus() >= 500) {
+      console.log(`[${method}] ${path}`, exception.stack);
       this.logger.error(`[${method}] ${path}`, exception.stack);
     }
 

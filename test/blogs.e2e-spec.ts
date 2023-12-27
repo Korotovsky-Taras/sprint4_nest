@@ -150,7 +150,6 @@ describe('blogs testing', () => {
       .expect(Status.CREATED);
   });
 
-
   it('should update blog post', async () => {
     expect(user).not.toBeNull();
     expect(createdBlogId).not.toBeNull();
