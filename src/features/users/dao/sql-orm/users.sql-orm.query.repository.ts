@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { IUsersQueryRepository } from '../../types/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import { UserPaginationQueryDto } from '../../dto/UserPaginationQueryDto';
 import { WithPagination } from '../../../../application/utils/types';
 import { UserConfirmation } from '../../types/dao';
@@ -12,16 +12,23 @@ import { withSqlOrmPagination } from '../../../../application/utils/withSqlOrmPa
 
 @Injectable()
 export class UsersSqlOrmQueryRepository implements IUsersQueryRepository {
-  constructor(@InjectRepository(UsersEntity) private userRepo: Repository<UsersEntity>) {}
+  constructor(
+    @InjectRepository(UsersEntity) private userRepo: Repository<UsersEntity>,
+    @InjectEntityManager() private manager: EntityManager,
+  ) {}
 
   async getUsers(query: UserPaginationQueryDto): Promise<WithPagination<UserViewModel>> {
+    const qb = this.manager.createQueryBuilder();
+
     const searchByLoginTerm = query.searchLoginTerm ?? '';
     const searchByEmailTerm = query.searchEmailTerm ?? '';
 
-    const queryBuilder = this.userRepo
-      .createQueryBuilder('u')
-      .select('u.*')
-      .where(`u.login ILIKE :login OR u.email ILIKE :email`, { login: `%${searchByLoginTerm}%`, email: `%${searchByEmailTerm}%` });
+    const queryBuilder = qb.select('res.*').from((subQuery) => {
+      return subQuery
+        .select('u.*')
+        .from(UsersEntity, 'u')
+        .where(`u.login ILIKE :login OR u.email ILIKE :email`, { login: `%${searchByLoginTerm}%`, email: `%${searchByEmailTerm}%` });
+    }, 'res');
 
     const sortByWithCollate = query.sortBy !== 'createdAt' ? 'COLLATE "C"' : '';
 

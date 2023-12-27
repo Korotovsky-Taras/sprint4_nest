@@ -1,9 +1,9 @@
 import 'reflect-metadata';
 import { Injectable } from '@nestjs/common';
 import { IBlogsQueryRepository } from '../../types/common';
-import { InjectRepository } from '@nestjs/typeorm';
+import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { BlogsEntity } from './blogs.entity';
-import { Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import { BlogPaginationQueryDto } from '../../dto/BlogPaginationQueryDto';
 import { WithPagination } from '../../../../application/utils/types';
 import { BlogViewModel } from '../../types/dto';
@@ -12,15 +12,22 @@ import { withSqlOrmPagination } from '../../../../application/utils/withSqlOrmPa
 
 @Injectable()
 export class BlogsSqlOrmQueryRepository implements IBlogsQueryRepository {
-  constructor(@InjectRepository(BlogsEntity) private blogsRepo: Repository<BlogsEntity>) {}
+  constructor(
+    @InjectRepository(BlogsEntity) private blogsRepo: Repository<BlogsEntity>,
+    @InjectEntityManager() private manager: EntityManager,
+  ) {}
 
   async getBlogs(query: BlogPaginationQueryDto): Promise<WithPagination<BlogViewModel>> {
+    const qb = this.manager.createQueryBuilder();
+
     const searchByTerm = query.searchNameTerm ?? '';
 
-    const queryBuilder = this.blogsRepo
-      .createQueryBuilder('b')
-      .select('b.*')
-      .where(`b.name ILIKE :name`, { name: `%${searchByTerm}%` });
+    const queryBuilder = qb.select('res.*').from((subQuery) => {
+      return subQuery
+        .select('b.*')
+        .from(BlogsEntity, 'b')
+        .where(`b.name ILIKE :name`, { name: `%${searchByTerm}%` });
+    }, 'res');
 
     const sortByWithCollate = query.sortBy !== 'createdAt' ? 'COLLATE "C"' : '';
 

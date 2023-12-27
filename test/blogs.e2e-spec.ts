@@ -4,6 +4,7 @@ import { UserViewModel } from '../src/features/users/types/dto';
 import { BlogViewModel } from '../src/features/blogs/types/dto';
 import { Status } from '../src/application/utils/types';
 import { authBasic64, TestCreateUtils, validBlogData, validPostData } from './utils/test.create.utils';
+import { PostViewModel } from '../src/features/posts/types/dto';
 
 let createdBlogId: string | null = null;
 let createdPostId: string | null = null;
