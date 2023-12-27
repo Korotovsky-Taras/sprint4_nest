@@ -2,7 +2,6 @@ import { testInit } from './utils/test.init';
 
 import { UserViewModel } from '../src/features/users/types/dto';
 import { BlogViewModel } from '../src/features/blogs/types/dto';
-import { PostViewModel } from '../src/features/posts/types/dto';
 import { Status } from '../src/application/utils/types';
 import { authBasic64, TestCreateUtils, validBlogData, validPostData } from './utils/test.create.utils';
 
@@ -54,6 +53,46 @@ describe('blogs testing', () => {
         createdAt: expect.any(String),
       });
     }
+  });
+
+  it('should return page1/page2 posts ', async () => {
+    expect(user).not.toBeNull();
+    expect(createdBlogId).not.toBeNull();
+
+    if (!user) {
+      return;
+    }
+
+    const PAGE_SIZE = 10;
+    const PAGE_OVER = 2;
+
+    for (let i = 0; i < PAGE_SIZE + PAGE_OVER; i++) {
+      await config
+        .getHttp()
+        .post('/posts')
+        .set('Authorization', 'Basic ' + authBasic64)
+        .set('Content-Type', 'application/json')
+        .send({
+          ...validPostData,
+          blogId: createdBlogId,
+        })
+        .expect(Status.CREATED);
+    }
+
+    const res1 = await config.getHttp().get(`/blogs/${createdBlogId}/posts?pageSize=${PAGE_SIZE}`).set('Content-Type', 'application/json').expect(Status.OK);
+
+    console.log(res1.body);
+    expect(res1.body.items.length).toBe(PAGE_SIZE);
+
+    const res2 = await config
+      .getHttp()
+      .get(`/blogs/${createdBlogId}/posts?pageSize=${PAGE_SIZE}&pageNumber=2`)
+      .set('Content-Type', 'application/json')
+      .expect(Status.OK);
+
+    console.log(res2.body);
+
+    expect(res2.body.items.length).toBe(PAGE_OVER);
   });
 
   it('should require authorization', async () => {
@@ -110,6 +149,7 @@ describe('blogs testing', () => {
       })
       .expect(Status.CREATED);
   });
+
 
   it('should update blog post', async () => {
     expect(user).not.toBeNull();

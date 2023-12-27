@@ -14,8 +14,8 @@ export const withSqlOrmPagination = async <T, O>(
   const items = await queryBuilder
     .addSelect(`CAST(count(*) OVER() as INTEGER)`, 'totalCount')
     .orderBy(`"${q.sortBy}" ${sortByWithCollate}`, sqlSortDirectionUpper(q.sortDirection))
-    .skip(Math.max(q.pageNumber - 1, 0) * q.pageSize)
-    .take(q.pageSize)
+    .offset(Math.max(q.pageNumber - 1, 0) * q.pageSize)
+    .limit(q.pageSize)
     .getRawMany();
 
   let totalCount = 0;
