@@ -74,45 +74,51 @@ export class PostsSqlOrmQueryRepository implements IPostsQueryRepository {
     const postsEntitySelectQueryBuilder = this.postsRepo.createQueryBuilder('p');
 
     const queryBuilder = postsEntitySelectQueryBuilder
-      .leftJoin('p.blog', 'pb')
-      .leftJoin('p.postLikes', 'pl')
-      .select('p.*')
-      .addSelect(`pb."_id"`, 'blogId')
-      .addSelect(`pb.name`, 'blogName')
-      .addSelect((qb) => {
-        return qb.select('row_to_json(row)', 'likesInfo').from((fqb) => {
-          return fqb
-            .select()
-            .fromDummy()
-            .addSelect((qb1) => {
-              return qb1
-                .select('ple."likeStatus"', 'myStatus')
+      .from((qb) => {
+        return qb
+          .from(PostsEntity, 'p')
+          .select('p.*')
+          .addSelect(`pb."_id"`, 'blogId')
+          .addSelect(`pb.name`, 'blogName')
+          .addSelect((qb) => {
+            return qb.select('row_to_json(row)', 'likesInfo').from((fqb) => {
+              return fqb
+                .select()
+                .fromDummy()
+                .addSelect((qb1) => {
+                  return qb1
+                    .select('ple."likeStatus"', 'myStatus')
+                    .from(PostsLikesEntity, 'ple')
+                    .where('ple."postId" = p."_id"')
+                    .andWhere('ple."userId" = :userId', { userId: Number(userId) });
+                })
+                .addSelect((qb2) => {
+                  return qb2.select('count(*)').from(PostsLikesEntity, 'ple').where('ple."postId" = p."_id"').andWhere('ple."likeStatus" = 1');
+                }, 'likesCount')
+                .addSelect((qb3) => {
+                  return qb3.select('count(*)').from(PostsLikesEntity, 'ple').where('ple."postId" = p."_id"').andWhere('ple."likeStatus" = 0');
+                }, 'dislikesCount');
+            }, 'row');
+          })
+          .addSelect((qb) => {
+            return qb.select(`jsonb_agg(row_to_json(row))`, 'lastLikes').from((qb3) => {
+              return qb3
+                .select('ple."createdAt"')
+                .addSelect('ple_u."login"', 'userLogin')
+                .addSelect('ple_u."_id"', 'userId')
                 .from(PostsLikesEntity, 'ple')
                 .where('ple."postId" = p."_id"')
-                .andWhere('ple."userId" = :userId', { userId: Number(userId) });
-            })
-            .addSelect((qb2) => {
-              return qb2.select('count(*)').from(PostsLikesEntity, 'ple').where('ple."postId" = p."_id"').andWhere('ple."likeStatus" = 1');
-            }, 'likesCount')
-            .addSelect((qb3) => {
-              return qb3.select('count(*)').from(PostsLikesEntity, 'ple').where('ple."postId" = p."_id"').andWhere('ple."likeStatus" = 0');
-            }, 'dislikesCount');
-        }, 'row');
-      })
-      .addSelect((qb) => {
-        return qb.select(`jsonb_agg(row_to_json(row))`, 'lastLikes').from((qb3) => {
-          return qb3
-            .select('ple."createdAt"')
-            .addSelect('ple_u."login"', 'userLogin')
-            .addSelect('ple_u."_id"', 'userId')
-            .from(PostsLikesEntity, 'ple')
-            .where('ple."postId" = p."_id"')
-            .andWhere('ple."likeStatus" = 1')
-            .leftJoin('ple.user', 'ple_u')
-            .orderBy('ple."createdAt"', 'DESC')
-            .limit(3);
-        }, 'row');
-      });
+                .andWhere('ple."likeStatus" = 1')
+                .leftJoin('ple.user', 'ple_u')
+                .orderBy('ple."createdAt"', 'DESC')
+                .limit(3);
+            }, 'row');
+          })
+          .leftJoin('p.blog', 'pb')
+          .leftJoin('p.postLikes', 'pl')
+          .groupBy('p."_id", pb."_id"');
+      }, 'res')
+      .select('res.*');
 
     const sortByWithCollate = query.sortBy !== 'createdAt' ? 'COLLATE "C"' : '';
 

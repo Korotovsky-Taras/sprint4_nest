@@ -81,7 +81,6 @@ describe('blogs testing', () => {
 
     const res1 = await config.getHttp().get(`/blogs/${createdBlogId}/posts?pageSize=${PAGE_SIZE}`).set('Content-Type', 'application/json').expect(Status.OK);
 
-    console.log(res1.body);
     expect(res1.body.items.length).toBe(PAGE_SIZE);
 
     const res2 = await config
@@ -89,8 +88,6 @@ describe('blogs testing', () => {
       .get(`/blogs/${createdBlogId}/posts?pageSize=${PAGE_SIZE}&pageNumber=2`)
       .set('Content-Type', 'application/json')
       .expect(Status.OK);
-
-    console.log(res2.body);
 
     expect(res2.body.items.length).toBe(PAGE_OVER);
   });
