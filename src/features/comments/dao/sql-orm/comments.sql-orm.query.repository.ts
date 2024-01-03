@@ -36,7 +36,7 @@ export class CommentsSqlOrmQueryRepository implements ICommentsQueryRepository {
                   .select('ple."likeStatus"', 'myStatus')
                   .from(PostsCommentsLikesEntity, 'ple')
                   .where('ple."commentId" = pc."_id"')
-                  .andWhere('ple."userId" = pc."userId"');
+                  .andWhere('ple."userId" = :userId', { userId: Number(userId) });
               })
               .addSelect((qb2) => {
                 return qb2.select('count(*)').from(PostsCommentsLikesEntity, 'ple').where('ple."commentId" = pc."_id"').andWhere('ple."likeStatus" = 1');
