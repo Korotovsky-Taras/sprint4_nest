@@ -7,6 +7,7 @@ import { TestCommonUtils } from './test.common.utils';
 import { BlogCreateDto } from '../../src/features/blogs/dto/BlogCreateDto';
 import { PostCreateDto } from '../../src/features/posts/dto/PostCreateDto';
 import { PostCommentCreateDto } from '../../src/features/posts/dto/PostCommentCreateDto';
+import { QuizGameQuestionCreateModel } from '../../src/features/quiz_game/types/dto';
 
 export class TestCreateUtils extends TestCommonUtils {
   private readonly config: AppTestProvider;
@@ -72,6 +73,21 @@ export class TestCreateUtils extends TestCommonUtils {
     };
   }
 
+  createNewQuestionModel(): QuizQuestionTestModel {
+    const body = this.generateString(20);
+    const getRandomCount = () => Math.max(1, Math.floor(10 * Math.random()));
+    const correctAnswerPredicate = (_, i) => {
+      if (i === 0) {
+        return '1';
+      }
+      return this.generateString(getRandomCount());
+    };
+    return {
+      body,
+      correctAnswers: new Array(getRandomCount()).fill(0).map(correctAnswerPredicate),
+    };
+  }
+
   createAccessToken(userId: string): string {
     const tokenCreator = this.config.getTokenCreator();
     return tokenCreator.createAccessToken(userId).token;
@@ -82,6 +98,7 @@ export type BlogCreationTestModel = BlogCreateDto;
 export type PostCreationTestModel = Omit<PostCreateDto, 'blogId' | 'blogName'>;
 export type CommentCreationTestModel = PostCommentCreateDto;
 export type UserCreationTestModel = UserCreateModel;
+export type QuizQuestionTestModel = Omit<QuizGameQuestionCreateModel, 'published' | 'correctAnswers'> & { correctAnswers: any[] };
 
 export const validBlogData: BlogCreationTestModel = {
   name: 'Taras',

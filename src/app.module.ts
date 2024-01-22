@@ -13,9 +13,10 @@ import { SharedModule } from './shared.module';
 import { TestsModule } from './features/tests/tests.module';
 import { DbModule } from './db/db.module';
 import { LogsModule } from './features/logs/logs.module';
+import { QuizGameModule } from './features/quiz_game/quiz-game.module';
 
 @Module({
-  imports: [configModule, DbModule, SharedModule, BlogsModule, PostsModule, CommentsModule, UsersModule, AuthModule, TestsModule, LogsModule],
+  imports: [configModule, DbModule, SharedModule, BlogsModule, PostsModule, CommentsModule, UsersModule, AuthModule, QuizGameModule, TestsModule, LogsModule],
   controllers: [AppController],
   providers: [AppService],
 })

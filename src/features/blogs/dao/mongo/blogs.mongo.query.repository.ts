@@ -1,7 +1,7 @@
 import 'reflect-metadata';
 
 import { FilterQuery, isValidObjectId, Model } from 'mongoose';
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Blog } from './blogs.mongo.schema';
 import { BlogQueryModel, BlogViewModel } from '../../types/dto';
@@ -13,10 +13,7 @@ import { BlogsMongoDataMapper } from './blogs.mongo.dm';
 
 @Injectable()
 export class BlogsMongoQueryRepository implements IBlogsQueryRepository {
-  constructor(
-    @InjectModel(Blog.name) private blogModel: Model<BlogDocumentType>,
-    @Inject() private dataMapper: BlogsMongoDataMapper,
-  ) {}
+  constructor(@InjectModel(Blog.name) private blogModel: Model<BlogDocumentType>) {}
 
   async getBlogs(query: BlogQueryModel): Promise<WithPagination<BlogViewModel>> {
     const filter: FilterQuery<IBlog> = {};

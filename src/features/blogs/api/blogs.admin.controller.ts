@@ -25,6 +25,7 @@ import { UpdateBlogPostByIdCommand } from '../use-cases/udpate-post-by-id.case';
 import { DeleteBlogPostByIdCommand } from '../use-cases/delete-post-by-id.case';
 import { BlogPostUpdateDto } from '../dto/BlogPostUpdateDto';
 import { ParamId } from '../../../application/decorators/params/getParamNumberId';
+import { WithRoles } from '../../../application/decorators/withRoles';
 
 @Injectable()
 @Controller('sa/blogs')
@@ -37,8 +38,9 @@ export class BlogsAdminController implements IBlogsAdminController {
   ) {}
 
   @Get()
+  @WithRoles('1', '2', '3')
   @HttpCode(Status.OK)
-  async getAll(@Query() query: BlogPaginationQueryDto): Promise<WithPagination<any>> {
+  async getAll(@Query() query: BlogPaginationQueryDto): Promise<WithPagination<BlogViewModel>> {
     return await this.blogsQueryRepo.getBlogs(query);
   }
 
