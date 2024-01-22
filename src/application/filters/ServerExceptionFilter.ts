@@ -2,6 +2,7 @@ import { ArgumentsHost, Catch, ExceptionFilter, HttpException, Logger } from '@n
 import { Request, Response } from 'express';
 import { Status } from '../utils/types';
 import { ConfigService } from '@nestjs/config';
+import { AppConfiguration, AppDbType } from '../utils/config';
 
 @Catch()
 export class ServerExceptionFilter implements ExceptionFilter {
@@ -16,9 +17,20 @@ export class ServerExceptionFilter implements ExceptionFilter {
     const request = ctx.getRequest<Request>();
     const path = request.url;
     const method = request.method;
+    const body = request.body;
+    const query = request.query;
+
+    const configService = new ConfigService<AppConfiguration, true>();
+    const isDevMode = configService.get<AppDbType>('DEV_MODE');
+
+    if (isDevMode) {
+      console.log(`[body] ${JSON.stringify(body)}, [query] ${JSON.stringify(query)},`);
+    }
 
     if (!(exception instanceof HttpException) || exception.getStatus() >= 500) {
-      console.log(`[${method}] ${path}`, exception.stack);
+      if (isDevMode) {
+        console.log(`[${method}] ${path}`, exception.stack);
+      }
       this.logger.error(`[${method}] ${path}`, exception.stack);
     }
 

@@ -78,7 +78,7 @@ export class TestCreateUtils extends TestCommonUtils {
     const getRandomCount = () => Math.max(1, Math.floor(10 * Math.random()));
     const correctAnswerPredicate = (_, i) => {
       if (i === 0) {
-        return '1';
+        return 'correct';
       }
       return this.generateString(getRandomCount());
     };

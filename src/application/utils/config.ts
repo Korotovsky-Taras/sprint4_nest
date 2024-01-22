@@ -34,6 +34,7 @@ export type AppConfigurationGmail = {
 
 export type AppConfiguration = {
   DB_TYPE: AppDbType;
+  DEV_MODE: boolean;
   PORT: number;
   auth: AppConfigurationAuth;
   mongo: AppConfigurationMongo;
@@ -88,6 +89,7 @@ export const getConfiguration = (): AppConfiguration => {
 
   return {
     DB_TYPE: dbType,
+    DEV_MODE: isTrue(process.env.DEV_MODE),
     PORT: Number(process.env.PORT) || 80,
     auth: {
       AUTH_LOGIN: process.env.AUTH_LOGIN || '',
