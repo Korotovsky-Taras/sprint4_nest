@@ -20,7 +20,7 @@ export class QuizGameQuestion implements IQuizGameQuestion {
   published: boolean;
 
   createdAt: Date;
-  updatedAt: Date;
+  updatedAt: Date | null;
 
   static createQuestion(input: QuizGameQuestionCreateModel) {
     return new this(input);
@@ -28,6 +28,13 @@ export class QuizGameQuestion implements IQuizGameQuestion {
 }
 
 export const QuizGameQuestionSchema = SchemaFactory.createForClass(QuizGameQuestion);
+
+QuizGameQuestionSchema.pre('save', function (next) {
+  if (this.isNew) {
+    this.updatedAt = null;
+  }
+  next();
+});
 
 QuizGameQuestionSchema.methods = {};
 

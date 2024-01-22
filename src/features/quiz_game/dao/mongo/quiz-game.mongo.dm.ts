@@ -26,7 +26,7 @@ export class QuizGameMongoDataMapper {
       correctAnswers: question.correctAnswers,
       published: question.published,
       createdAt: toIsoString(question.createdAt),
-      updatedAt: toIsoString(question.updatedAt),
+      updatedAt: question.updatedAt ? toIsoString(question.updatedAt) : null,
     };
   }
 

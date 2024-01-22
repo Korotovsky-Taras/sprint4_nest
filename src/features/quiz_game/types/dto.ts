@@ -25,7 +25,11 @@ export type QuizGameViewModel = {
   status: string;
 };
 
-export type QuizGameQuestionViewModel = Pick<IQuizGameQuestion, 'body' | 'correctAnswers' | 'published'> & { id: string; createdAt: string; updatedAt: string };
+export type QuizGameQuestionViewModel = Pick<IQuizGameQuestion, 'body' | 'correctAnswers' | 'published'> & {
+  id: string;
+  createdAt: string;
+  updatedAt: string | null;
+};
 
 export type QuizGameCreateModel = Pick<IQuizGameQuestion, 'body' | 'correctAnswers' | 'published'> & { firstPlayerProgress: ObjectId };
 

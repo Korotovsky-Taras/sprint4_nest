@@ -89,7 +89,7 @@ export interface IQuizGameQuestion {
   correctAnswers: string[];
   published: boolean;
   createdAt: Date;
-  updatedAt: Date;
+  updatedAt: Date | null;
 }
 
 export type QuizGameQuestionDBType = WithId<IQuizGameQuestion>;
