@@ -5,6 +5,7 @@ import { Type } from 'class-transformer';
 
 enum QuizQuerySortEnum {
   createdAt = 'createdAt',
+  body = 'body',
 }
 
 enum QuizQueryStatusEnum {
