@@ -12,7 +12,7 @@ export function useAppSettings(app: INestApplication) {
   app.enableCors();
   app.use(cookieParser());
   app.useGlobalPipes(new ClassValidationPipe());
-  app.useGlobalFilters(new ServerExceptionFilter(configService, new Logger()), new HttpExceptionFilter());
+  app.useGlobalFilters(new ServerExceptionFilter(configService, new Logger()), new HttpExceptionFilter(configService));
 
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
 }
