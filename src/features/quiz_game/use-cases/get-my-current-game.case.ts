@@ -4,6 +4,7 @@ import { Inject } from '@nestjs/common';
 import { ServiceResult } from '../../../application/core/ServiceResult';
 import { QuizResultError } from '../types/errors';
 import { QuizGameViewModel } from '../types/dto';
+import { QuizGameStatus } from '../types/dao';
 
 export class GetMyCurrentGameCommand {
   constructor(public readonly userId: string) {}
@@ -16,7 +17,7 @@ export class GetMyCurrentGameCase implements ICommandHandler<GetMyCurrentGameCom
   async execute({ userId }: GetMyCurrentGameCommand): Promise<ServiceResult<QuizGameViewModel>> {
     const res = new ServiceResult<QuizGameViewModel>();
 
-    const game: QuizGameViewModel | null = await this.quizRepo.getPlayerActiveGame(userId);
+    const game: QuizGameViewModel | null = await this.quizRepo.getPlayerGameWithStatus(userId, [QuizGameStatus.Active, QuizGameStatus.PendingSecondPlayer]);
 
     if (game == null) {
       res.addError({

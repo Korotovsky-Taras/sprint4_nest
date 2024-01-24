@@ -45,7 +45,7 @@ export class AuthController implements IAuthRouterController {
   ) {}
 
   @Post('login')
-  @UseGuards(RateLimiterGuard)
+  // @UseGuards(RateLimiterGuard)
   @HttpCode(Status.OK)
   async login(@Body() input: AuthLoginInputDto, @Req() req: Request, @Res() res: Response) {
     const result: ServiceResult<AuthTokens> = await this.commandBus.execute<AuthLoginCommand, ServiceResult<AuthTokens>>(

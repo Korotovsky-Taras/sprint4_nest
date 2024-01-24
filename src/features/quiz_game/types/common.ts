@@ -1,6 +1,7 @@
 import { IRepository, IService } from '../../types';
 import { WithPagination } from '../../../application/utils/types';
 import {
+  GameViewAndPlayersIdCortege,
   QuizGameAnswerViewModel,
   QuizGameQuestionCreateModel,
   QuizGameQuestionPublishUpdateModel,
@@ -11,7 +12,7 @@ import {
 import { QuizQuestionCreateDto } from '../dto/QuizQuestionCreateDto';
 import { QuizPaginationQueryDto } from '../dto/QuizPaginationQueryDto';
 import { QuizAnswerDto } from '../dto/QuizAnswerDto';
-import { QuizGamePlayerProgressDBType } from './dao';
+import { QuizGamePlayerProgressDBType, QuizGameStatus } from './dao';
 
 export interface IQuizGameService extends IService {}
 
@@ -37,7 +38,8 @@ export interface IQuizGameRepository<T> extends IRepository<T> {
   isUserInActiveGame(quizQuestionId: string): Promise<boolean>;
   isUserFinishInActiveGame(gameId: string, userId: string): Promise<boolean>;
   setGameAnswer(gameId: string, userId: string, answer: string): Promise<QuizGameAnswerViewModel | null>;
-  getPlayerActiveGame(userId: string): Promise<QuizGameViewModel | null>;
+  getGameAndPlayers(gameId: string): Promise<GameViewAndPlayersIdCortege | null>;
+  getPlayerGameWithStatus(userId: string, gameStatus: QuizGameStatus[]): Promise<QuizGameViewModel | null>;
   getAwaitedGameId(): Promise<string | null>;
   createNewGame(userData: { userId: string; userLogin: string }): Promise<QuizGameViewModel | null>;
   connectToGame(gameId: string, userData: { userId: string; userLogin: string }): Promise<QuizGameViewModel | null>;

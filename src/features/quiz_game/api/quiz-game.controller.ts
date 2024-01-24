@@ -12,6 +12,7 @@ import { Status } from '../../../application/utils/types';
 import { QuizGameAnswerViewModel, QuizGameViewModel } from '../types/dto';
 import { GetMyCurrentGameCommand } from '../use-cases/get-my-current-game.case';
 import { SetMyCurrentGameAnswerCommand } from '../use-cases/set-my-current-game-answer.case';
+import { GetGameByIdCommand } from '../use-cases/get-game-by-id.case';
 
 @Controller('pair-game-quiz/pairs')
 @UseGuards(AuthTokenGuard)
@@ -35,12 +36,17 @@ export class QuizGameController implements IQuizGameController {
 
   @Get('/:gameId')
   @HttpCode(Status.OK)
-  async getGame(@ParamId('gameId') gameId: string): Promise<QuizGameViewModel> {
-    const game = await this.quizGameQueryRepo.getGameById(gameId);
-    if (game == null) {
+  async getGame(@ParamId('gameId') gameId: string, @GetUserId() userId: string): Promise<QuizGameViewModel> {
+    const res = await this.commandBus.execute<GetGameByIdCommand, ServiceResult<QuizGameViewModel>>(new GetGameByIdCommand(gameId, userId));
+
+    if (res.hasErrorCode(QuizResultError.QUIZ_GAME_NO_FOUND)) {
       throw new NotFoundException();
     }
-    return game;
+    if (res.hasErrorCode(QuizResultError.QUIZ_GAME_NO_PERMISSION)) {
+      throw new ForbiddenException();
+    }
+
+    return res.getData();
   }
 
   @Post('/my-current/answers')

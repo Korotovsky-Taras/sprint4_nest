@@ -6,6 +6,7 @@ import { QuizAnswerDto } from '../dto/QuizAnswerDto';
 import { validateOrRejectDto } from '../../../application/utils/validateOrRejectDto';
 import { QuizResultError } from '../types/errors';
 import { QuizGameAnswerViewModel } from '../types/dto';
+import { QuizGameStatus } from '../types/dao';
 
 export class SetMyCurrentGameAnswerCommand {
   constructor(
@@ -23,7 +24,7 @@ export class SetMyCurrentGameAnswerCase implements ICommandHandler<SetMyCurrentG
 
     const res = new ServiceResult<QuizGameAnswerViewModel>();
 
-    const game = await this.quizRepo.getPlayerActiveGame(userId);
+    const game = await this.quizRepo.getPlayerGameWithStatus(userId, [QuizGameStatus.Active]);
 
     if (game === null) {
       res.addError({

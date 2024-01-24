@@ -5,6 +5,7 @@ import { UpdateQuizQuestionPublishCase } from './update-quiz-question-publish.ca
 import { CreateQuizConnectionCase } from './create-quiz-connection.case';
 import { GetMyCurrentGameCase } from './get-my-current-game.case';
 import { SetMyCurrentGameAnswerCase } from './set-my-current-game-answer.case';
+import { GetGameByIdCase } from './get-game-by-id.case';
 
 export const quizCases = [
   DeleteQuizQuestionCase,
@@ -13,5 +14,6 @@ export const quizCases = [
   UpdateQuizQuestionPublishCase,
   CreateQuizConnectionCase,
   GetMyCurrentGameCase,
+  GetGameByIdCase,
   SetMyCurrentGameAnswerCase,
 ];

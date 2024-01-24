@@ -23,6 +23,7 @@ import { QuizGameQuestion } from './quiz-game-question.mongo.schema';
 import { DeleteResult, ObjectId } from 'mongodb';
 import { HydratedDocument, isValidObjectId } from 'mongoose';
 import {
+  GameViewAndPlayersIdCortege,
   QuizGameAnswerViewModel,
   QuizGameQuestionCreateModel,
   QuizGameQuestionPublishUpdateModel,
@@ -158,9 +159,9 @@ export class QuizGameMongoRepository implements IQuizGameRepository<HydratedDocu
     return QuizGameMongoDataMapper.toAnswerView(playerAnswer);
   }
 
-  async getPlayerActiveGame(userId: string): Promise<QuizGameViewModel | null> {
+  async getPlayerGameWithStatus(userId: string, gameStatus: QuizGameStatus[]): Promise<QuizGameViewModel | null> {
     const game: QuizGameDocumentType | null = await this.quizGameModel.findOne({
-      status: { $in: [QuizGameStatus.PendingSecondPlayer, QuizGameStatus.Active] },
+      status: { $in: [...gameStatus] },
       players: { $in: [new ObjectId(userId)] },
     });
 
@@ -172,6 +173,24 @@ export class QuizGameMongoRepository implements IQuizGameRepository<HydratedDocu
       ]);
 
       return QuizGameMongoDataMapper.toGameView(g2);
+    }
+
+    return null;
+  }
+
+  async getGameAndPlayers(gameId: string): Promise<GameViewAndPlayersIdCortege | null> {
+    const game: QuizGameDocumentType | null = await this.quizGameModel.findOne({
+      _id: new ObjectId(gameId),
+    });
+
+    if (game !== null) {
+      const g2 = await this.quizGameModel.populate<QuizGameDBPType>(game, [
+        { path: 'firstPlayerProgress' },
+        { path: 'secondPlayerProgress' },
+        { path: 'questions' },
+      ]);
+
+      return [QuizGameMongoDataMapper.toGameView(g2), game.players.map(String)];
     }
 
     return null;

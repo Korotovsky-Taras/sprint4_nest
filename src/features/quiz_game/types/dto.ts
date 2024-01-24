@@ -25,6 +25,8 @@ export type QuizGameViewModel = {
   status: string;
 };
 
+export type GameViewAndPlayersIdCortege = [QuizGameViewModel, string[]];
+
 export type QuizGameQuestionViewModel = Pick<IQuizGameQuestion, 'body' | 'correctAnswers' | 'published'> & {
   id: string;
   createdAt: string;

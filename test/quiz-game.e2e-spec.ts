@@ -516,6 +516,64 @@ describe('quiz game testing', () => {
       .expect(Status.NOT_FOUND);
   });
 
+  it('should return 403 if not connected user try get game by id', async () => {
+    const usrModel1 = utils.createNewUserModel();
+    const usrModel2 = utils.createNewUserModel();
+
+    await utils.createUser(usrModel1);
+    await utils.createUser(usrModel2);
+
+    //авторизуем юзера 1
+    const res1 = await config
+      .getHttp()
+      .post(`/auth/login`)
+      .set('Content-Type', 'application/json')
+      .send({
+        loginOrEmail: usrModel1.login,
+        password: usrModel1.password,
+      })
+      .expect(Status.OK);
+
+    expect(res1.body).toEqual({
+      accessToken: expect.any(String),
+    });
+
+    const u1at = res1.body.accessToken;
+
+    //авторизуем юзера 2
+    const res2 = await config
+      .getHttp()
+      .post(`/auth/login`)
+      .set('Content-Type', 'application/json')
+      .send({
+        loginOrEmail: usrModel2.login,
+        password: usrModel2.password,
+      })
+      .expect(Status.OK);
+
+    expect(res2.body).toEqual({
+      accessToken: expect.any(String),
+    });
+
+    const u2at = res2.body.accessToken;
+
+    const res3 = await config
+      .getHttp()
+      .post(`/pair-game-quiz/pairs/connection`)
+      .set('Content-Type', 'application/json')
+      .set('Authorization', 'Bearer ' + u1at)
+      .expect(Status.OK);
+
+    expect(res3.body.id).not.toBeUndefined();
+
+    await config
+      .getHttp()
+      .get(`/pair-game-quiz/pairs/${res3.body.id}`)
+      .set('Content-Type', 'application/json')
+      .set('Authorization', 'Bearer ' + u2at)
+      .expect(Status.FORBIDDEN);
+  });
+
   it('should return 403 if not connected user try answer in game', async () => {
     await utils.wait(10);
 
@@ -573,6 +631,48 @@ describe('quiz game testing', () => {
       .post(`/pair-game-quiz/pairs/my-current/answers`)
       .set('Content-Type', 'application/json')
       .set('Authorization', 'Bearer ' + user2at)
+      .send({ answer: 'no' })
+      .expect(Status.FORBIDDEN);
+  });
+
+  it('should return 403 if connected user try answer in game without second player ', async () => {
+    await utils.wait(10);
+
+    const usrModel1 = utils.createNewUserModel();
+
+    await utils.createUser(usrModel1);
+
+    //авторизуем юзера 1
+    const res1 = await config
+      .getHttp()
+      .post(`/auth/login`)
+      .set('Content-Type', 'application/json')
+      .send({
+        loginOrEmail: usrModel1.login,
+        password: usrModel1.password,
+      })
+      .expect(Status.OK);
+
+    expect(res1.body).toEqual({
+      accessToken: expect.any(String),
+    });
+
+    const user1at = res1.body.accessToken;
+
+    // создаем игру
+    await config
+      .getHttp()
+      .post(`/pair-game-quiz/pairs/connection`)
+      .set('Content-Type', 'application/json')
+      .set('Authorization', 'Bearer ' + user1at)
+      .expect(Status.OK);
+
+    // пробуем ответить пользователем 2
+    await config
+      .getHttp()
+      .post(`/pair-game-quiz/pairs/my-current/answers`)
+      .set('Content-Type', 'application/json')
+      .set('Authorization', 'Bearer ' + user1at)
       .send({ answer: 'no' })
       .expect(Status.FORBIDDEN);
   });
