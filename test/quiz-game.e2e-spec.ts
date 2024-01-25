@@ -354,7 +354,7 @@ describe('quiz game testing', () => {
     });
   });
 
-  it('should play game u1 & u2 -> u1 should win', async () => {
+  it('should play game u1 & u2 -> u1 should win first with bonus', async () => {
     const usrModel1 = utils.createNewUserModel();
     const usrModel2 = utils.createNewUserModel();
 
@@ -411,36 +411,52 @@ describe('quiz game testing', () => {
 
     // первый пользователь должен закончить игру первым
     // дав два правильных ответа
-    await config
-      .getHttp()
-      .post(`/pair-game-quiz/pairs/my-current/answers`)
-      .set('Content-Type', 'application/json')
-      .set('Authorization', 'Bearer ' + u1at)
-      .send({ answer: 'correct' })
-      .expect(Status.OK);
 
-    for (let i = 0; i < 3; i++) {
-      await config
-        .getHttp()
-        .post(`/pair-game-quiz/pairs/my-current/answers`)
-        .set('Content-Type', 'application/json')
-        .set('Authorization', 'Bearer ' + u1at)
-        .send({ answer: 'no' })
-        .expect(Status.OK);
-    }
-    await config
-      .getHttp()
-      .post(`/pair-game-quiz/pairs/my-current/answers`)
-      .set('Content-Type', 'application/json')
-      .set('Authorization', 'Bearer ' + u1at)
-      .send({ answer: 'correct' })
-      .expect(Status.OK);
+    await utils.sendQuizAnswer(u1at, true);
 
-    const u1GameRes = await config
+    const u1Current = await config
       .getHttp()
       .get(`/pair-game-quiz/pairs/my-current`)
       .set('Content-Type', 'application/json')
       .set('Authorization', 'Bearer ' + u1at)
+      .expect(Status.OK);
+
+    for (let i = 0; i < 3; i++) {
+      await utils.sendQuizAnswer(u1at, false);
+    }
+    await utils.sendQuizAnswer(u1at, true);
+
+    //шестой ответ запрещен
+    await config
+      .getHttp()
+      .post(`/pair-game-quiz/pairs/my-current/answers`)
+      .set('Content-Type', 'application/json')
+      .set('Authorization', 'Bearer ' + u1at)
+      .send({ answer: 'correct' })
+      .expect(Status.FORBIDDEN);
+
+    // второй пользователь должен закончить игру вторым
+    // дав два правильных ответа
+    await utils.sendQuizAnswer(u2at, true);
+    for (let i = 0; i < 3; i++) {
+      await utils.sendQuizAnswer(u2at, false);
+    }
+    await utils.sendQuizAnswer(u2at, true);
+
+    //шестой ответ запрещен
+    await config
+      .getHttp()
+      .post(`/pair-game-quiz/pairs/my-current/answers`)
+      .set('Content-Type', 'application/json')
+      .set('Authorization', 'Bearer ' + u2at)
+      .send({ answer: 'correct' })
+      .expect(Status.FORBIDDEN);
+
+    const u1GameRes = await config
+      .getHttp()
+      .get(`/pair-game-quiz/pairs/${u1Current.body.id}`)
+      .set('Content-Type', 'application/json')
+      .set('Authorization', 'Bearer ' + u2at)
       .expect(Status.OK);
 
     const correctU1Answers = u1GameRes.body.firstPlayerProgress.answers.filter((answer) => answer.answerStatus === 'Correct');
@@ -453,51 +469,25 @@ describe('quiz game testing', () => {
     expect(correctU1Answers.length).toBe(2);
     expect(incorrectU1Answers.length).toBe(3);
 
-    // второй пользователь должен закончить игру вторым
-    // дав два правильных ответа
-    await config
-      .getHttp()
-      .post(`/pair-game-quiz/pairs/my-current/answers`)
-      .set('Content-Type', 'application/json')
-      .set('Authorization', 'Bearer ' + u2at)
-      .send({ answer: 'correct' })
-      .expect(Status.OK);
-    for (let i = 0; i < 3; i++) {
-      await config
-        .getHttp()
-        .post(`/pair-game-quiz/pairs/my-current/answers`)
-        .set('Content-Type', 'application/json')
-        .set('Authorization', 'Bearer ' + u2at)
-        .send({ answer: 'no' })
-        .expect(Status.OK);
-    }
-    await config
-      .getHttp()
-      .post(`/pair-game-quiz/pairs/my-current/answers`)
-      .set('Content-Type', 'application/json')
-      .set('Authorization', 'Bearer ' + u2at)
-      .send({ answer: 'correct' })
-      .expect(Status.OK);
-
-    const gameRes = await config
+    const u2GameRes = await config
       .getHttp()
       .get(`/pair-game-quiz/pairs/${u1GameRes.body.id}`)
       .set('Content-Type', 'application/json')
       .set('Authorization', 'Bearer ' + u2at)
       .expect(Status.OK);
 
-    const correctU2Answers = gameRes.body.firstPlayerProgress.answers.filter((answer) => answer.answerStatus === 'Correct');
-    const incorrectU2Answers = gameRes.body.firstPlayerProgress.answers.filter((answer) => answer.answerStatus === 'Incorrect');
+    const correctU2Answers = u2GameRes.body.firstPlayerProgress.answers.filter((answer) => answer.answerStatus === 'Correct');
+    const incorrectU2Answers = u2GameRes.body.firstPlayerProgress.answers.filter((answer) => answer.answerStatus === 'Incorrect');
 
-    expect(gameRes.body.secondPlayerProgress.answers.length).toBe(5);
+    expect(u2GameRes.body.secondPlayerProgress.answers.length).toBe(5);
 
     // пользователь закончил вторым значит у него нет бонусного очка
-    expect(gameRes.body.secondPlayerProgress.score).toBe(2);
+    expect(u2GameRes.body.secondPlayerProgress.score).toBe(2);
     expect(correctU2Answers.length).toBe(2);
     expect(incorrectU2Answers.length).toBe(3);
 
     // Игра должна быть закончена
-    expect(gameRes.body.status).toBe('Finished');
+    expect(u2GameRes.body.status).toBe('Finished');
 
     // текущей игры быть не должно, она должна быть закончена
     await config
@@ -514,6 +504,101 @@ describe('quiz game testing', () => {
       .set('Content-Type', 'application/json')
       .set('Authorization', 'Bearer ' + u2at)
       .expect(Status.NOT_FOUND);
+  });
+
+  it('should add bonus score to win player only if game ends', async () => {
+    const usrModel1 = utils.createNewUserModel();
+    const usrModel2 = utils.createNewUserModel();
+
+    await utils.createUser(usrModel1);
+    await utils.createUser(usrModel2);
+
+    //авторизуем юзера 1
+    const res1 = await config
+      .getHttp()
+      .post(`/auth/login`)
+      .set('Content-Type', 'application/json')
+      .send({
+        loginOrEmail: usrModel1.login,
+        password: usrModel1.password,
+      })
+      .expect(Status.OK);
+
+    expect(res1.body).toEqual({
+      accessToken: expect.any(String),
+    });
+
+    const u1at = res1.body.accessToken;
+
+    //авторизуем юзера 2
+    const res2 = await config
+      .getHttp()
+      .post(`/auth/login`)
+      .set('Content-Type', 'application/json')
+      .send({
+        loginOrEmail: usrModel2.login,
+        password: usrModel2.password,
+      })
+      .expect(Status.OK);
+
+    expect(res2.body).toEqual({
+      accessToken: expect.any(String),
+    });
+
+    const u2at = res2.body.accessToken;
+
+    await config
+      .getHttp()
+      .post(`/pair-game-quiz/pairs/connection`)
+      .set('Content-Type', 'application/json')
+      .set('Authorization', 'Bearer ' + u1at)
+      .expect(Status.OK);
+
+    await config
+      .getHttp()
+      .post(`/pair-game-quiz/pairs/connection`)
+      .set('Content-Type', 'application/json')
+      .set('Authorization', 'Bearer ' + u2at)
+      .expect(Status.OK);
+
+    const res_a1 = await utils.sendQuizAnswer(u1at, true);
+    expect(res_a1.current.firstPlayerProgress?.score).toBe(1);
+
+    const res_a2 = await utils.sendQuizAnswer(u1at, true);
+    expect(res_a2.current.firstPlayerProgress?.score).toBe(2);
+
+    const res_a3 = await utils.sendQuizAnswer(u2at, true);
+    expect(res_a3.current.secondPlayerProgress?.score).toBe(1);
+
+    const res_a4 = await utils.sendQuizAnswer(u2at, true);
+    expect(res_a4.current.secondPlayerProgress?.score).toBe(2);
+
+    const res_a5 = await utils.sendQuizAnswer(u1at, false);
+    expect(res_a5.current.firstPlayerProgress?.score).toBe(2);
+
+    const res_a6 = await utils.sendQuizAnswer(u1at, true);
+    expect(res_a6.current.firstPlayerProgress?.score).toBe(3);
+
+    const res_a7 = await utils.sendQuizAnswer(u1at, false);
+    expect(res_a7.current.firstPlayerProgress?.score).toBe(3);
+
+    const res_a8 = await utils.sendQuizAnswer(u2at, true);
+    expect(res_a8.current.secondPlayerProgress?.score).toBe(3);
+
+    const res_a9 = await utils.sendQuizAnswer(u2at, false);
+    expect(res_a9.current.secondPlayerProgress?.score).toBe(3);
+
+    await utils.sendQuizAnswer(u2at, false);
+
+    //Конец игры, все ответили, бонусное очко должно появиться у первого игрока
+    const finalUser1res = await config
+      .getHttp()
+      .get(`/pair-game-quiz/pairs/${res_a1.current.id}`)
+      .set('Content-Type', 'application/json')
+      .set('Authorization', 'Bearer ' + u1at)
+      .expect(Status.OK);
+
+    expect(finalUser1res.body.firstPlayerProgress?.score).toBe(4);
   });
 
   it('should return 403 if not connected user try get game by id', async () => {
@@ -631,7 +716,7 @@ describe('quiz game testing', () => {
       .post(`/pair-game-quiz/pairs/my-current/answers`)
       .set('Content-Type', 'application/json')
       .set('Authorization', 'Bearer ' + user2at)
-      .send({ answer: 'no' })
+      .send({ answer: 'incorrect' })
       .expect(Status.FORBIDDEN);
   });
 
@@ -673,7 +758,7 @@ describe('quiz game testing', () => {
       .post(`/pair-game-quiz/pairs/my-current/answers`)
       .set('Content-Type', 'application/json')
       .set('Authorization', 'Bearer ' + user1at)
-      .send({ answer: 'no' })
+      .send({ answer: 'incorrect' })
       .expect(Status.FORBIDDEN);
   });
 });

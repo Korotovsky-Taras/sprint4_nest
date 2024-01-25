@@ -129,8 +129,8 @@ export class QuizGameMongoRepository implements IQuizGameRepository<HydratedDocu
 
     if (answerStatus === QuizGameAnswerStatus.Correct) {
       userProgress.score += 1;
+      await this.saveDoc(userProgress);
     }
-    await this.saveDoc(userProgress);
 
     const secondPlayerProgressId = String(game.firstPlayerProgress) === String(userProgress._id) ? game.secondPlayerProgress : game.firstPlayerProgress;
 
@@ -142,19 +142,26 @@ export class QuizGameMongoRepository implements IQuizGameRepository<HydratedDocu
 
     if (userProgress.answers.length === g2.questions.length) {
       userProgress.setStatus(QuizGameProgressStatus.Finished);
-      await this.saveDoc(game);
 
       //если пользователь закончил раньше, и у него был один правильный ответ, добавляем ему очки
-      if (userProgress.score > 0 && secondUserProgress.answers.length < userProgress.answers.length) {
-        userProgress.score += 1;
-        await this.saveDoc(userProgress);
+      if (userProgress.score > 0 && secondUserProgress.status === QuizGameProgressStatus.Active) {
+        userProgress.bonusScore += 1;
       }
     }
 
-    if (userProgress.answers.length === g2.questions.length && secondUserProgress.answers.length === g2.questions.length) {
+    if (userProgress.status === QuizGameProgressStatus.Finished && secondUserProgress.status === QuizGameProgressStatus.Finished) {
       game.finishGame();
-      await this.saveDoc(game);
+
+      userProgress.score += userProgress.bonusScore;
+      secondUserProgress.score += secondUserProgress.bonusScore;
+
+      userProgress.bonusScore = 0;
+      secondUserProgress.bonusScore = 0;
     }
+
+    await this.saveDoc(userProgress);
+    await this.saveDoc(secondUserProgress);
+    await this.saveDoc(game);
 
     return QuizGameMongoDataMapper.toAnswerView(playerAnswer);
   }

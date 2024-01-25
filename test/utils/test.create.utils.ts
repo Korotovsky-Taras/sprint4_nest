@@ -7,7 +7,7 @@ import { TestCommonUtils } from './test.common.utils';
 import { BlogCreateDto } from '../../src/features/blogs/dto/BlogCreateDto';
 import { PostCreateDto } from '../../src/features/posts/dto/PostCreateDto';
 import { PostCommentCreateDto } from '../../src/features/posts/dto/PostCommentCreateDto';
-import { QuizGameQuestionCreateModel } from '../../src/features/quiz_game/types/dto';
+import { QuizGameAnswerViewModel, QuizGameQuestionCreateModel, QuizGameViewModel } from '../../src/features/quiz_game/types/dto';
 
 export class TestCreateUtils extends TestCommonUtils {
   private readonly config: AppTestProvider;
@@ -15,6 +15,27 @@ export class TestCreateUtils extends TestCommonUtils {
   constructor(config: AppTestProvider) {
     super();
     this.config = config;
+  }
+
+  async sendQuizAnswer(token: string, correct = true): Promise<{ answer: QuizGameAnswerViewModel; current: QuizGameViewModel }> {
+    const answer = correct ? 'correct' : 'incorrect';
+    const result = await this.config
+      .getHttp()
+      .post(`/pair-game-quiz/pairs/my-current/answers`)
+      .set('Content-Type', 'application/json')
+      .set('Authorization', 'Bearer ' + token)
+      .send({ answer });
+
+    const result2 = await this.config
+      .getHttp()
+      .get(`/pair-game-quiz/pairs/my-current`)
+      .set('Content-Type', 'application/json')
+      .set('Authorization', 'Bearer ' + token);
+
+    return {
+      answer: result.body,
+      current: result2.body,
+    };
   }
 
   async createBlog(userId: string, model: BlogCreationTestModel = validBlogData): Promise<BlogViewModel> {

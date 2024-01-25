@@ -34,9 +34,11 @@ export type IQuizGamePlayerAnswer = {
 };
 
 export interface IQuizGamePlayerProgress {
+  status: QuizGameProgressStatus;
   player: IQuizGamePlayer;
   answers: IQuizGamePlayerAnswer[];
   score: number;
+  bonusScore: number;
   createdAt: Date;
   updatedAt: Date;
 }

@@ -27,6 +27,9 @@ export class QuizGamePlayerProgress implements IQuizGamePlayerProgress {
   @Prop({ type: Number, default: 0 })
   score: number;
 
+  @Prop({ type: Number, default: 0 })
+  bonusScore: number;
+
   @Prop()
   gameId: string;
 
