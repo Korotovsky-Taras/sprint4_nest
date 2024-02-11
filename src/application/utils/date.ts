@@ -1,6 +1,6 @@
 export function toIsoString(date: Date): string {
   if (date instanceof Date) {
-    return date.toISOString();
+    return new Date(date.getTime()).toISOString();
   }
   return date;
   // const tzOffset = -date.getTimezoneOffset();
