@@ -62,7 +62,7 @@ export class QuizGameSqlRawDataMapper {
     if (playerProgress !== null) {
       return {
         player: {
-          id: playerProgress.player.id,
+          id: String(playerProgress.player.id),
           login: playerProgress.player.login,
         },
         answers: playerProgress.answers.map((answer) => {

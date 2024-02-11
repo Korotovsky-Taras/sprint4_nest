@@ -63,7 +63,7 @@ export type QuizGamePlayerProgressAnswersRawType = WithId<{
 
 export type QuizGamePlayerProgressRawType = {
   player: {
-    id: string;
+    id: number;
     login: string;
   };
   answers: QuizGameAnswerRawType[];
