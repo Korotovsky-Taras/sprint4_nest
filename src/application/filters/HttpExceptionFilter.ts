@@ -1,12 +1,11 @@
 import { ArgumentsHost, Catch, ExceptionFilter } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { ApiValidationError } from '../core/ApiValidationError';
-import { ConfigService } from '@nestjs/config';
-import { AppDbType } from '../utils/config';
+import { AppConfigService } from '../../app.config.service';
 
 @Catch(ApiValidationError)
 export class HttpExceptionFilter implements ExceptionFilter {
-  constructor(private readonly configService: ConfigService) {}
+  constructor(private readonly configService: AppConfigService) {}
   catch(exception: ApiValidationError, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
@@ -15,9 +14,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const body = request.body;
     const query = request.query;
 
-    const isDevMode = this.configService.get<AppDbType>('DEV_MODE');
-
-    if (isDevMode) {
+    if (this.configService.isDevMode()) {
       console.log(`[body] ${JSON.stringify(body)}, [query] ${JSON.stringify(query)},`);
     }
 

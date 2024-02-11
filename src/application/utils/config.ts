@@ -43,7 +43,10 @@ export type AppConfiguration = {
 };
 
 function isTrue(str: string | undefined): boolean {
-  return str === 'true';
+  if (str === 'true') {
+    return true;
+  }
+  return false;
 }
 
 export function getEnvFilePath() {

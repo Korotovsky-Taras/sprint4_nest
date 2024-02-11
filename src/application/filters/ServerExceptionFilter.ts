@@ -1,13 +1,12 @@
 import { ArgumentsHost, Catch, ExceptionFilter, HttpException, Logger } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { Status } from '../utils/types';
-import { ConfigService } from '@nestjs/config';
-import { AppDbType } from '../utils/config';
+import { AppConfigService } from '../../app.config.service';
 
 @Catch()
 export class ServerExceptionFilter implements ExceptionFilter {
   constructor(
-    private readonly configService: ConfigService,
+    private readonly configService: AppConfigService,
     private readonly logger: Logger,
   ) {}
 
@@ -20,14 +19,12 @@ export class ServerExceptionFilter implements ExceptionFilter {
     const body = request.body;
     const query = request.query;
 
-    const isDevMode = this.configService.get<AppDbType>('DEV_MODE');
-
-    if (isDevMode) {
+    if (this.configService.isDevMode()) {
       console.log(`[body] ${JSON.stringify(body)}, [query] ${JSON.stringify(query)},`);
     }
 
     if (!(exception instanceof HttpException) || exception.getStatus() >= 500) {
-      if (isDevMode) {
+      if (this.configService.isDevMode()) {
         console.log(`[${method}] ${path}`, exception.stack);
       }
       this.logger.error(`[${method}] ${path}`, exception.stack);

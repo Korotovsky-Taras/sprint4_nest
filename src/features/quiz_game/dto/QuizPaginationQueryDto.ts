@@ -8,7 +8,7 @@ enum QuizQuerySortEnum {
   body = 'body',
 }
 
-enum QuizQueryStatusEnum {
+export enum QuizQueryStatusEnum {
   all = 'all',
   published = 'published',
   notPublished = 'notPublished',

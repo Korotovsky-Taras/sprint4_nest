@@ -5,14 +5,14 @@ import { HttpExceptionFilter } from '../filters/HttpExceptionFilter';
 import { ServerExceptionFilter } from '../filters/ServerExceptionFilter';
 import { useContainer } from 'class-validator';
 import { AppModule } from '../../app.module';
-import { ConfigService } from '@nestjs/config';
+import { AppConfigService } from '../../app.config.service';
 
 export function useAppSettings(app: INestApplication) {
-  const configService = app.get<ConfigService>(ConfigService);
+  const appConfigService = app.get<AppConfigService>(AppConfigService);
   app.enableCors();
   app.use(cookieParser());
   app.useGlobalPipes(new ClassValidationPipe());
-  app.useGlobalFilters(new ServerExceptionFilter(configService, new Logger()), new HttpExceptionFilter(configService));
+  app.useGlobalFilters(new ServerExceptionFilter(appConfigService, new Logger()), new HttpExceptionFilter(appConfigService));
 
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
 }

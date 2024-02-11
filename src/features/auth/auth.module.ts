@@ -13,7 +13,7 @@ import { SharedModule } from '../../shared.module';
 import { CqrsModule } from '@nestjs/cqrs';
 import { authCases } from './use-cases';
 import { GMailSender } from '../../application/mails/GMailSender';
-import { withDbTypedClass, withDbTypedModule } from '../../application/utils/withTyped';
+import { withTypedDbModule, withTypedRepository } from '../../application/utils/withTyped';
 import { AuthRepoKey, AuthRepoQueryKey } from './types/common';
 import { AuthSqlRawRepository } from './dao/sql-raw/auth.sql-raw.repository';
 import { AuthSqlRawQueryRepository } from './dao/sql-raw/auth.sql-raw.query.repository';
@@ -22,13 +22,13 @@ import { AuthSqlOrmQueryRepository } from './dao/sql-orm/auth.sql-orm.query.repo
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthEntity } from './dao/sql-orm/auth.entity';
 
-const AuthQueryRepoTyped = withDbTypedClass(AuthRepoQueryKey, {
+const AuthQueryRepoTyped = withTypedRepository(AuthRepoQueryKey, {
   Mongo: AuthMongoQueryRepository,
   SQLRaw: AuthSqlRawQueryRepository,
   SQLOrm: AuthSqlOrmQueryRepository,
 });
-const AuthRepoTyped = withDbTypedClass(AuthRepoKey, { Mongo: AuthMongoRepository, SQLRaw: AuthSqlRawRepository, SQLOrm: AuthSqlOrmRepository });
-const AuthDbModuleTyped = withDbTypedModule({
+const AuthRepoTyped = withTypedRepository(AuthRepoKey, { Mongo: AuthMongoRepository, SQLRaw: AuthSqlRawRepository, SQLOrm: AuthSqlOrmRepository });
+const AuthDbModuleTyped = withTypedDbModule({
   Mongo: MongooseModule.forFeature([
     {
       name: AuthSession.name,

@@ -35,8 +35,6 @@ export class SetMyCurrentGameAnswerCase implements ICommandHandler<SetMyCurrentG
 
     const isUserFinishTheGame = await this.quizRepo.isUserFinishInActiveGame(game.id, userId);
 
-    console.log({ userId, isUserFinishTheGame });
-
     if (isUserFinishTheGame) {
       res.addError({
         code: QuizResultError.QUIZ_GAME_NO_PERMISSION,

@@ -33,6 +33,14 @@ export type IQuizGamePlayerAnswer = {
   addedAt: Date;
 };
 
+export type QuizGameAnswerRawType = WithId<{
+  status: QuizGameAnswerStatus;
+  progressId: number;
+  questionId: number;
+  createdAt: Date;
+  answer: string;
+}>;
+
 export interface IQuizGamePlayerProgress {
   status: QuizGameProgressStatus;
   player: IQuizGamePlayer;
@@ -44,6 +52,23 @@ export interface IQuizGamePlayerProgress {
 }
 
 export type QuizGamePlayerProgressDBType = WithId<IQuizGamePlayerProgress>;
+
+export type QuizGamePlayerProgressAnswersRawType = WithId<{
+  answer: string;
+  progressId: number;
+  questionId: number;
+  status: QuizGameAnswerStatus;
+  createdAt: Date;
+}>;
+
+export type QuizGamePlayerProgressRawType = {
+  player: {
+    id: string;
+    login: string;
+  };
+  answers: QuizGameAnswerRawType[];
+  score: number;
+};
 
 export type QuizGamePlayerProgressDocumentType = HydratedDocument<IQuizGamePlayerProgress, IQuizGamePlayerProgressMethods>;
 
@@ -65,6 +90,18 @@ export interface IQuizGame<P, Q> {
   startGameDate: Date;
   finishGameDate: Date;
 }
+
+export type QuizGameRawType = WithId<{
+  secondPlayerProgress: QuizGamePlayerProgressRawType;
+  firstPlayerProgress: QuizGamePlayerProgressRawType;
+  questions: QuizGameQuestionRawType[];
+  sp_id: number;
+  fp_id: number;
+  status: QuizGameStatus;
+  createdAt: Date;
+  startGameDate: Date;
+  finishGameDate: Date;
+}>;
 
 export type QuizGameDBType = WithId<IQuizGame<ObjectId, ObjectId>>;
 
@@ -95,6 +132,8 @@ export interface IQuizGameQuestion {
 }
 
 export type QuizGameQuestionDBType = WithId<IQuizGameQuestion>;
+
+export type QuizGameQuestionRawType = WithId<IQuizGameQuestion>;
 
 export type QuizGameQuestionDocumentType = HydratedDocument<IQuizGameQuestion, IQuizGameQuestionMethods>;
 

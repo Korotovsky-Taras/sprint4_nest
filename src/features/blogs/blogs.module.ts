@@ -12,20 +12,20 @@ import { CqrsModule } from '@nestjs/cqrs';
 import { BlogsSqlRawRepository } from './dao/sql-raw/blogs.sql-raw.repository';
 import { BlogsSqlRawQueryRepository } from './dao/sql-raw/blogs.sql-raw.query.repository';
 import { BlogQueryRepoKey, BlogRepoKey } from './types/common';
-import { withDbTypedClass, withDbTypedModule } from '../../application/utils/withTyped';
+import { withTypedDbModule, withTypedRepository } from '../../application/utils/withTyped';
 import { BlogsAdminController } from './api/blogs.admin.controller';
 import { BlogsSqlOrmRepository } from './dao/sql-orm/blogs.sql-orm.repository';
 import { BlogsSqlOrmQueryRepository } from './dao/sql-orm/blogs.sql-orm.query.repository';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { BlogsEntity } from './dao/sql-orm/blogs.entity';
 
-const BlogQueryRepoTyped = withDbTypedClass(BlogQueryRepoKey, {
+const BlogQueryRepoTyped = withTypedRepository(BlogQueryRepoKey, {
   Mongo: BlogsMongoQueryRepository,
   SQLRaw: BlogsSqlRawQueryRepository,
   SQLOrm: BlogsSqlOrmQueryRepository,
 });
-const BlogRepoTyped = withDbTypedClass(BlogRepoKey, { Mongo: BlogsMongoRepository, SQLRaw: BlogsSqlRawRepository, SQLOrm: BlogsSqlOrmRepository });
-const BlogsDbModuleTyped = withDbTypedModule({
+const BlogRepoTyped = withTypedRepository(BlogRepoKey, { Mongo: BlogsMongoRepository, SQLRaw: BlogsSqlRawRepository, SQLOrm: BlogsSqlOrmRepository });
+const BlogsDbModuleTyped = withTypedDbModule({
   Mongo: MongooseModule.forFeature([
     {
       name: Blog.name,

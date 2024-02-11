@@ -1,11 +1,16 @@
 import { AppConfiguration, AppDbType } from './config';
 import { ConfigService } from '@nestjs/config';
 
-type DbTypedClass = {
-  [key in AppDbType]?: any;
+type TypedKeys<T extends string | number | symbol> = {
+  [key in T]: any;
 };
 
-export const withDbTypedClass = (key: symbol, map: DbTypedClass) => {
+type TypedRepositoryKeys = TypedKeys<AppDbType>;
+
+/**
+ * Подключение зависимостей для репозитория
+ */
+export const withTypedRepository = (key: symbol, map: TypedRepositoryKeys) => {
   const configService = new ConfigService<AppConfiguration, true>();
   const dbType = configService.get<AppDbType>('DB_TYPE');
 
@@ -20,13 +25,19 @@ export const withDbTypedClass = (key: symbol, map: DbTypedClass) => {
   };
 };
 
-export const withDbTypedModule = (map: DbTypedClass) => {
+type TypedDbKeys = TypedKeys<Exclude<AppDbType, 'SQLRaw'>>;
+
+/**
+ * Подключение зависимостей для модулей БД
+ */
+export const withTypedDbModule = (map: TypedDbKeys) => {
   const configService = new ConfigService<AppConfiguration, true>();
   const dbType = configService.get<AppDbType>('DB_TYPE');
 
   const dbTypedClass = map[dbType];
+
   if (!dbTypedClass) {
-    throw Error(`Module injection: DB_TYPE required module for ${dbType}`);
+    return class FakeDbModule {};
   }
 
   return dbTypedClass;

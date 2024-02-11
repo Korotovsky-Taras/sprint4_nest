@@ -14,11 +14,12 @@ import { TestsModule } from './features/tests/tests.module';
 import { DbModule } from './db/db.module';
 import { LogsModule } from './features/logs/logs.module';
 import { QuizGameModule } from './features/quiz_game/quiz-game.module';
+import { AppConfigService } from './app.config.service';
 
 @Module({
   imports: [configModule, DbModule, SharedModule, BlogsModule, PostsModule, CommentsModule, UsersModule, AuthModule, QuizGameModule, TestsModule, LogsModule],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, AppConfigService],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

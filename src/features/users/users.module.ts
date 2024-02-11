@@ -13,7 +13,7 @@ import { SharedModule } from '../../shared.module';
 import { GMailSender } from '../../application/mails/GMailSender';
 import { CqrsModule } from '@nestjs/cqrs';
 import { userCases } from './use-cases';
-import { withDbTypedClass, withDbTypedModule } from '../../application/utils/withTyped';
+import { withTypedDbModule, withTypedRepository } from '../../application/utils/withTyped';
 import { UserQueryRepoKey, UserRepoKey } from './types/common';
 import { UsersSqlRawRepository } from './dao/sql-raw/users.sql-raw.repository';
 import { UsersSqlRawQueryRepository } from './dao/sql-raw/users.sql-raw.query.repository';
@@ -25,13 +25,13 @@ import { UsersCredentialsEntity } from './dao/sql-orm/entities/users-credentials
 import { UsersRecoveryConfirmationEntity } from './dao/sql-orm/entities/users-recovery-confirmation.entity';
 import { UsersRegistrationConfirmationEntity } from './dao/sql-orm/entities/users-registration-confirmation.entity';
 
-const UserQueryRepoTyped = withDbTypedClass(UserQueryRepoKey, {
+const UserQueryRepoTyped = withTypedRepository(UserQueryRepoKey, {
   Mongo: UsersMongoQueryRepository,
   SQLRaw: UsersSqlRawQueryRepository,
   SQLOrm: UsersSqlOrmQueryRepository,
 });
-const UserRepoTyped = withDbTypedClass(UserRepoKey, { Mongo: UsersMongoRepository, SQLRaw: UsersSqlRawRepository, SQLOrm: UsersSqlOrmRepository });
-const UserDbModuleTyped = withDbTypedModule({
+const UserRepoTyped = withTypedRepository(UserRepoKey, { Mongo: UsersMongoRepository, SQLRaw: UsersSqlRawRepository, SQLOrm: UsersSqlOrmRepository });
+const UserDbModuleTyped = withTypedDbModule({
   Mongo: MongooseModule.forFeature([
     {
       name: User.name,

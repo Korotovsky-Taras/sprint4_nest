@@ -32,9 +32,14 @@ export function testInit(): AppTestProvider {
     configHttp = agent(app.getHttpServer());
   });
 
-  afterAll(async () => {
-    await configApp.close();
-    await configCloseConnections();
+  afterAll((done) => {
+    configCloseConnections()
+      .then(() => {
+        return configApp.close();
+      })
+      .finally(() => {
+        done();
+      });
   });
 
   return {

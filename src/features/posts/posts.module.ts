@@ -11,7 +11,7 @@ import { IsPostIdExistValidator } from '../../application/decorators/validation/
 import { UsersModule } from '../users/users.module';
 import { CqrsModule } from '@nestjs/cqrs';
 import { postCases } from './use-cases';
-import { withDbTypedClass, withDbTypedModule } from '../../application/utils/withTyped';
+import { withTypedDbModule, withTypedRepository } from '../../application/utils/withTyped';
 import { PostQueryRepoKey, PostRepoKey } from './types/common';
 import { PostsSqlRawRepository } from './dao/sql-raw/posts.sql-raw.repository';
 import { PostsSqlRawQueryRepository } from './dao/sql-raw/posts.sql-raw.query.repository';
@@ -21,13 +21,13 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { PostsEntity } from './dao/sql-orm/entities/posts.entity';
 import { PostsLikesEntity } from './dao/sql-orm/entities/posts-likes.entity';
 
-const PostQueryRepoTyped = withDbTypedClass(PostQueryRepoKey, {
+const PostQueryRepoTyped = withTypedRepository(PostQueryRepoKey, {
   Mongo: PostsMongoQueryRepository,
   SQLRaw: PostsSqlRawQueryRepository,
   SQLOrm: PostsSqlOrmQueryRepository,
 });
-const PostRepoTyped = withDbTypedClass(PostRepoKey, { Mongo: PostsMongoRepository, SQLRaw: PostsSqlRawRepository, SQLOrm: PostsSqlOrmRepository });
-const PostDbModuleTyped = withDbTypedModule({
+const PostRepoTyped = withTypedRepository(PostRepoKey, { Mongo: PostsMongoRepository, SQLRaw: PostsSqlRawRepository, SQLOrm: PostsSqlOrmRepository });
+const PostDbModuleTyped = withTypedDbModule({
   Mongo: MongooseModule.forFeature([
     {
       name: Post.name,

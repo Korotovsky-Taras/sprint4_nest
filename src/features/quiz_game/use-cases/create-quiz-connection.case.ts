@@ -44,7 +44,7 @@ export class CreateQuizConnectionCase implements ICommandHandler<CreateQuizConne
 
     //если такая есть – то присоединить текущего игрока к игре
     if (gameId) {
-      const game: QuizGameViewModel | null = await this.quizRepo.connectToGame(gameId, {
+      const game: QuizGameViewModel | null = await this.quizRepo.connectSecondPlayerToGame(gameId, {
         userLogin: user.login,
         userId: userId,
       });

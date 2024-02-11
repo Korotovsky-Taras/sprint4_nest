@@ -10,10 +10,8 @@ import {
   QuizGameDBPType,
   QuizGameDBType,
   QuizGameDocumentType,
-  QuizGamePlayerProgressDBType,
   QuizGamePlayerProgressDocumentType,
   QuizGameProgressStatus,
-  QuizGameQuestionDBType,
   QuizGameQuestionDocumentType,
   QuizGameStatus,
 } from '../../types/dao';
@@ -54,14 +52,6 @@ export class QuizGameMongoRepository implements IQuizGameRepository<HydratedDocu
     }
     const result: DeleteResult = await this.quizGameQuestionsModel.deleteOne({ _id: new ObjectId(quizQuestionId) }).exec();
     return result.deletedCount === 1;
-  }
-
-  async isQuestionExist(quizQuestionId: string): Promise<boolean> {
-    if (!isValidObjectId(quizQuestionId)) {
-      return false;
-    }
-    const question: QuizGameQuestionDBType | null = await this.quizGameQuestionsModel.findById(quizQuestionId).lean();
-    return question !== null;
   }
 
   async isUserInActiveGame(userId: string): Promise<boolean> {
@@ -203,7 +193,7 @@ export class QuizGameMongoRepository implements IQuizGameRepository<HydratedDocu
     return null;
   }
 
-  async connectToGame(gameId: string, userData: { userId: string; userLogin: string }): Promise<QuizGameViewModel | null> {
+  async connectSecondPlayerToGame(gameId: string, userData: { userId: string; userLogin: string }): Promise<QuizGameViewModel | null> {
     const game: QuizGameDocumentType | null = await this.quizGameModel.findById(gameId).exec();
 
     if (!game || game.secondPlayerProgress !== null) {
@@ -266,13 +256,6 @@ export class QuizGameMongoRepository implements IQuizGameRepository<HydratedDocu
       return game._id.toString();
     }
     return null;
-  }
-
-  async getPlayerProgress(userId: string): Promise<QuizGamePlayerProgressDBType | null> {
-    if (!isValidObjectId(userId)) {
-      return null;
-    }
-    return await this.quizGameProgressModel.findOne({ 'player.playerId': userId }).lean();
   }
 
   async updateQuestion(quizQuestionId: string, model: QuizGameQuestionUpdateModel): Promise<boolean> {
