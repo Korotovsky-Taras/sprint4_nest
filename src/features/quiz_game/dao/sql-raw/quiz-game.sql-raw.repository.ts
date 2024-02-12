@@ -130,6 +130,7 @@ export class QuizGameSqlRawRepository implements IQuizGameRepository<void> {
                                   FROM public."QuizGamesLinkedQuestions" lq
                                   LEFT JOIN public."QuizGamesProgressAnswers" pa ON pa."questionId" = lq."questionId" AND pa."progressId" = fp."_id"
                                   WHERE lq."gameId" = g."_id" AND pa."questionId" = lq."questionId"
+                                  ORDER BY lq."_id"
                               ))
               ) as "firstPlayerProgress"),
               (SELECT
@@ -149,6 +150,7 @@ export class QuizGameSqlRawRepository implements IQuizGameRepository<void> {
                                                 FROM public."QuizGamesLinkedQuestions" lq
                                                 LEFT JOIN public."QuizGamesProgressAnswers" pa ON pa."questionId" = lq."questionId" AND pa."progressId" = sp."_id"
                                                 WHERE lq."gameId" = g."_id" AND pa."questionId" = lq."questionId"
+                                                ORDER BY lq."_id"
                                             ))
                            )
                    END as "secondPlayerProgress"),
@@ -156,6 +158,7 @@ export class QuizGameSqlRawRepository implements IQuizGameRepository<void> {
                                              SELECT gq."_id", gq."body" FROM public."QuizGamesLinkedQuestions" lq
                                              LEFT JOIN public."QuizGamesQuestions" gq ON gq."_id" = lq."questionId"
                                              WHERE  lq."gameId" = g."_id"
+                                             ORDER BY lq."_id"
                                          ) as row)) as "questions"
        FROM public."QuizGames" as g
                 LEFT JOIN public."QuizGamesPlayerProgress" fp ON g.fp_id = fp."userId" AND fp."gameId" = g."_id"
@@ -229,7 +232,7 @@ export class QuizGameSqlRawRepository implements IQuizGameRepository<void> {
 
     //ищем id вопросов на которые осталось ответить
     const currentPlayerLastQuestions = await this.dataSource.query<{ id: number }[]>(
-      'SELECT p."questionId" as "id" FROM public."QuizGamesLinkedQuestions" as p WHERE p."gameId" = $1 AND NOT p."questionId" IN (SELECT qa."questionId" FROM public."QuizGamesProgressAnswers" qa WHERE qa."questionId" = p."questionId" AND qa."progressId" = $2)',
+      'SELECT p."questionId" as "id" FROM public."QuizGamesLinkedQuestions" as p WHERE p."gameId" = $1 AND NOT p."questionId" IN (SELECT qa."questionId" FROM public."QuizGamesProgressAnswers" qa WHERE qa."questionId" = p."questionId" AND qa."progressId" = $2) ORDER BY p."_id"',
       [Number(gameId), currentPlayerProgress.id],
     );
 
@@ -338,12 +341,14 @@ export class QuizGameSqlRawRepository implements IQuizGameRepository<void> {
                                              FROM public."QuizGamesLinkedQuestions" lq
                                                       LEFT JOIN public."QuizGamesProgressAnswers" pa ON pa."questionId" = lq."questionId" AND pa."progressId" = sp."_id"
                                              WHERE lq."gameId" = g."_id" AND pa."questionId" = lq."questionId"
+                                             ORDER BY lq."_id"
                                          ) as row)) as "answers"
                     ) as row),
            (SELECT array(SELECT row_to_json(row) FROM (
                                           SELECT gq.* FROM public."QuizGamesLinkedQuestions" lq
                                           LEFT JOIN public."QuizGamesQuestions" gq ON gq."_id" = lq."questionId"
                                           WHERE  lq."gameId" = g."_id"
+                                          ORDER BY lq."_id"
                                       ) as row)) as "questions"
        FROM public."QuizGames" as g
                 LEFT JOIN public."QuizGamesPlayerProgress" fp ON g.fp_id = fp."userId" AND fp."gameId" = g."_id"

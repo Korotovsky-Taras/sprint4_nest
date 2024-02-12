@@ -506,6 +506,106 @@ describe('quiz game testing', () => {
       .expect(Status.NOT_FOUND);
   });
 
+  it('player should answer right order', async () => {
+    const usrModel1 = utils.createNewUserModel();
+    const usrModel2 = utils.createNewUserModel();
+
+    await utils.createUser(usrModel1);
+    await utils.createUser(usrModel2);
+    //авторизуем юзера 1
+    const res1 = await config
+      .getHttp()
+      .post(`/auth/login`)
+      .set('Content-Type', 'application/json')
+      .send({
+        loginOrEmail: usrModel1.login,
+        password: usrModel1.password,
+      })
+      .expect(Status.OK);
+
+    expect(res1.body).toEqual({
+      accessToken: expect.any(String),
+    });
+
+    const u1at = res1.body.accessToken;
+
+    //авторизуем юзера 2
+    const res2 = await config
+      .getHttp()
+      .post(`/auth/login`)
+      .set('Content-Type', 'application/json')
+      .send({
+        loginOrEmail: usrModel2.login,
+        password: usrModel2.password,
+      })
+      .expect(Status.OK);
+
+    expect(res2.body).toEqual({
+      accessToken: expect.any(String),
+    });
+
+    const u2at = res2.body.accessToken;
+
+    await config
+      .getHttp()
+      .post(`/pair-game-quiz/pairs/connection`)
+      .set('Content-Type', 'application/json')
+      .set('Authorization', 'Bearer ' + u1at)
+      .expect(Status.OK);
+
+    await config
+      .getHttp()
+      .post(`/pair-game-quiz/pairs/connection`)
+      .set('Content-Type', 'application/json')
+      .set('Authorization', 'Bearer ' + u2at)
+      .expect(Status.OK);
+
+    const gameRes = await config
+      .getHttp()
+      .get(`/pair-game-quiz/pairs/my-current`)
+      .set('Content-Type', 'application/json')
+      .set('Authorization', 'Bearer ' + u2at)
+      .expect(Status.OK);
+
+    expect(gameRes.body.questions).not.toBeUndefined();
+    expect(gameRes.body.questions).toHaveLength(5);
+
+    const [question1_id, question2_id, question3_id, question4_id, question5_id] = gameRes.body.questions.map((q) => q.id);
+
+    console.log(gameRes.body.questions);
+
+    const res_a1 = await utils.sendQuizAnswer(u1at, true);
+
+    expect(res_a1.answer.questionId).toBe(question1_id);
+    expect(res_a1.answer.answerStatus).toBe('Correct');
+    expect(res_a1.current.firstPlayerProgress?.answers).toHaveLength(1);
+    expect(res_a1.current.firstPlayerProgress?.answers[0].questionId).toBe(question1_id);
+
+    const res_a2 = await utils.sendQuizAnswer(u1at, false);
+    expect(res_a2.answer.questionId).toBe(question2_id);
+    expect(res_a2.answer.answerStatus).toBe('Incorrect');
+    expect(res_a2.current.firstPlayerProgress?.answers).toHaveLength(2);
+    expect(res_a2.current.firstPlayerProgress?.answers[1].questionId).toBe(question2_id);
+
+    const res_a3 = await utils.sendQuizAnswer(u1at, false);
+    expect(res_a3.answer.questionId).toBe(question3_id);
+    expect(res_a3.answer.answerStatus).toBe('Incorrect');
+    expect(res_a3.current.firstPlayerProgress?.answers).toHaveLength(3);
+    expect(res_a3.current.firstPlayerProgress?.answers[2].questionId).toBe(question3_id);
+
+    const res_a4 = await utils.sendQuizAnswer(u1at, false);
+    expect(res_a4.answer.questionId).toBe(question4_id);
+    expect(res_a4.answer.answerStatus).toBe('Incorrect');
+    expect(res_a4.current.firstPlayerProgress?.answers).toHaveLength(4);
+    expect(res_a4.current.firstPlayerProgress?.answers[3].questionId).toBe(question4_id);
+
+    const res_a5 = await utils.sendQuizAnswer(u1at, true);
+    expect(res_a5.answer.questionId).toBe(question5_id);
+    expect(res_a5.answer.answerStatus).toBe('Correct');
+    expect(res_a5.current.firstPlayerProgress?.answers).toHaveLength(5);
+    expect(res_a5.current.firstPlayerProgress?.answers[4].questionId).toBe(question5_id);
+  });
+
   it('should add bonus score to win player only if game ends', async () => {
     const usrModel1 = utils.createNewUserModel();
     const usrModel2 = utils.createNewUserModel();
