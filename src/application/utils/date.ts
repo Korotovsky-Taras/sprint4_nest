@@ -5,7 +5,7 @@ export function toIsoString(date: unknown): string {
   if (typeof date === 'string') {
     return new Date(new Date(date).getTime()).toISOString();
   }
-  return String(date);
+  return date as string;
   // const tzOffset = -date.getTimezoneOffset();
   // const diff = tzOffset >= 0 ? '+' : '-';
   // const pad = (n : number) => `${Math.floor(Math.abs(n))}`.padStart(2, '0');

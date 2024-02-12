@@ -115,37 +115,45 @@ export class QuizGameSqlRawRepository implements IQuizGameRepository<void> {
   async getPlayerGameWithStatus(userId: string, gameStatus: QuizGameStatus[]): Promise<QuizGameViewModel | null> {
     const [game = null] = await this.dataSource.query<QuizGameRawType[]>(
       `SELECT g.*,
-              (SELECT row_to_json(row) as "firstPlayerProgress" FROM
-                  (SELECT fp."score",
-                          (json_build_object(
-                                  'id', fp."userId",
-                                  'login', u1."login"
-                              )) as "player",
-                          (SELECT array(SELECT row_to_json(row) FROM (
-                                           SELECT pa.*
-                                           FROM public."QuizGamesLinkedQuestions" lq
-                                           LEFT JOIN public."QuizGamesProgressAnswers" pa ON pa."questionId" = lq."questionId" AND pa."progressId" = fp."_id"
-                                           WHERE lq."gameId" = g."_id" AND pa."questionId" = lq."questionId"
-                                       ) as row)) as "answers"
-                  ) as row),
+              (SELECT json_build_object(
+                  'score', fp."score",
+                  'player', json_build_object(
+                      'id', fp."userId",
+                      'login', u1."login"
+                  ),
+                  'answers',  (SELECT array(
+                                  SELECT json_build_object(
+                                     'status', pa."status",
+                                     'questionId', pa."questionId",
+                                     'createdAt', pa."createdAt"
+                                  )
+                                  FROM public."QuizGamesLinkedQuestions" lq
+                                  LEFT JOIN public."QuizGamesProgressAnswers" pa ON pa."questionId" = lq."questionId" AND pa."progressId" = fp."_id"
+                                  WHERE lq."gameId" = g."_id" AND pa."questionId" = lq."questionId"
+                              ))
+              ) as "firstPlayerProgress"),
               (SELECT
                    CASE
-                       WHEN g.sp_id IS NOT NULL THEN row_to_json(row)
-                       END as "secondPlayerProgress"
-               FROM (SELECT sp."score",
-                            (json_build_object(
+                       WHEN g.sp_id IS NOT NULL THEN json_build_object(
+                                'score', sp."score",
+                                'player', json_build_object(
                                     'id', sp."userId",
                                     'login', u2."login"
-                                )) as "player",
-                            (SELECT array(SELECT row_to_json(row) FROM (
-                                             SELECT pa.*
-                                             FROM public."QuizGamesLinkedQuestions" lq
-                                             LEFT JOIN public."QuizGamesProgressAnswers" pa ON pa."questionId" = lq."questionId" AND pa."progressId" = sp."_id"
-                                             WHERE lq."gameId" = g."_id" AND pa."questionId" = lq."questionId"
-                                         ) as row)) as "answers"
-                    ) as row),
+                                ),
+                                'answers',  (SELECT array(
+                                                SELECT json_build_object(
+                                                   'status', pa."status",
+                                                   'questionId', pa."questionId",
+                                                   'createdAt', pa."createdAt"
+                                               )
+                                                FROM public."QuizGamesLinkedQuestions" lq
+                                                LEFT JOIN public."QuizGamesProgressAnswers" pa ON pa."questionId" = lq."questionId" AND pa."progressId" = sp."_id"
+                                                WHERE lq."gameId" = g."_id" AND pa."questionId" = lq."questionId"
+                                            ))
+                           )
+                   END as "secondPlayerProgress"),
               (SELECT array(SELECT row_to_json(row) FROM (
-                                             SELECT gq.* FROM public."QuizGamesLinkedQuestions" lq
+                                             SELECT gq."_id", gq."body" FROM public."QuizGamesLinkedQuestions" lq
                                              LEFT JOIN public."QuizGamesQuestions" gq ON gq."_id" = lq."questionId"
                                              WHERE  lq."gameId" = g."_id"
                                          ) as row)) as "questions"
