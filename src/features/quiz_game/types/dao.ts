@@ -1,6 +1,7 @@
 import { ObjectId, WithId } from 'mongodb';
 import { HydratedDocument, Model } from 'mongoose';
 import { QuizGamePlayerProgressCreateModel, QuizGameQuestionCreateModel } from './dto';
+import { WithDbId } from '../../../application/utils/types';
 
 export enum QuizGameStatus {
   PendingSecondPlayer = 0,
@@ -131,9 +132,9 @@ export interface IQuizGameQuestion {
   updatedAt: Date | null;
 }
 
-export type QuizGameQuestionDBType = WithId<IQuizGameQuestion>;
+export type QuizGameQuestionDBType = WithDbId<IQuizGameQuestion>;
 
-export type QuizGameQuestionRawType = WithId<IQuizGameQuestion>;
+export type QuizGameQuestionRawType = WithDbId<IQuizGameQuestion>;
 
 export type QuizGameQuestionDocumentType = HydratedDocument<IQuizGameQuestion, IQuizGameQuestionMethods>;
 
@@ -142,3 +143,26 @@ export interface IQuizGameQuestionMethods {}
 export interface IQuizGameQuestionsModel extends Model<QuizGameQuestionDocumentType, IQuizGameQuestionMethods> {
   createQuestion(input: QuizGameQuestionCreateModel): QuizGameQuestionDocumentType;
 }
+
+export type QuizGamePlayerProgressOrmType = WithDbId<{
+  userId: number;
+  answers: QuizGameProgressAnswersOrmType[];
+}>;
+
+export type QuizGameProgressOrmPlayer = WithDbId<{
+  login: string;
+}>;
+
+export type QuizGameQuestionOrmType = WithDbId<{}>;
+
+export type QuizGameProgressAnswersOrmType = WithDbId<{}>;
+
+export type QuizGameOrmType = WithDbId<{
+  firstPlayerProgress: QuizGamePlayerProgressOrmType;
+  secondPlayerProgress: QuizGamePlayerProgressOrmType | null;
+  questions: QuizGameQuestionOrmType[] | null;
+  status: QuizGameStatus;
+  createdAt: Date;
+  startGameDate: Date | null;
+  finishGameDate: Date | null;
+}>;

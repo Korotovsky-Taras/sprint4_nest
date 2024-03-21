@@ -16,7 +16,7 @@ export const withSqlOrmPagination = async <T, O>(
     .orderBy(`"${q.sortBy}" ${sortByWithCollate}`, sqlSortDirectionUpper(q.sortDirection))
     .offset(Math.max(q.pageNumber - 1, 0) * q.pageSize)
     .limit(q.pageSize)
-    .getRawMany();
+    .getRawMany<T & { totalCount: number }>();
 
   let totalCount = 0;
   if (items.length > 0 && items[0].totalCount) {

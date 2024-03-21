@@ -4,8 +4,10 @@ import { AppModule } from '../../../src/app.module';
 import { AuthTokenCreator } from '../../../src/features/auth/utils/tokenCreator';
 import { TestsService } from '../../../src/features/tests/domain/tests.service';
 import { TestDaoUtils } from '../dao/test.dao.utils';
-import { DbMongooseService } from '../../../src/db/db-mongoose.service';
-import { DataSource } from 'typeorm';
+import { ConfigService } from '@nestjs/config';
+import { AppDbType } from '../../../src/application/utils/config';
+import { DBService } from '../../../src/db/types';
+import { getDbProviderKey } from '../../../src/application/utils/withTyped';
 
 export const testConfig = async (): Promise<AppConfig> => {
   const moduleRef: TestingModule = await Test.createTestingModule({
@@ -14,8 +16,7 @@ export const testConfig = async (): Promise<AppConfig> => {
 
   const app = moduleRef.createNestApplication();
 
-  const mongoDbService = moduleRef.get<DbMongooseService>(DbMongooseService) as DbMongooseService;
-  const dataSource = moduleRef.get<DataSource>(DataSource) as DataSource;
+  const configService = moduleRef.get<ConfigService>(ConfigService) as ConfigService;
   const tokenCreator = moduleRef.get<AuthTokenCreator>(AuthTokenCreator) as AuthTokenCreator;
   const testsService = moduleRef.get<TestsService>(TestsService) as TestsService;
 
@@ -26,9 +27,11 @@ export const testConfig = async (): Promise<AppConfig> => {
     daoUtils,
     tokenCreator,
     closeConnections: async (): Promise<void> => {
-      await mongoDbService.getConnection().close();
-      if (dataSource.isInitialized) {
-        await dataSource.destroy();
+      const dbType = configService.get<AppDbType>('DB_TYPE');
+      const dbService = moduleRef.get<DBService>(getDbProviderKey(dbType!)) as DBService;
+
+      if (dbService) {
+        await dbService.closeConnection();
       }
     },
   };

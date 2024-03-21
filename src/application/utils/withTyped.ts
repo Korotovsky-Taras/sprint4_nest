@@ -25,7 +25,9 @@ export const withTypedRepository = (key: symbol, map: TypedRepositoryKeys) => {
   };
 };
 
-type TypedDbKeys = TypedKeys<Exclude<AppDbType, 'SQLRaw'>>;
+type MakeKeyOptional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
+
+type TypedDbKeys = MakeKeyOptional<TypedKeys<AppDbType>, 'SQLRaw'>;
 
 /**
  * Подключение зависимостей для модулей БД
@@ -41,4 +43,24 @@ export const withTypedDbModule = (map: TypedDbKeys) => {
   }
 
   return dbTypedClass;
+};
+
+export function getDbProviderKey(dbType: AppDbType): string {
+  return 'DB_P' + dbType;
+}
+
+export const withTypedDbProvider = (map: TypedDbKeys) => {
+  const configService = new ConfigService<AppConfiguration, true>();
+  const dbType = configService.get<AppDbType>('DB_TYPE');
+
+  let dbTypedClass = map[dbType];
+
+  if (!dbTypedClass) {
+    dbTypedClass = class FakeDbModule {};
+  }
+
+  return {
+    provide: getDbProviderKey(dbType),
+    useClass: dbTypedClass,
+  };
 };

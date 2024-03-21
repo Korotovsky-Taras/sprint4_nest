@@ -1,12 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/mongoose';
 import { Connection } from 'mongoose';
+import { DBService } from '../types';
 
 @Injectable()
-export class DbMongooseService {
+export class DbMongooseService implements DBService {
   constructor(@InjectConnection() private connection: Connection) {}
 
-  getConnection() {
-    return this.connection;
+  async closeConnection() {
+    await this.connection.close();
   }
 }

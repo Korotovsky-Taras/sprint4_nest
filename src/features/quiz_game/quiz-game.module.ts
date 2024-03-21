@@ -5,7 +5,6 @@ import { SharedModule } from '../../shared.module';
 import { withTypedDbModule, withTypedRepository } from '../../application/utils/withTyped';
 import { MongooseModule } from '@nestjs/mongoose';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { BlogsEntity } from '../blogs/dao/sql-orm/blogs.entity';
 import { QuizGameQueryRepoKey, QuizGameRepoKey } from './types/common';
 import { QuizGameMongoQueryRepository } from './dao/mongo/quiz-game.mongo.query.repository';
 import { QuizGameMongoRepository } from './dao/mongo/quiz-game.mongo.repository';
@@ -19,6 +18,11 @@ import { QuizGameAdminController } from './api/quiz-game.admin.controller';
 import { quizCases } from './use-cases';
 import { QuizGamePlayerProgress, QuizGamePlayerProgressSchema } from './dao/mongo/quiz-game-player-progress.mongo.schema';
 import { UsersModule } from '../users/users.module';
+import { QuizGameEntity } from './dao/sql-orm/entities/quiz-game.entity';
+import { QuizGameQuestionsEntity } from './dao/sql-orm/entities/quiz-game-questions.entity';
+import { QuizGamePlayerProgressEntity } from './dao/sql-orm/entities/quiz-game-player-progress.entity';
+import { QuizGameProgressAnswersEntity } from './dao/sql-orm/entities/quiz-game-progress-answers.entity';
+import { QuizGameQuestionsSubscriber } from './dao/sql-orm/entities/quiz-game-questions.subscriber';
 
 const QuizGameQueryRepoTyped = withTypedRepository(QuizGameQueryRepoKey, {
   Mongo: QuizGameMongoQueryRepository,
@@ -45,13 +49,13 @@ const QuizGameDbModuleTyped = withTypedDbModule({
       schema: QuizGamePlayerProgressSchema,
     },
   ]),
-  SQLOrm: TypeOrmModule.forFeature([BlogsEntity]),
+  SQLOrm: TypeOrmModule.forFeature([QuizGameEntity, QuizGameProgressAnswersEntity, QuizGameQuestionsEntity, QuizGamePlayerProgressEntity]),
 });
 
 @Module({
   imports: [CqrsModule, QuizGameDbModuleTyped, SharedModule, UsersModule],
   controllers: [QuizGameController, QuizGameAdminController],
-  providers: [QuizGameQueryRepoTyped, QuizGameRepoTyped, ...quizCases],
+  providers: [QuizGameQueryRepoTyped, QuizGameRepoTyped, QuizGameQuestionsSubscriber, ...quizCases],
   exports: [QuizGameRepoTyped, QuizGameQueryRepoTyped],
 })
 export class QuizGameModule {}
